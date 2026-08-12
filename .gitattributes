@@ -1,0 +1,11 @@
+# Default: normalize line endings to LF in the repo
+* text=auto eol=lf
+
+# Shell scripts: always LF (executable bit set via git update-index --chmod=+x)
+.bin/mcp-run        text eol=lf
+.tools/*.sh         text eol=lf
+.tools/*/*.sh       text eol=lf
+
+# JSON / lock files: LF, no executable
+*.json              text eol=lf
+*.jsonc             text eol=lf

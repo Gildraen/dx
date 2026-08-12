@@ -1,0 +1,37 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "devcontainer": {
+    "enabled": true
+  },
+  "regexManagers": [
+    {
+      "fileMatch": [
+        "^\\.devcontainer/devcontainer\\.json$"
+      ],
+      "matchStrings": [
+        "\"image\":\\s*\"(?<depName>[^:\"]+):(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": [
+        "^\\.tools/ollama/install\\.sh$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) versioning=(?<versioning>\\S+)\\nOLLAMA_VERSION=\"(?<currentValue>[^\"]+)\""
+      ]
+    },
+    {
+      "fileMatch": [
+        "^\\.tools/mcp-server-github/install\\.sh$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) versioning=(?<versioning>\\S+)\\nGITHUB_MCP_SERVER_VERSION=\"(?<currentValue>[^\"]+)\""
+      ]
+    }
+  ]
+}

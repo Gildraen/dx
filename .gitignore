@@ -1,0 +1,10 @@
+.tools/*/node_modules/
+.tools/*/bin/
+node_modules/
+
+# Local env files — never commit secrets
+.env
+.env.local
+
+# Local notes — not tracked
+TODO.md

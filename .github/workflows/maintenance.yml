@@ -1,0 +1,30 @@
+name: maintenance
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # chaque lundi à 8h UTC
+  workflow_dispatch:      # déclenchement manuel possible
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-links:
+    name: Check docs links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
+        with:
+          args: >
+            --no-progress
+            --exclude-loopback
+            --exclude 'https://github.com/Gildraen/local-llm'
+            docs/**/*.md
+            README.md
+            AGENTS.md
+          fail: true

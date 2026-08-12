@@ -1,0 +1,50 @@
+{
+  "name": "<project-name>",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers-extra/features/apt-get-packages:1": {
+      "packages": "ripgrep,zstd"
+    },
+    "ghcr.io/devcontainers-extra/features/go-task:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "postCreateCommand": "bash ./.tools/install-tools.sh",
+  "postStartCommand": "bash ./.tools/install-tools.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "chat.agent.sandbox.enabled": "off"
+      },
+      "mcp": {
+        "servers": {
+          "github": {
+            "command": "bash",
+            "args": [
+              "${containerWorkspaceFolder}/.bin/mcp-run",
+              "github"
+            ]
+          }
+        }
+      },
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "bierner.markdown-mermaid"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "GH_CONFIG_DIR": "${containerWorkspaceFolder}/.devcontainer/.gh",
+    "MCP_DATA_DIR": "${containerWorkspaceFolder}/.devcontainer/.mcp",
+    "EDITOR": "code --wait",
+    "VISUAL": "code --wait"
+  }
+}
