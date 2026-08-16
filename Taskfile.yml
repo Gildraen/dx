@@ -38,12 +38,12 @@ tasks:
             exit 1
           }
           mode=${entry%% *}
-          if [[ "$mode" != "100755" ]]; then
+          if [ "$mode" != "100755" ]; then
             echo "not executable in git: $file" >&2
             exit 1
           fi
         done
-      - jq empty renovate.json
+      - node -e "JSON.parse(require('fs').readFileSync('renovate.json', 'utf8'))"
       - test -f .devcontainer/devcontainer.json
       - test -f .github/workflows/validate.yml
       - test -f .github/workflows/maintenance.yml

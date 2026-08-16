@@ -14,6 +14,11 @@ cat > "$LAUNCHER" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 
+if ! command -v npx >/dev/null 2>&1; then
+	echo "npx is required to run the GitHub MCP server; install Node.js first." >&2
+	exit 1
+fi
+
 exec npx -y @modelcontextprotocol/server-github@${GITHUB_MCP_SERVER_VERSION} "\$@"
 EOF
 
