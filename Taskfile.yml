@@ -1,0 +1,51 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Show available tasks.
+    cmds:
+      - task --list
+
+  install-tools:
+    desc: Install local tool dependencies used by the devcontainer.
+    cmds:
+      - bash ./.tools/install-tools.sh
+
+  status:
+    desc: Show basic repository state.
+    cmds:
+      - |
+        echo "=== dx status ==="
+        echo "Git: $(git log --oneline -1 2>/dev/null || echo 'no commits yet')"
+        changed=$(git status --short 2>/dev/null | wc -l | tr -d ' ')
+        if [ "$changed" -eq 0 ]; then
+          echo "     working tree clean"
+        else
+          echo "     $changed file(s) modified"
+        fi
+
+  validate:
+    desc: Repository sanity check (required files + executable bits).
+    cmds:
+      - |
+        for file in \
+          .bin/mcp-run \
+          .tools/install-tools.sh \
+          .tools/ollama/install.sh \
+          .tools/mcp-server-github/install.sh; do
+          entry=$(git ls-files --stage --error-unmatch "$file") || {
+            echo "required file is not tracked: $file" >&2
+            exit 1
+          }
+          mode=${entry%% *}
+          if [ "$mode" != "100755" ]; then
+            echo "not executable in git: $file" >&2
+            exit 1
+          fi
+        done
+      - node -e "JSON.parse(require('fs').readFileSync('renovate.json', 'utf8'))"
+      - test -f .devcontainer/devcontainer.json
+      - test -f .github/workflows/validate.yml
+      - test -f .github/workflows/maintenance.yml
+      - test -f .github/workflows/dx-coherence.yml
+      - test -f .github/scripts/dx-check.mjs
