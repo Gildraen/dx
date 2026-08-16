@@ -10,11 +10,11 @@ GITHUB_MCP_SERVER_VERSION="2026.8.4"
 
 mkdir -p "$BIN_DIR"
 
-cat > "$LAUNCHER" <<'EOF'
+cat > "$LAUNCHER" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec npx -y @modelcontextprotocol/server-github@2026.8.4 "$@"
+exec npx -y @modelcontextprotocol/server-github@${GITHUB_MCP_SERVER_VERSION} "\$@"
 EOF
 
 chmod +x "$LAUNCHER"

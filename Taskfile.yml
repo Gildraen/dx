@@ -28,12 +28,21 @@ tasks:
     desc: Repository sanity check (required files + executable bits).
     cmds:
       - |
-        git ls-files --stage \
+        for file in \
           .bin/mcp-run \
           .tools/install-tools.sh \
           .tools/ollama/install.sh \
-          .tools/mcp-server-github/install.sh \
-        | awk '$1 != "100755" { print "not executable in git: " $4; err=1 } END { exit err+0 }'
+          .tools/mcp-server-github/install.sh; do
+          entry=$(git ls-files --stage --error-unmatch "$file") || {
+            echo "required file is not tracked: $file" >&2
+            exit 1
+          }
+          mode=${entry%% *}
+          if [[ "$mode" != "100755" ]]; then
+            echo "not executable in git: $file" >&2
+            exit 1
+          fi
+        done
       - jq empty renovate.json
       - test -f .devcontainer/devcontainer.json
       - test -f .github/workflows/validate.yml

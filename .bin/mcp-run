@@ -7,7 +7,12 @@ shift || true
 
 case "$TARGET" in
   github)
-    exec "$ROOT_DIR/.tools/mcp-server-github/bin/github-mcp-server" "$@"
+    SERVER="$ROOT_DIR/.tools/mcp-server-github/bin/github-mcp-server"
+    if [[ ! -x "$SERVER" ]]; then
+      echo "GitHub MCP server is not installed; run 'task install-tools' first." >&2
+      exit 1
+    fi
+    exec "$SERVER" "$@"
     ;;
   "")
     echo "usage: .bin/mcp-run <server> [args...]" >&2
