@@ -1,15 +1,67 @@
 version: '3'
 
+# Tasks needed to work on the dx repository itself.
+# Shared tasks consumed by other repositories live in
+# src/dx/runtime/taskfiles/ and are included via Remote Taskfiles.
+
 tasks:
   default:
     desc: Show available tasks.
     cmds:
       - task --list
 
-  install-tools:
-    desc: Install local tool dependencies used by the devcontainer.
+  validate:
+    desc: Repository sanity check (required files, JSON/workflow syntax, executable bits).
     cmds:
-      - bash ./.tools/install-tools.sh
+      - |
+        for file in \
+          src/dx/install.sh \
+          src/dx/runtime/bin/dx-mcp; do
+          entry=$(git ls-files --stage --error-unmatch "$file") || {
+            echo "required file is not tracked: $file" >&2
+            exit 1
+          }
+          mode=${entry%% *}
+          if [ "$mode" != "100755" ]; then
+            echo "not executable in git: $file" >&2
+            exit 1
+          fi
+        done
+      - test -f src/dx/devcontainer-feature.json
+      - test -f default.json
+      - test -f renovate.json
+      - test -f .devcontainer/devcontainer.json
+      - test -f .github/workflows/validate.yml
+      - test -f .github/workflows/maintenance.yml
+      - test -f .github/workflows/reusable-validate.yml
+      - test -f .github/workflows/reusable-maintenance.yml
+      - test -f .github/workflows/release.yml
+      - bash test/dx/validate-json.sh
+      - bash test/dx/validate-workflows.sh
+      - task --taskfile Taskfile.yml --list >/dev/null
+      - task --taskfile src/dx/runtime/taskfiles/base.yml --list >/dev/null
+
+  test:
+    desc: Run the dx test suite (non-Feature tests; see feature:test for the Feature).
+    cmds:
+      - test -x src/dx/runtime/bin/dx-mcp
+      - bash -n src/dx/runtime/bin/dx-mcp
+      - bash -n test/dx/test-dx-mcp-resolution.sh
+      - bash -n test/dx/test-dx-mcp-image.sh
+      - node -e "const d=require('./examples/consumer/.devcontainer/devcontainer.json'); if (!d.features['ghcr.io/devcontainers/features/docker-outside-of-docker:1']) process.exit(1)"
+      - node -e "const d=require('./examples/consumer/.devcontainer/devcontainer.json'); if (d.features['ghcr.io/devcontainers-extra/features/go-task:1'].version !== '3.53.0') process.exit(1)"
+      - "grep -q 'TASK_REMOTE_TRUSTED_HOSTS: github.com' .github/workflows/reusable-validate.yml"
+      - "grep -q 'version: 3.53.0' .github/workflows/reusable-validate.yml"
+      - grep -q 'ref=v1.0.0' examples/consumer/Taskfile.yml
+      - "! rg -n 'ghcr.io/gildraen/dx/dx:1($|[^.])' README.md docs examples/consumer"
+      - rg -n 'ghcr.io/gildraen/dx/dx:1\.0\.0' README.md docs examples/consumer
+      - '! rg -n "@modelcontextprotocol/server-github|MCP_DATA_DIR|mcp-server-github" src .devcontainer examples/consumer'
+      - bash test/dx/test-dx-mcp-image.sh
+
+  feature:test:
+    desc: Run the Dev Container Feature test suite (requires a Docker daemon reachable with matching bind-mount paths, e.g. not always available from nested docker-outside-of-docker).
+    cmds:
+      - npx --yes @devcontainers/cli features test --features dx --project-folder .
 
   status:
     desc: Show basic repository state.
@@ -24,28 +76,15 @@ tasks:
           echo "     $changed file(s) modified"
         fi
 
-  validate:
-    desc: Repository sanity check (required files + executable bits).
+  archive:
+    desc: Create a shareable archive of the tracked (git) files only.
     cmds:
       - |
-        for file in \
-          .bin/mcp-run \
-          .tools/install-tools.sh \
-          .tools/ollama/install.sh \
-          .tools/mcp-server-github/install.sh; do
-          entry=$(git ls-files --stage --error-unmatch "$file") || {
-            echo "required file is not tracked: $file" >&2
-            exit 1
-          }
-          mode=${entry%% *}
-          if [ "$mode" != "100755" ]; then
-            echo "not executable in git: $file" >&2
-            exit 1
-          fi
-        done
-      - node -e "JSON.parse(require('fs').readFileSync('renovate.json', 'utf8'))"
-      - test -f .devcontainer/devcontainer.json
-      - test -f .github/workflows/validate.yml
-      - test -f .github/workflows/maintenance.yml
-      - test -f .github/workflows/dx-coherence.yml
-      - test -f .github/scripts/dx-check.mjs
+        repo_name=$(basename "$PWD")
+        timestamp=$(date -u +%Y%m%d-%H%M%S)
+        archive_dir="artifacts"
+        archive_path="$archive_dir/${repo_name}-${timestamp}.zip"
+
+        mkdir -p "$archive_dir"
+        git archive --format=zip --output="$archive_path" HEAD
+        echo "Archive created: $archive_path (tracked files only, via git archive)"

@@ -1,57 +1,96 @@
 # dx
 
-Canonical development-experience baseline shared across Gildraen repositories.
+Shared, versioned, consumable developer experience (DX) for Gildraen
+repositories.
 
-This repository is the source of truth for common tooling, devcontainer defaults, CI checks, and maintenance automation.
+**Principle: reference / consume / install the DX, don't copy it.** A
+consumer repository keeps only what is genuinely project-specific, plus the
+small bootstrap files that a few tools still require locally.
 
-## Goal
+## What it provides
 
-- Keep all project repositories aligned on a common DX baseline
-- Reduce drift between repos
-- Make updates in one place, then propagate safely
+- A Dev Container **Feature** (`ghcr.io/gildraen/dx/dx:1.0.0`) that installs the
+  shared runtime (agent instructions, the portable `dx-mcp` launcher, and
+  Task helpers) to
+  `DX_HOME` (`/opt/dx`).
+- **Reusable GitHub Actions workflows** for the `validate`/`maintenance`
+  contracts (`.github/workflows/reusable-*.yml`).
+- A **Renovate preset** (`default.json`) consumer repositories extend.
+- A **Remote Taskfile** of small, generic helpers
+  (`src/dx/runtime/taskfiles/base.yml`).
 
-## Scope
+The `dx-mcp github` command is a small portable entry point for GitHub's
+official MCP server. It runs the official
+`ghcr.io/github/github-mcp-server:v1.10.1` image via Docker. Authentication is
+handled by the official server; DX stores no token. A temporary test image can
+be selected with `GITHUB_MCP_IMAGE`, without changing the consumer.
 
-- `.devcontainer/` baseline
-- GitHub Actions templates and validation workflows
-- Renovate baseline rules
-- Agent contribution guardrails (`.agents/`)
+See [docs/architecture.md](docs/architecture.md) for the full model.
 
-## Operating Model
+## How a repository consumes `dx`
 
-1. Update DX policy/files in this repository
-2. Propagate equivalent updates to target repositories (`Niki`, `infra`, `local-llm`, etc.)
-3. Validate per-repo with local tasks and CI
-4. Keep periodic coherence checks active
+```jsonc
+// .devcontainer/devcontainer.json
+"features": {
+  "ghcr.io/gildraen/dx/dx:1.0.0": {}
+}
+```
 
-## Coherence Strategy
+```yaml
+# .github/workflows/validate.yml
+jobs:
+  validate:
+    uses: Gildraen/dx/.github/workflows/reusable-validate.yml@v1.0.0
+```
 
-The `dx-coherence` workflow is intended to detect drift from this baseline across repositories.
+```jsonc
+// renovate.json
+{ "extends": ["github>Gildraen/dx#v1.0.0"] }
+```
 
-Recommended policy:
+Full walkthrough: [docs/consumer.md](docs/consumer.md). Minimal working
+example: [examples/consumer/](examples/consumer/).
 
-- define canonical file list in this repo
-- compare target repos against canonical revisions
-- open issue or PR on drift detection
+## Releases
 
-## Baseline Components Present
+`dx` is versioned with SemVer tags (`vX.Y.Z`). Before tagging, update the
+Feature manifest to the same version, for example `"version": "1.1.0"`, then
+push `v1.1.0`. The release workflow fails if they differ, publishes the
+Feature to GHCR, and creates a GitHub release. The official Feature action
+publishes the SemVer major, minor, and patch tags. Consumers in this repository
+are pinned to `ghcr.io/gildraen/dx/dx:1.0.0`; Renovate can propose upgrades to
+new exact versions.
 
-- Devcontainer baseline (Node LTS, task, gh, docker-outside-of-docker)
-- Maintenance workflow (link checks)
-- Validation workflow (`task validate`)
-- Renovate config including regex managers for tool installers
+## Developing a DX change (dogfood)
 
-## Suggested Propagation Rules
+Changes to `dx` are validated in a real consumer repository before release,
+using a **git worktree** (`project/.dx`), not a copy. See
+[docs/dogfood.md](docs/dogfood.md) for the exact procedure.
 
-- Propagate from `dx` to product/infrastructure repos for:
-  - `.devcontainer/devcontainer.json`
-  - `.github/workflows/maintenance.yml`
-  - `.github/workflows/validate.yml`
-  - `renovate.json`
-- Keep repo-specific runtime files local (business logic, product specs, service compose details)
+## Migrating existing repositories
 
-## Related Repositories
+`Niki`, `infra`, `local-llm`, etc. are migrated one at a time from the old
+copy/propagation model. See [docs/migration.md](docs/migration.md).
 
-- `Gildraen/Niki`: product behavior and tests
-- `Gildraen/infra`: shared Traefik layer
-- `Gildraen/local-llm`: local LLM microservice
+## Repository layout
+
+```
+src/dx/                  Dev Container Feature source (devcontainer-feature.json, install.sh, runtime/)
+.github/workflows/       validate/maintenance (dx itself) + reusable-* (consumers) + release
+test/dx/                 Feature test + small runtime/taskfile/JSON/workflow checks
+examples/consumer/       minimal example of a repository consuming dx
+docs/                    architecture, consumer guide, dogfood guide, migration guide
+default.json             Renovate preset consumed by other repositories
+renovate.json            dx's own Renovate config
+Taskfile.yml             tasks to work on dx itself (validate, test, feature:test, status, archive)
+```
+
+## Useful commands
+
+```sh
+task --list
+task validate
+task test
+task feature:test
+task status
+```

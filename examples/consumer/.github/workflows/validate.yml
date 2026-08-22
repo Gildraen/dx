@@ -1,0 +1,8 @@
+name: validate
+
+on:
+  pull_request:
+
+jobs:
+  validate:
+    uses: Gildraen/dx/.github/workflows/reusable-validate.yml@v1.0.0

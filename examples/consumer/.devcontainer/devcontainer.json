@@ -1,0 +1,33 @@
+{
+    "name": "example-consumer",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+    "remoteUser": "vscode",
+    "features": {
+        "ghcr.io/devcontainers/features/node:2": {
+            "version": "lts"
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers-extra/features/go-task:1": {
+            "version": "3.53.0"
+        },
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+        "ghcr.io/gildraen/dx/dx:1.0.0": {}
+    },
+    "customizations": {
+        "vscode": {
+            "mcp": {
+                "servers": {
+                    "github": {
+                        "command": "dx-mcp",
+                        "args": [
+                            "github"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "remoteEnv": {
+        "GH_CONFIG_DIR": "${containerWorkspaceFolder}/.devcontainer/.gh"
+    }
+}
