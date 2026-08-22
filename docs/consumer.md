@@ -16,7 +16,7 @@ Compose the official Features you need with the shared `dx` Feature:
   "features": {
     "ghcr.io/devcontainers/features/node:2": { "version": "lts" },
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers-extra/features/go-task:1": { "version": "3.53.0" },
+    "ghcr.io/devcontainers-extra/features/go-task:1": { "version": "3.53.1" },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/gildraen/dx/dx:1.0.0": {}
   }
@@ -70,7 +70,7 @@ includes:
 Gives you `task dx:doctor` and `task dx:mcp:github`. Your own
 `validate`/`test`/`lint` tasks stay in your Taskfile.
 
-Remote Taskfiles require Go Task `v3.53.0` or newer. This is the first stable
+Remote Taskfiles require Go Task `v3.53.1` or newer. This is the first stable
 release where Remote Taskfiles are generally available, so the Dev Container
 pins that minimum version.
 

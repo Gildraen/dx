@@ -10,7 +10,7 @@
       "packages": "ripgrep,zstd"
     },
     "ghcr.io/devcontainers-extra/features/go-task:1": {
-      "version": "3.53.0"
+      "version": "3.53.1"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},

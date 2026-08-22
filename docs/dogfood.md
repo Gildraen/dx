@@ -80,7 +80,7 @@ includes:
     taskfile: ./.dx/src/dx/runtime/taskfiles/base.yml
 ```
 
-Use Go Task `v3.53.0` or newer. In CI, the reusable validate workflow trusts
+Use Go Task `v3.53.1` or newer. In CI, the reusable validate workflow trusts
 only `github.com` through `TASK_REMOTE_TRUSTED_HOSTS=github.com`; local runs
 show Task's normal trust prompt on first use.
 

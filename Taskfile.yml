@@ -49,9 +49,9 @@ tasks:
       - bash -n test/dx/test-dx-mcp-resolution.sh
       - bash -n test/dx/test-dx-mcp-image.sh
       - node -e "const d=require('./examples/consumer/.devcontainer/devcontainer.json'); if (!d.features['ghcr.io/devcontainers/features/docker-outside-of-docker:1']) process.exit(1)"
-      - node -e "const d=require('./examples/consumer/.devcontainer/devcontainer.json'); if (d.features['ghcr.io/devcontainers-extra/features/go-task:1'].version !== '3.53.0') process.exit(1)"
+      - node -e "const d=require('./examples/consumer/.devcontainer/devcontainer.json'); if (d.features['ghcr.io/devcontainers-extra/features/go-task:1'].version !== '3.53.1') process.exit(1)"
       - "grep -q 'TASK_REMOTE_TRUSTED_HOSTS: github.com' .github/workflows/reusable-validate.yml"
-      - "grep -q 'version: 3.53.0' .github/workflows/reusable-validate.yml"
+      - "grep -q 'version: 3.53.1' .github/workflows/reusable-validate.yml"
       - grep -q 'ref=v1.0.0' examples/consumer/Taskfile.yml
       - "! rg -n 'ghcr.io/gildraen/dx/dx:1($|[^.])' README.md docs examples/consumer"
       - rg -n 'ghcr.io/gildraen/dx/dx:1\.0\.0' README.md docs examples/consumer
