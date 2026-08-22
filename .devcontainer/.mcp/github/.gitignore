@@ -1,3 +1,0 @@
-# GitHub MCP token — used as fallback when gh CLI auth is not available.
-# Place a fine-grained PAT (or classic token) in a file named `token` here.
-token
