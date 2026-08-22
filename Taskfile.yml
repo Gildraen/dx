@@ -34,6 +34,7 @@ tasks:
       - test -f .github/workflows/validate.yml
       - test -f .github/workflows/maintenance.yml
       - test -f .github/workflows/reusable-validate.yml
+      - test -f .github/workflows/reusable-devcontainer-test.yml
       - test -f .github/workflows/reusable-maintenance.yml
       - test -f .github/workflows/release.yml
       - bash .devcontainer/test/dx/validate-json.sh
@@ -42,7 +43,7 @@ tasks:
       - task --taskfile .devcontainer/src/dx/runtime/taskfiles/base.yml --list >/dev/null
 
   test:
-    desc: Run the dx test suite (non-Feature tests; see feature:test for the Feature).
+    desc: Run the dx test suite inside the dx devcontainer (non-Feature tests).
     cmds:
       - test -x .devcontainer/src/dx/runtime/bin/dx-mcp
       - bash -n .devcontainer/src/dx/runtime/bin/dx-mcp
@@ -59,7 +60,7 @@ tasks:
       - bash .devcontainer/test/dx/test-dx-mcp-image.sh
 
   feature:test:
-    desc: Run the Dev Container Feature test suite (requires a Docker daemon reachable with matching bind-mount paths, e.g. not always available from nested docker-outside-of-docker).
+    desc: Run the Dev Container Feature test suite directly with the local Docker daemon.
     cmds:
       - npx --yes @devcontainers/cli features test --features dx --project-folder .devcontainer
 

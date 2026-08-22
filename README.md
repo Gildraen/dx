@@ -15,6 +15,9 @@ small bootstrap files that a few tools still require locally.
   `DX_HOME` (`/opt/dx`).
 - **Reusable GitHub Actions workflows** for the `validate`/`maintenance`
   contracts (`.github/workflows/reusable-*.yml`).
+- The `dx` CI keeps structural validation on the runner, runs `task test` in
+  this repository's devcontainer, and runs the Feature tests directly on the
+  runner's Docker daemon.
 - A **Renovate preset** (`default.json`) consumer repositories extend.
 - A **Remote Taskfile** of small, generic helpers
   (`.devcontainer/src/dx/runtime/taskfiles/base.yml`).
@@ -90,7 +93,7 @@ Taskfile.yml             tasks to work on dx itself (validate, test, feature:tes
 ```sh
 task --list
 task validate
-task test
-task feature:test
+task test                 # inside the dx devcontainer
+task feature:test         # directly on a host with Docker
 task status
 ```

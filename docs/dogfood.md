@@ -105,10 +105,13 @@ The normal loop is `edit Feature -> rebuild container -> test`. Runtime-only
 changes do not require a rebuild when the consumer reads them through
 `DX_HOME`.
 
-Run the consumer's `task validate` and `task test`. Reusable GitHub workflows
-cannot see a local worktree: push `feature/my-dx-change`, temporarily reference
-`@feature/my-dx-change` from the consumer, run its CI, then restore the released
-tag.
+Run the consumer's `task validate` and `task test` in its devcontainer. The dx
+repository CI follows the same model: structural `task validate` runs on the
+runner, `task test` runs in `.devcontainer/devcontainer.json`, and
+`feature:test` runs directly on the runner's Docker daemon. Reusable GitHub
+workflows cannot see a local worktree: push `feature/my-dx-change`, temporarily
+reference `@feature/my-dx-change` from the consumer, run its CI, then restore
+the released tag.
 
 ## Finish dogfood and release
 
