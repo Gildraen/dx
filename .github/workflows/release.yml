@@ -36,7 +36,7 @@ jobs:
         uses: devcontainers/action@v1
         with:
           publish-features: "true"
-          base-path-to-features: "./.devcontainer"
+          base-path-to-features: "./.devcontainer/src"
           generate-docs: "false"
 
   github-release:

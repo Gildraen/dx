@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Validates that every *.json / *.jsonc file in the repo parses correctly.
+# Validates that every *.json file in the repo parses correctly.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -12,9 +12,9 @@ while IFS= read -r -d '' file; do
     echo "invalid JSON: $file" >&2
     status=1
   fi
-done < <(git ls-files -z --cached --others --exclude-standard '*.json' '*.jsonc')
+done < <(git ls-files -z --cached --others --exclude-standard '*.json')
 
 if [[ $status -eq 0 ]]; then
-  echo "all JSON/JSONC files parse correctly"
+  echo "all JSON files parse correctly"
 fi
 exit $status

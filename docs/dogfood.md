@@ -2,7 +2,7 @@
 
 Dogfood uses a real Git worktree of `Gildraen/dx` inside a consumer project.
 The worktree is created by the DX repository, not by the consumer repository,
-and `.dx` is local-only state.
+and `.devcontainer/.dx` is local-only state.
 
 ## Create the worktree
 
@@ -19,25 +19,25 @@ create a new branch and worktree from the DX repository:
 cd ~/projects/dx
 git switch main
 git pull --ff-only
-git worktree add -b feature/my-dx-change ../Niki/.dx main
+git worktree add -b feature/my-dx-change ../Niki/.devcontainer/.dx main
 ```
 
-The command creates `Niki/.dx` as a linked worktree of `dx` on
+The command creates `Niki/.devcontainer/.dx` as a linked worktree of `dx` on
 `feature/my-dx-change`. Verify the ownership from the worktree itself:
 
 ```sh
-cd ~/projects/Niki/.dx
+cd ~/projects/Niki/.devcontainer/.dx
 git status
 git remote -v
 git branch --show-current
 ```
 
-Changes under `Niki/.dx` belong to `Gildraen/dx`, not to `Niki`. Exclude the
+Changes under `Niki/.devcontainer/.dx` belong to `Gildraen/dx`, not to `Niki`. Exclude the
 worktree only in the consumer clone:
 
 ```sh
 cd ~/projects/Niki
-echo '.dx/' >> .git/info/exclude
+echo '.devcontainer/.dx/' >> .git/info/exclude
 git status --short
 ```
 
@@ -48,24 +48,24 @@ devcontainer session:
 
 ```sh
 cd ~/projects/Niki
-export DX_HOME="$PWD/.dx/.devcontainer/src/dx/runtime"
+export DX_HOME="$PWD/.devcontainer/.dx/.devcontainer/src/dx/runtime"
 ```
 
 Runtime selection is deterministic:
 
 ```text
 DX_HOME explicitly set  -> that directory
-otherwise .dx exists    -> <workspace>/.dx/.devcontainer/src/dx/runtime
+otherwise .devcontainer/.dx exists -> <workspace>/.devcontainer/.dx/.devcontainer/src/dx/runtime
 otherwise               -> /opt/dx
 ```
 
 The installed `/usr/local/bin/dx-mcp` is only a small selector. It resolves
 this order on every invocation and then executes the selected runtime's
-`bin/dx-mcp`. Editing `.dx/.devcontainer/src/dx/runtime/bin/dx-mcp` therefore affects the
+`bin/dx-mcp`. Editing `.devcontainer/.dx/.devcontainer/src/dx/runtime/bin/dx-mcp` therefore affects the
 next `dx-mcp` invocation immediately; no rebuild or release is needed. The
-Feature test exercises both the `.dx` selection and the explicit override.
+Feature test exercises both the `.devcontainer/.dx` selection and the explicit override.
 
-The shared agent bootstrap already prefers `./.dx/.devcontainer/src/dx/runtime/agents/` and
+The shared agent bootstrap already prefers `./.devcontainer/.dx/.devcontainer/src/dx/runtime/agents/` and
 otherwise falls back to `$DX_HOME/agents/` or `/opt/dx/agents/`. Runtime files
 such as agent instructions, the Task helpers, and `dx-mcp` are therefore live
 from the worktree. `dx-mcp github` runs GitHub's official MCP image through
@@ -77,7 +77,7 @@ the live Taskfile:
 ```yaml
 includes:
   dx:
-    taskfile: ./.dx/.devcontainer/src/dx/runtime/taskfiles/base.yml
+    taskfile: ./.devcontainer/.dx/.devcontainer/src/dx/runtime/taskfiles/base.yml
 ```
 
 Use Go Task `v3.53.1` or newer. In CI, the reusable validate workflow trusts
@@ -97,7 +97,7 @@ rebuild the container:
 
 ```jsonc
 "features": {
-  "../.dx/.devcontainer/src/dx": {}
+  "../.devcontainer/.dx/.devcontainer/src/dx": {}
 }
 ```
 
@@ -117,7 +117,7 @@ are committed or discarded:
 
 ```sh
 cd ~/projects/dx
-git worktree remove ../Niki/.dx
+git worktree remove ../Niki/.devcontainer/.dx
 git worktree prune
 ```
 

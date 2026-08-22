@@ -16,10 +16,10 @@ write_fake_dispatcher() {
   chmod +x "$runtime_dir/bin/dx-mcp"
 }
 
-write_fake_dispatcher "$workdir/project/.dx/.devcontainer/src/dx/runtime"
+write_fake_dispatcher "$workdir/project/.devcontainer/.dx/.devcontainer/src/dx/runtime"
 write_fake_dispatcher "$workdir/explicit"
 
-dogfood_home="$workdir/project/.dx/.devcontainer/src/dx/runtime"
+dogfood_home="$workdir/project/.devcontainer/.dx/.devcontainer/src/dx/runtime"
 output="$(cd "$workdir/project" && env -u DX_HOME dx-mcp github)"
 [[ "$output" == "$dogfood_home" ]] || fail "dogfood runtime was not selected (got: $output)"
 

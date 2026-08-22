@@ -6,9 +6,6 @@
     "description": "Installs the shared Gildraen developer-experience runtime (agent instructions, portable GitHub MCP launcher, and Task helpers) under /opt/dx.",
     "documentationURL": "https://github.com/Gildraen/dx",
     "options": {},
-    "containerEnv": {
-        "DX_HOME": "/opt/dx"
-    },
     "installsAfter": [
         "ghcr.io/devcontainers/features/node",
         "ghcr.io/devcontainers/features/github-cli",

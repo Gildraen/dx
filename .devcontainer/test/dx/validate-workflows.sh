@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Validates that every tracked GitHub Actions workflow is syntactically valid YAML.
+# Validates every non-ignored local GitHub Actions workflow as valid YAML.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"

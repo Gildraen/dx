@@ -13,3 +13,9 @@ jobs:
   validate:
     uses: ./.github/workflows/reusable-validate.yml
     secrets: inherit
+
+  test:
+    uses: ./.github/workflows/reusable-validate.yml
+    with:
+      task-name: test
+    secrets: inherit
