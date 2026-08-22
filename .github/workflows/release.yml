@@ -6,17 +6,25 @@ on:
       - "v*.*.*"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  publish-feature:
-    name: Publish DX Dev Container Feature
+  validate:
+    uses: ./.github/workflows/reusable-validate.yml
+    secrets: inherit
+
+  devcontainer-test:
+    uses: ./.github/workflows/reusable-devcontainer-test.yml
+    secrets: inherit
+
+  feature-test:
+    uses: ./.github/workflows/reusable-feature-test.yml
+    secrets: inherit
+
+  verify-tag:
+    name: Verify release tag
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      packages: write
-      contents: write
-      pull-requests: write
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
@@ -32,6 +40,17 @@ jobs:
             exit 1
           fi
 
+  publish-feature:
+    name: Publish DX Dev Container Feature
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [validate, devcontainer-test, feature-test, verify-tag]
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
       - name: Publish Features to GHCR
         uses: devcontainers/action@1082abd5d2bf3a11abccba70eef98df068277772 # v1
         with:
@@ -44,6 +63,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish-feature
     timeout-minutes: 5
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 

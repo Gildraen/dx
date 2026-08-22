@@ -91,7 +91,7 @@ Gildraen/dx feature branch
       git worktree
           │
           ▼
-   project/.dx
+  project/.devcontainer/.dx
           │
           ▼
  real project used as testbed

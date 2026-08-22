@@ -35,6 +35,7 @@ tasks:
       - test -f .github/workflows/maintenance.yml
       - test -f .github/workflows/reusable-validate.yml
       - test -f .github/workflows/reusable-devcontainer-test.yml
+      - test -f .github/workflows/reusable-feature-test.yml
       - test -f .github/workflows/reusable-maintenance.yml
       - test -f .github/workflows/release.yml
       - bash .devcontainer/test/dx/validate-json.sh
@@ -62,7 +63,7 @@ tasks:
   feature:test:
     desc: Run the Dev Container Feature test suite directly with the local Docker daemon.
     cmds:
-      - npx --yes @devcontainers/cli features test --features dx --project-folder .devcontainer
+      - npx --yes @devcontainers/cli@0.88.0 features test --features dx --project-folder .devcontainer
 
   status:
     desc: Show basic repository state.

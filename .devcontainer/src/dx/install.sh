@@ -20,6 +20,7 @@ else
 	DX_HOME="${DX_HOME:-/opt/dx}"
 fi
 
+export DX_HOME
 exec "$DX_HOME/bin/dx-mcp" "$@"
 EOF
 

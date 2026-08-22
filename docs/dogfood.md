@@ -97,7 +97,7 @@ rebuild the container:
 
 ```jsonc
 "features": {
-  "../.devcontainer/.dx/.devcontainer/src/dx": {}
+  "./.dx/.devcontainer/src/dx": {}
 }
 ```
 

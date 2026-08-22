@@ -67,7 +67,7 @@ new exact versions.
 ## Developing a DX change (dogfood)
 
 Changes to `dx` are validated in a real consumer repository before release,
-using a **git worktree** (`project/.dx`), not a copy. See
+using a **git worktree** (`project/.devcontainer/.dx`), not a copy. See
 [docs/dogfood.md](docs/dogfood.md) for the exact procedure.
 
 ## Migrating existing repositories
@@ -80,7 +80,7 @@ copy/propagation model. See [docs/migration.md](docs/migration.md).
 ```
 .devcontainer/src/dx/    Dev Container Feature source (devcontainer-feature.json, install.sh, runtime/)
 .github/workflows/       validate/maintenance (dx itself) + reusable-* (consumers) + release
-test/dx/                 Feature test + small runtime/taskfile/JSON/workflow checks
+.devcontainer/test/dx/   Feature test + small runtime/taskfile/JSON/workflow checks
 examples/consumer/       minimal example of a repository consuming dx
 docs/                    architecture, consumer guide, dogfood guide, migration guide
 default.json             Renovate preset consumed by other repositories
