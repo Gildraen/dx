@@ -14,8 +14,8 @@ install -m 0755 /dev/stdin /usr/local/bin/dx-mcp <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ -z "${DX_HOME:-}" ] && [ -d "$PWD/.dx/src/dx/runtime" ]; then
-	DX_HOME="$PWD/.dx/src/dx/runtime"
+if [ -z "${DX_HOME:-}" ] && [ -d "$PWD/.dx/.devcontainer/src/dx/runtime" ]; then
+	DX_HOME="$PWD/.dx/.devcontainer/src/dx/runtime"
 else
 	DX_HOME="${DX_HOME:-/opt/dx}"
 fi

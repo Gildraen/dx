@@ -48,24 +48,24 @@ devcontainer session:
 
 ```sh
 cd ~/projects/Niki
-export DX_HOME="$PWD/.dx/src/dx/runtime"
+export DX_HOME="$PWD/.dx/.devcontainer/src/dx/runtime"
 ```
 
 Runtime selection is deterministic:
 
 ```text
 DX_HOME explicitly set  -> that directory
-otherwise .dx exists    -> <workspace>/.dx/src/dx/runtime
+otherwise .dx exists    -> <workspace>/.dx/.devcontainer/src/dx/runtime
 otherwise               -> /opt/dx
 ```
 
 The installed `/usr/local/bin/dx-mcp` is only a small selector. It resolves
 this order on every invocation and then executes the selected runtime's
-`bin/dx-mcp`. Editing `.dx/src/dx/runtime/bin/dx-mcp` therefore affects the
+`bin/dx-mcp`. Editing `.dx/.devcontainer/src/dx/runtime/bin/dx-mcp` therefore affects the
 next `dx-mcp` invocation immediately; no rebuild or release is needed. The
 Feature test exercises both the `.dx` selection and the explicit override.
 
-The shared agent bootstrap already prefers `./.dx/src/dx/runtime/agents/` and
+The shared agent bootstrap already prefers `./.dx/.devcontainer/src/dx/runtime/agents/` and
 otherwise falls back to `$DX_HOME/agents/` or `/opt/dx/agents/`. Runtime files
 such as agent instructions, the Task helpers, and `dx-mcp` are therefore live
 from the worktree. `dx-mcp github` runs GitHub's official MCP image through
@@ -77,7 +77,7 @@ the live Taskfile:
 ```yaml
 includes:
   dx:
-    taskfile: ./.dx/src/dx/runtime/taskfiles/base.yml
+    taskfile: ./.dx/.devcontainer/src/dx/runtime/taskfiles/base.yml
 ```
 
 Use Go Task `v3.53.1` or newer. In CI, the reusable validate workflow trusts
@@ -88,7 +88,7 @@ Restore the versioned remote include before committing the consumer change:
 
 ```yaml
 includes:
-  dx: https://github.com/Gildraen/dx.git//src/dx/runtime/taskfiles/base.yml?ref=v1.0.0
+  dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=v1.0.0
 ```
 
 If the Feature itself changes (`devcontainer-feature.json` or `install.sh`),
@@ -97,7 +97,7 @@ rebuild the container:
 
 ```jsonc
 "features": {
-  "../.dx/src/dx": {}
+  "../.dx/.devcontainer/src/dx": {}
 }
 ```
 
@@ -122,7 +122,7 @@ git worktree prune
 ```
 
 Open and merge the PR from `feature/my-dx-change` into `main`. For a release,
-update `src/dx/devcontainer-feature.json` to the release version, merge it,
+update `.devcontainer/src/dx/devcontainer-feature.json` to the release version, merge it,
 then create and push the matching tag. For example, manifest `1.1.0` requires
 tag `v1.1.0`; the release workflow rejects mismatches before publishing.
 After merge, the branch can be deleted according to the repository policy.

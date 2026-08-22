@@ -26,7 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           version_from_tag="${RELEASE_TAG#v}"
-          version_from_manifest="$(node -p "require('./src/dx/devcontainer-feature.json').version")"
+          version_from_manifest="$(node -p "require('./.devcontainer/src/dx/devcontainer-feature.json').version")"
           if [ "$version_from_tag" != "$version_from_manifest" ]; then
             echo "Release tag $RELEASE_TAG does not match Feature version $version_from_manifest" >&2
             exit 1
@@ -36,7 +36,7 @@ jobs:
         uses: devcontainers/action@v1
         with:
           publish-features: "true"
-          base-path-to-features: "./src"
+          base-path-to-features: "./.devcontainer"
           generate-docs: "false"
 
   github-release:

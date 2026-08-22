@@ -14,7 +14,7 @@
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-    "../src/dx": {}
+    "./src/dx": {}
   },
   "customizations": {
     "vscode": {

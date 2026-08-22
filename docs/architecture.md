@@ -29,7 +29,7 @@ this way is the main design tool used throughout this repository.
    (reusable GitHub workflows, a Remote Taskfile, a Renovate preset). Never
    copied.
 2. **Installable** — packaged and installed as part of the dev environment,
-   mainly through the `dx` Dev Container Feature (`src/dx/`). Covers the DX
+  mainly through the `dx` Dev Container Feature (`.devcontainer/src/dx/`). Covers the DX
    runtime (agents, MCP launchers, task helpers).
 3. **Bootstrap local obligatoire** — a handful of tools still require a file
    physically present in the consumer repository (`devcontainer.json`,
@@ -44,8 +44,8 @@ this way is the main design tool used throughout this repository.
 | Concern | Category | Where |
 |---|---|---|
 | Devcontainer baseline (Node, gh, task, docker) | Référençable (official Features) | consumer composes official Features directly |
-| Agent instructions (`base.md`, `git.md`) | Installable | `src/dx/runtime/agents/` → `$DX_HOME/agents/` |
-| Shared Task helpers | Référençable (Remote Taskfile) | `src/dx/runtime/taskfiles/base.yml` |
+| Agent instructions (`base.md`, `git.md`) | Installable | `.devcontainer/src/dx/runtime/agents/` → `$DX_HOME/agents/` |
+| Shared Task helpers | Référençable (Remote Taskfile) | `.devcontainer/src/dx/runtime/taskfiles/base.yml` |
 | CI contracts (`validate`, `test`, `lint`) | Référençable (reusable workflow) | `.github/workflows/reusable-*.yml` |
 | Renovate rules | Référençable (preset) | `default.json` |
 | `devcontainer.json`, `AGENTS.md`, `Taskfile.yml` | Bootstrap local obligatoire | short files in each consumer repo |

@@ -64,7 +64,7 @@ Same pattern for maintenance / link-checking:
 ```yaml
 # Taskfile.yml
 includes:
-  dx: https://github.com/Gildraen/dx.git//src/dx/runtime/taskfiles/base.yml?ref=v1.0.0
+  dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=v1.0.0
 ```
 
 Gives you `task dx:doctor` and `task dx:mcp:github`. Your own
@@ -103,7 +103,7 @@ truly project-specific.
 # Project agent instructions
 
 Load the shared DX agent instructions first:
-- when a DX dogfood checkout exists (`./.dx/src/dx/runtime/agents/`), use it;
+- when a DX dogfood checkout exists (`./.dx/.devcontainer/src/dx/runtime/agents/`), use it;
 - otherwise use the installed runtime (`$DX_HOME/agents/`, `/opt/dx/agents/`).
 
 Then apply the project-specific rules below.

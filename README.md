@@ -17,7 +17,7 @@ small bootstrap files that a few tools still require locally.
   contracts (`.github/workflows/reusable-*.yml`).
 - A **Renovate preset** (`default.json`) consumer repositories extend.
 - A **Remote Taskfile** of small, generic helpers
-  (`src/dx/runtime/taskfiles/base.yml`).
+  (`.devcontainer/src/dx/runtime/taskfiles/base.yml`).
 
 The `dx-mcp github` command is a small portable entry point for GitHub's
 official MCP server. It runs the official
@@ -75,7 +75,7 @@ copy/propagation model. See [docs/migration.md](docs/migration.md).
 ## Repository layout
 
 ```
-src/dx/                  Dev Container Feature source (devcontainer-feature.json, install.sh, runtime/)
+.devcontainer/src/dx/    Dev Container Feature source (devcontainer-feature.json, install.sh, runtime/)
 .github/workflows/       validate/maintenance (dx itself) + reusable-* (consumers) + release
 test/dx/                 Feature test + small runtime/taskfile/JSON/workflow checks
 examples/consumer/       minimal example of a repository consuming dx

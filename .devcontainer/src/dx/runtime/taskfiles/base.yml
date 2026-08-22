@@ -4,7 +4,7 @@ version: '3'
 # remote reference, e.g.:
 #
 #   includes:
-#     dx: https://github.com/Gildraen/dx.git//src/dx/runtime/taskfiles/base.yml?ref=v1.0.0
+#     dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=v1.0.0
 #
 # These tasks are generic DX helpers, not project contracts. Project contracts
 # (validate/test/lint) stay defined in each consumer's own Taskfile.
@@ -16,8 +16,8 @@ tasks:
       - |
         dx_home="${DX_HOME:-}"
         if [ -z "$dx_home" ]; then
-          if [ -d "$PWD/.dx/src/dx/runtime" ]; then
-            dx_home="$PWD/.dx/src/dx/runtime"
+          if [ -d "$PWD/.dx/.devcontainer/src/dx/runtime" ]; then
+            dx_home="$PWD/.dx/.devcontainer/src/dx/runtime"
           else
             dx_home="/opt/dx"
           fi

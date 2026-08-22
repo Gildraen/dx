@@ -18,9 +18,9 @@ task** — this is a guide for a follow-up migration in each of them.
 | `.tools/ollama/` | supprimé de la baseline commune — à gérer par projet si nécessaire, hors `dx` |
 | `.bin/mcp-run` | `dx-mcp github` (wrapper portable du serveur officiel GitHub MCP) |
 | `.tools/mcp-server-github/` | supprimé — `dx-mcp` utilise l'image Docker officielle versionnée avec OAuth |
-| `.agents/rules/git.md` | `src/dx/runtime/agents/git.md` (runtime partagé) |
+| `.agents/rules/git.md` | `.devcontainer/src/dx/runtime/agents/git.md` (runtime partagé) |
 | gros `AGENTS.md` copié | bootstrap local court + runtime partagé (`$DX_HOME/agents/`) |
-| `Taskfile.yml` partagé par copie | Remote Taskfile (`src/dx/runtime/taskfiles/base.yml`) |
+| `Taskfile.yml` partagé par copie | Remote Taskfile (`.devcontainer/src/dx/runtime/taskfiles/base.yml`) |
 | `validate.yml` copié | `uses: Gildraen/dx/.github/workflows/reusable-validate.yml@vX.Y.Z` |
 | `maintenance.yml` copié | `uses: Gildraen/dx/.github/workflows/reusable-maintenance.yml@vX.Y.Z` |
 | `renovate.json` copié | `"extends": ["github>Gildraen/dx#vX.Y.Z"]` |

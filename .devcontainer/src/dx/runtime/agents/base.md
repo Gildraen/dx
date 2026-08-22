@@ -11,7 +11,7 @@ paths:
 ## Provenance
 
 These instructions are shared DX runtime resources, versioned in `Gildraen/dx`
-(`src/dx/runtime/agents/`). They are consumed by other repositories either
+(`.devcontainer/src/dx/runtime/agents/`). They are consumed by other repositories either
 through the installed DX runtime (`DX_HOME`) or a local `.dx` dogfood checkout.
 Do not fork or copy this content into a consumer repository — extend it with a
 short, project-specific `AGENTS.md` instead.

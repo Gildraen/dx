@@ -2,9 +2,9 @@
 * text=auto eol=lf
 
 # Shell scripts: always LF (executable bit set via git update-index --chmod=+x)
-src/dx/install.sh          text eol=lf
-src/dx/runtime/bin/*       text eol=lf
-src/dx/runtime/mcp/**/*.sh text eol=lf
+.devcontainer/src/dx/install.sh          text eol=lf
+.devcontainer/src/dx/runtime/bin/*       text eol=lf
+.devcontainer/src/dx/runtime/mcp/**/*.sh text eol=lf
 
 # JSON / lock files: LF, no executable
 *.json              text eol=lf
