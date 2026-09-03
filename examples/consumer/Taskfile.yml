@@ -1,0 +1,20 @@
+version: '3'
+
+includes:
+  dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=v1.0.0
+
+tasks:
+  default:
+    desc: Show available tasks.
+    cmds:
+      - task --list
+
+  validate:
+    desc: Project validate contract, used by the reusable-validate workflow.
+    cmds:
+      - echo "run project-specific checks here (lint, config, etc.)"
+
+  test:
+    desc: Project test contract.
+    cmds:
+      - echo "run project-specific tests here"

@@ -1,0 +1,14 @@
+{
+    "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainerFeature.schema.json",
+    "id": "dx",
+    "version": "1.0.0",
+    "name": "Gildraen DX runtime",
+    "description": "Installs the shared Gildraen developer-experience runtime (agent instructions, portable GitHub MCP launcher, and Task helpers) under /opt/dx.",
+    "documentationURL": "https://github.com/Gildraen/dx",
+    "options": {},
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/node",
+        "ghcr.io/devcontainers/features/github-cli",
+        "ghcr.io/devcontainers-extra/features/go-task"
+    ]
+}

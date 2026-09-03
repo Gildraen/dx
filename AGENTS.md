@@ -1,26 +1,35 @@
 # dx - Guide agent de developpement
 
-Ce repository centralise la baseline DX partagee entre les repos Gildraen.
+Ce repository est le developpement du produit `dx` lui-meme : la Feature Dev
+Container, les workflows reusable, le preset Renovate et le runtime DX
+partages avec les autres repos Gildraen.
+
+Ce fichier concerne le developpement de `dx`. Il ne doit pas etre copie dans
+les repositories consommateurs — voir [docs/consumer.md](docs/consumer.md)
+et [examples/consumer/AGENTS.md](examples/consumer/AGENTS.md) pour le
+bootstrap consommateur.
 
 ## Role
 
-- Source canonique pour les fichiers DX communs
-- Workflows CI de maintenance/validation
-- Detection de drift via `dx-coherence`
+- Source canonique de la DX partagee (Feature, reusable workflows, preset
+  Renovate, runtime) — voir [docs/architecture.md](docs/architecture.md).
+- Les regles agent generiques destinees aux consommateurs vivent dans
+  `.devcontainer/src/dx/runtime/agents/` (`base.md`, `git.md`), pas ici.
 
 ## Regles de contribution
 
 - Travailler sur une branche dediee, jamais directement sur `main`.
 - Ne jamais commit ni push sans validation explicite de l'utilisateur.
+- Self-review du diff complet avant toute publication (voir
+  [.devcontainer/src/dx/runtime/agents/git.md](.devcontainer/src/dx/runtime/agents/git.md)).
 - Ouvrir une PR vers `main` et attendre la CI avant merge.
-
-Les regles detaillees de contribution et de self-review sont definies dans [.agents/rules/git.md](.agents/rules/git.md).
 
 ## Commandes utiles
 
 ```sh
 task --list
-task install-tools
 task validate
+task test
+task feature:test
 task status
 ```

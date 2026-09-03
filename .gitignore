@@ -1,5 +1,3 @@
-.tools/*/node_modules/
-.tools/*/bin/
 node_modules/
 
 # Local env files — never commit secrets
@@ -8,3 +6,6 @@ node_modules/
 
 # Local notes — not tracked
 TODO.md
+
+# Generated archives (task archive)
+artifacts/
