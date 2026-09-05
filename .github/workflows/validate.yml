@@ -2,8 +2,6 @@ name: validate
 
 on:
   pull_request:
-    paths-ignore:
-      - docs/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,3 +19,17 @@ jobs:
   feature-test:
     uses: ./.github/workflows/reusable-feature-test.yml
     secrets: inherit
+
+  feature-manifest:
+    name: Validate Feature manifest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # Same schema check the publish step runs, so a bad manifest fails here instead of after the release tag is pushed.
+      - uses: devcontainers/action@1082abd5d2bf3a11abccba70eef98df068277772 # v1
+        with:
+          validate-only: "true"
+          base-path-to-features: "./.devcontainer/src"
+          generate-docs: "false"
