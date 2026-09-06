@@ -7,6 +7,9 @@ set -e
 source dev-container-features-test-lib
 
 check "Feature does not inject DX_HOME" bash -c "[ -z \"\${DX_HOME:-}\" ]"
+check "Go Task baseline is installed" bash -c "task --version | grep -q '^3.53.1$'"
+check "jq baseline is installed" bash -c "command -v jq >/dev/null"
+check "ripgrep baseline is installed" bash -c "command -v rg >/dev/null"
 check "stable runtime installed at /opt/dx" bash -c "test -d /opt/dx"
 check "agent instructions present" bash -c "test -f /opt/dx/agents/base.md && test -f /opt/dx/agents/git.md"
 check "shared taskfile present" bash -c "test -f /opt/dx/taskfiles/base.yml"

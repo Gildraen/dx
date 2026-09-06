@@ -23,9 +23,17 @@ Compose the official Features you need with the shared `dx` Feature:
 }
 ```
 
-Only add other official Features (docker-outside-of-docker, apt packages,
-language runtimes, …) if your project actually needs them. `dx` does not
-bundle them.
+Only add other Features or packages for project-specific requirements
+(Docker-outside-of-Docker, language runtimes, service CLIs, …). The DX common
+tool baseline is deliberately limited and does not cover those tools.
+
+At `1.0.0`, the DX Feature installs the runtime but not Go Task, `jq`, or
+ripgrep. The `go-task` Feature in this example is consequently required for
+local `task` commands and Remote Taskfiles. A later DX release may guarantee
+the documented common baseline; the unreleased `1.1.0` Feature is prepared to
+do so by composing the dedicated `go-task` and `apt-get-packages` Features.
+Never rely on a tool until the exact published DX version used by the repository
+installs it.
 
 This installs the DX runtime at `/opt/dx` (`DX_HOME`): shared agent
 instructions, the portable `dx-mcp` launcher, and Task helpers. The launcher
@@ -73,6 +81,10 @@ Gives you `task dx:doctor` and `task dx:mcp:github`. Your own
 Remote Taskfiles require Go Task `v3.53.1` or newer. This is the first stable
 release where Remote Taskfiles are generally available, so the Dev Container
 pins that minimum version.
+
+The reusable validation workflow installs this same Task version on its GitHub
+Actions runner before executing `task validate`. Its availability in CI does
+not mean that the local devcontainer already provides it.
 
 The first released consumer ref is shown as `v1.0.0`; it must exist as a DX
 tag before the consumer is used. CI downloads that exact ref and trusts only
