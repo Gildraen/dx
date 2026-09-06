@@ -7,6 +7,24 @@ repositories.
 consumer repository keeps only what is genuinely project-specific, plus the
 small bootstrap files that a few tools still require locally.
 
+## Shared tool baseline
+
+`dx` is also the common development-tool baseline for Gildraen projects. Its
+baseline must stay intentionally small: a tool belongs there only when it is
+expected to be used durably across most projects or is required by a shared DX
+contract. It is not a catalogue of convenient command-line tools.
+
+The `1.1.0` baseline is Go Task, `jq`, and ripgrep (`rg`). The Feature composes
+the dedicated `go-task` Feature and `apt-get-packages` Feature to provide them.
+Task qualifies through the shared Taskfile and `task validate` contract; `jq`
+and `rg` are common shell-building blocks, not DX helpers. Project runtimes,
+service-specific CLIs, and occasional utilities remain consumer-owned.
+
+The released `1.0.0` Feature currently installs the DX runtime only. Until a
+`1.1.0` Feature is published, consumers that need these commands must compose
+their own Features or packages. A published DX version guarantees only the
+tools its Feature actually installs.
+
 ## What it provides
 
 - A Dev Container **Feature** (`ghcr.io/gildraen/dx/dx:1.0.0`) that installs the

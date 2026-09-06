@@ -43,7 +43,7 @@ this way is the main design tool used throughout this repository.
 
 | Concern | Category | Where |
 |---|---|---|
-| Devcontainer baseline (Node, gh, task, docker) | Référençable (official Features) | consumer composes official Features directly |
+| Shared tool baseline | Installable | DX Feature, when guaranteed by its released version |
 | Agent instructions (`base.md`, `git.md`) | Installable | `.devcontainer/src/dx/runtime/agents/` → `$DX_HOME/agents/` |
 | Shared Task helpers | Référençable (Remote Taskfile) | `.devcontainer/src/dx/runtime/taskfiles/base.yml` |
 | CI contracts (`validate`, `test`, `lint`) | Référençable (reusable workflow) | `.github/workflows/reusable-*.yml` |
@@ -70,14 +70,35 @@ image; DX does not install an npm package or manage a token store.
 `DX_HOME` selects the installed agent instructions in stable mode and the live
 worktree runtime in dogfood mode (see [dogfood.md](dogfood.md)).
 
+## Shared tool baseline
+
+DX is a common base for Gildraen projects as well as a versioned reference
+source. A released Feature may therefore guarantee a deliberately small set of
+system tools. Admission requires one of these conditions:
+
+- the tool is required by a shared DX contract; or
+- it is expected to be used durably by most Gildraen repositories.
+
+Convenience alone is not sufficient. Project language runtimes, service CLIs,
+and specialist utilities remain consumer-specific.
+
+The `1.1.0` baseline is Go Task, `jq`, and ripgrep (`rg`). The DX Feature owns
+this guarantee declaratively by depending on the dedicated `go-task` Feature
+and the `apt-get-packages` Feature for `jq` and `ripgrep`; it does not duplicate
+their installation logic. The package Feature also installs `git`, a technical
+prerequisite of the selected Task Feature on a minimal image. Go Task supports
+the shared `task validate` contract and Remote Taskfiles. `jq` and `rg` are
+portable shell primitives likely to be reused across repositories. The released
+`1.0.0` Feature does not install them, so consumers must install what they use
+until `1.1.0` is published and adopted.
+
 ## What `dx` intentionally does *not* do
 
 - No custom CLI, framework, daemon, or file-propagation engine.
 - No list of consumer repositories (`targetRepos`) and no drift/coherence
   checker comparing canonical files against copies.
-- No reimplementation of Node, GitHub CLI, Go Task, or Docker Features —
-  consumers compose the official Features directly alongside the `dx`
-  Feature.
+- No unbounded tool bundle: a system tool enters the baseline only under the
+  shared-tool policy above.
 - Ollama and Docker-outside-of-Docker are **not** part of the common
   baseline: they are only relevant to specific projects and are configured
   there, not in `dx`.

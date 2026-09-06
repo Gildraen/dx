@@ -15,6 +15,9 @@ bootstrap consommateur.
   Renovate, runtime) — voir [docs/architecture.md](docs/architecture.md).
 - Les regles agent generiques destinees aux consommateurs vivent dans
   `.devcontainer/src/dx/runtime/agents/` (`base.md`, `git.md`), pas ici.
+- Le socle d'outils commun reste volontairement limite : un outil y entre
+  seulement s'il est un contrat DX ou un besoin durable de la plupart des
+  projets, jamais seulement par commodite.
 
 ## Regles de contribution
 

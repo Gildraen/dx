@@ -23,6 +23,9 @@ short, project-specific `AGENTS.md` instead.
   guessing silently.
 - Respect the contracts a repository exposes (for example `task validate`,
   `task test`, `task lint`) rather than assuming a specific implementation.
+- Treat a command as available from the DX tool baseline only when the exact
+  released DX Feature used by the repository guarantees it. Add project-
+  specific tools in the consumer configuration, not by copying DX logic.
 - Keep secrets, tokens, and authentication state out of versioned files.
 
 See [git.md](git.md) for the Git and review workflow rules.
