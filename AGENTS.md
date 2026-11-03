@@ -36,5 +36,4 @@ task --list
 task validate
 task test
 task feature:test
-task status
 ```

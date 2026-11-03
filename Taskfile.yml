@@ -24,29 +24,3 @@ tasks:
     desc: Run the Dev Container Feature test suite directly with the local Docker daemon.
     cmds:
       - bash .devcontainer/test/dx/feature-test.sh
-
-  status:
-    desc: Show basic repository state.
-    cmds:
-      - |
-        echo "=== dx status ==="
-        echo "Git: $(git log --oneline -1 2>/dev/null || echo 'no commits yet')"
-        changed=$(git status --short 2>/dev/null | wc -l | tr -d ' ')
-        if [ "$changed" -eq 0 ]; then
-          echo "     working tree clean"
-        else
-          echo "     $changed file(s) modified"
-        fi
-
-  archive:
-    desc: Create a shareable archive of the tracked (git) files only.
-    cmds:
-      - |
-        repo_name=$(basename "$PWD")
-        timestamp=$(date -u +%Y%m%d-%H%M%S)
-        archive_dir="artifacts"
-        archive_path="$archive_dir/${repo_name}-${timestamp}.zip"
-
-        mkdir -p "$archive_dir"
-        git archive --format=zip --output="$archive_path" HEAD
-        echo "Archive created: $archive_path (tracked files only, via git archive)"
