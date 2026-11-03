@@ -13,7 +13,7 @@ repositories. It is **consumed by reference**, not copied.
              │                │                │
              └────────────────┼────────────────┘
                               │
-                       versioned releases (SemVer tags)
+                         published releases
                               │
                ┌──────────────┼──────────────┐
                ▼              ▼              ▼
@@ -43,37 +43,87 @@ this way is the main design tool used throughout this repository.
 
 | Concern | Category | Where |
 |---|---|---|
-| Shared tool baseline | Installable | DX Feature, when guaranteed by its released version |
-| Agent instructions (`base.md`, `git.md`) | Installable | `.devcontainer/src/dx/runtime/agents/` → `$DX_HOME/agents/` |
+| Shared tool baseline | Installable | DX Feature manifest |
+| Shared entry point | Installable | `.devcontainer/src/dx/runtime/AGENTS.md` -> `/opt/dx/AGENTS.md` |
+| Shared instructions (`base.md`, `git.md`) | Installable | `.devcontainer/src/dx/runtime/instructions/` -> `/opt/dx/instructions/` |
+| Shared roles (one `.md` file per role; the directory listing is authoritative, not this table) | Installable | `.devcontainer/src/dx/runtime/agents/` -> `/opt/dx/agents/` |
+| Shared skills (one directory per skill with a `SKILL.md`; the directory listing is authoritative, not this table) | Installable | `.devcontainer/src/dx/runtime/skills/` -> `/opt/dx/skills/` |
 | Shared Task helpers | Référençable (Remote Taskfile) | `.devcontainer/src/dx/runtime/taskfiles/base.yml` |
 | CI contracts (`validate`, `test`, `lint`) | Référençable (reusable workflow) | `.github/workflows/reusable-*.yml` |
 | Renovate rules | Référençable (preset) | `default.json` |
 | `devcontainer.json`, `AGENTS.md`, `Taskfile.yml` | Bootstrap local obligatoire | short files in each consumer repo |
+| Explicit resource loading | Bootstrap local obligatoire | project `AGENTS.md` -> runtime `AGENTS.md` -> rules, selected roles and skills |
+| Project agents (canonical source) | Spécifique au projet | `.agents/agents/` in each consumer repository |
+| Project skills | Spécifique au projet | `.agents/skills/` in each consumer repository |
+| Future MCP config | Bootstrap local obligatoire | `.agents/mcp.json` once the contract exists |
 | Business logic, service specifics | Spécifique au projet | stays in each repository |
 
 ## Runtime: `DX_HOME`
 
-The Feature installs the versioned runtime to a stable path:
+The Feature installs the shared runtime to a stable path:
 
 ```
 DX_HOME=/opt/dx
 /opt/dx/
+├── AGENTS.md
 ├── agents/
 ├── bin/
+├── instructions/
+├── skills/
 └── taskfiles/
 ```
 
-The runtime contains shared agent instructions, Task helpers, and a small
-`dx-mcp` launcher. GitHub MCP itself is provided by GitHub's official container
-image; DX does not install an npm package or manage a token store.
+The runtime contains an `AGENTS.md` entry point, shared instructions, on-demand
+roles, shared skills, Task helpers, and a small `dx-mcp` launcher. Its Markdown
+resources are independent of any AI client, model, or editor. GitHub MCP itself is provided by
+GitHub's official container image; DX does not install an npm package or
+manage a token store.
 
-`DX_HOME` selects the installed agent instructions in stable mode and the live
-worktree runtime in dogfood mode (see [dogfood.md](dogfood.md)).
+The Feature copies the versioned runtime to `/opt/dx` and declares
+`DX_HOME=/opt/dx` through `containerEnv`. It does not configure AI clients.
+The project's small `AGENTS.md` asks the agent to resolve `DX_HOME` from the
+process environment (default `/opt/dx` when absent) and read its `AGENTS.md`.
+That entry point explicitly loads `instructions/base.md` and
+`instructions/git.md` before any work. These rules apply through explicit
+loading, not editor-specific activation metadata. Missing rules must be
+reported rather than silently skipped.
+
+To choose a role, list `agents/*.md`, inspect `name` and `description`, then
+read the selected file in full. For workflows, list `skills/*/SKILL.md` and
+use the same metadata-driven selection. Directory contents are authoritative;
+no central role or skill list is required. Delegate focused work only when the
+client supports subagents with these instructions; otherwise apply the role
+in the current agent and report that fallback. The main agent integrates and
+validates delegated work.
+
+DX resources and project resources are additive. Project customizations stay
+in `.agents/agents/*.md` and `.agents/skills/*/SKILL.md`; the bootstrap asks the
+agent to list them and load relevant resources explicitly, as described in
+[consumer.md](consumer.md). These paths are project conventions, not universal
+client discovery locations. There are no provider-specific adapters, link
+conversions, generated resource files, or user-profile symlinks. Shared content
+must not be copied into consumers.
+`.agents/mcp.json` is reserved for a later MCP configuration contract and
+should not be introduced before that contract is documented here.
+
+Neither file availability nor `DX_HOME` guarantees a native role picker,
+automatic loading, or subagent support. If a client does not read the project's
+`AGENTS.md`, provide it explicitly through context or the initial request.
+Instructions guide the agent; they are not a security enforcement boundary.
+Permissions and isolation must be enforced by the execution environment.
+
+Stable consumers use the installed snapshot; runtime changes require updating
+the Feature release and rebuilding their container. Dogfood explicitly sets
+`remoteEnv.DX_HOME` to the live worktree runtime and reads it through the same
+bootstrap, without discovery settings (see [dogfood.md](dogfood.md)). This
+repository sets `remoteEnv.DX_HOME` to
+`${containerWorkspaceFolder}/.devcontainer/src/dx/runtime`; its root
+[AGENTS.md](../AGENTS.md) links directly to the local runtime entry point.
 
 ## Shared tool baseline
 
-DX is a common base for Gildraen projects as well as a versioned reference
-source. A released Feature may therefore guarantee a deliberately small set of
+DX is a common base for Gildraen projects as well as a shared reference source.
+A released Feature may therefore guarantee a deliberately small set of
 system tools. Admission requires one of these conditions:
 
 - the tool is required by a shared DX contract; or
@@ -82,15 +132,19 @@ system tools. Admission requires one of these conditions:
 Convenience alone is not sufficient. Project language runtimes, service CLIs,
 and specialist utilities remain consumer-specific.
 
-The `1.1.0` baseline is Go Task, `jq`, and ripgrep (`rg`). The DX Feature owns
-this guarantee declaratively by depending on the dedicated `go-task` Feature
-and the `apt-get-packages` Feature for `jq` and `ripgrep`; it does not duplicate
+The common baseline is Node.js LTS, GitHub CLI, Go Task, `jq`, and ripgrep
+(`rg`). The Feature manifest is the source of truth for this baseline. DX owns
+the guarantee declaratively by depending on the
+official `node` and `github-cli` Features, the dedicated `go-task` Feature, and
+the `apt-get-packages` Feature for `jq` and `ripgrep`; it does not duplicate
 their installation logic. The package Feature also installs `git`, a technical
-prerequisite of the selected Task Feature on a minimal image. Go Task supports
-the shared `task validate` contract and Remote Taskfiles. `jq` and `rg` are
-portable shell primitives likely to be reused across repositories. The released
-`1.0.0` Feature does not install them, so consumers must install what they use
-until `1.1.0` is published and adopted.
+prerequisite of the selected Task Feature on a minimal image. Node.js and GitHub
+CLI are part of the shared agent/dev workflow inherited from the pre-DX
+consumer baseline. Go Task supports the shared `task validate` contract and
+Remote Taskfiles. `jq` and `rg` are portable shell primitives likely to be
+reused across repositories. Consumers should rely only on tools declared by
+the Feature release they have selected; tools outside that contract remain
+consumer-specific.
 
 ## What `dx` intentionally does *not* do
 

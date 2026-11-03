@@ -1,6 +1,6 @@
 # dx
 
-Shared, versioned, consumable developer experience (DX) for Gildraen
+Shared, consumable developer experience (DX) for Gildraen
 repositories.
 
 **Principle: reference / consume / install the DX, don't copy it.** A
@@ -9,27 +9,17 @@ small bootstrap files that a few tools still require locally.
 
 ## Shared tool baseline
 
-`dx` is also the common development-tool baseline for Gildraen projects. Its
-baseline must stay intentionally small: a tool belongs there only when it is
-expected to be used durably across most projects or is required by a shared DX
-contract. It is not a catalogue of convenient command-line tools.
-
-The `1.1.0` baseline is Go Task, `jq`, and ripgrep (`rg`). The Feature composes
-the dedicated `go-task` Feature and `apt-get-packages` Feature to provide them.
-Task qualifies through the shared Taskfile and `task validate` contract; `jq`
-and `rg` are common shell-building blocks, not DX helpers. Project runtimes,
-service-specific CLIs, and occasional utilities remain consumer-owned.
-
-The released `1.0.0` Feature currently installs the DX runtime only. Until a
-`1.1.0` Feature is published, consumers that need these commands must compose
-their own Features or packages. A published DX version guarantees only the
-tools its Feature actually installs.
+`dx` also defines a small common tool baseline for Gildraen projects, admitted
+only when a shared DX contract requires a tool or it is expected to be used
+durably across most projects — see
+[docs/architecture.md](docs/architecture.md#shared-tool-baseline) for the
+current list, the admission policy, and why each tool qualifies.
 
 ## What it provides
 
-- A Dev Container **Feature** (`ghcr.io/gildraen/dx/dx:1.0.0`) that installs the
-  shared runtime (agent instructions, the portable `dx-mcp` launcher, and
-  Task helpers) to
+- A Dev Container **Feature** (`ghcr.io/gildraen/dx/dx`) that installs the
+  shared runtime (agent instructions, skills, the portable `dx-mcp` launcher,
+  and Task helpers) to
   `DX_HOME` (`/opt/dx`).
 - **Reusable GitHub Actions workflows** for the `validate`/`maintenance`
   contracts (`.github/workflows/reusable-*.yml`).
@@ -40,11 +30,28 @@ tools its Feature actually installs.
 - A **Remote Taskfile** of small, generic helpers
   (`.devcontainer/src/dx/runtime/taskfiles/base.yml`).
 
+The runtime is independent of the AI client, model, and editor. A small project
+`AGENTS.md` resolves `DX_HOME` from the environment (default `/opt/dx` when
+absent) and asks the agent to read that runtime's `AGENTS.md`. The runtime
+explicitly loads `instructions/base.md` and `instructions/git.md` before work,
+then lists roles in `agents/*.md` and workflows in `skills/*/SKILL.md` by their
+`name` and `description` metadata. Directory contents are authoritative.
+
+Consumer repositories may add project-specific roles in `.agents/agents/`
+and skills in `.agents/skills/`; their bootstrap asks the agent to list and
+read relevant resources there too. These paths and `DX_HOME` do not configure
+a client's native picker or guarantee automatic loading. If a client does not
+read the project's `AGENTS.md`, provide it explicitly in the context or initial
+request. Subagents are used only when the client supports them; otherwise the
+current agent applies the selected role and reports that fallback.
+`.agents/mcp.json` is reserved for a future MCP configuration standard and is
+not part of the current contract.
+
 The `dx-mcp github` command is a small portable entry point for GitHub's
-official MCP server. It runs the official
-`ghcr.io/github/github-mcp-server:v1.10.1` image via Docker. Authentication is
-handled by the official server; DX stores no token. A temporary test image can
-be selected with `GITHUB_MCP_IMAGE`, without changing the consumer.
+official MCP server. It runs a pinned version of the official
+`ghcr.io/github/github-mcp-server` image via Docker. Authentication is
+handled by the official server; DX stores no token. The image tag is pinned in
+the script and kept current by Renovate, not configurable per consumer.
 
 See [docs/architecture.md](docs/architecture.md) for the full model.
 
@@ -53,7 +60,7 @@ See [docs/architecture.md](docs/architecture.md) for the full model.
 ```jsonc
 // .devcontainer/devcontainer.json
 "features": {
-  "ghcr.io/gildraen/dx/dx:1.0.0": {}
+  "ghcr.io/gildraen/dx/dx:<released-tag>": {}
 }
 ```
 
@@ -61,37 +68,44 @@ See [docs/architecture.md](docs/architecture.md) for the full model.
 # .github/workflows/validate.yml
 jobs:
   validate:
-    uses: Gildraen/dx/.github/workflows/reusable-validate.yml@v1.0.0
+    uses: Gildraen/dx/.github/workflows/reusable-validate.yml@<released-tag>
 ```
 
 ```jsonc
 // renovate.json
-{ "extends": ["github>Gildraen/dx#v1.0.0"] }
+{ "extends": ["github>Gildraen/dx#<released-tag>"] }
 ```
 
-Full walkthrough: [docs/consumer.md](docs/consumer.md). Minimal working
-example: [examples/consumer/](examples/consumer/).
+Use the same existing release tag for the Feature, workflows, and preset;
+Renovate proposes upgrades afterwards. Full walkthrough:
+[docs/consumer.md](docs/consumer.md).
 
 ## Releases
 
-`dx` is versioned with SemVer tags (`vX.Y.Z`). Before tagging, update the
-Feature manifest to the same version, for example `"version": "1.1.0"`, then
-push `v1.1.0`. The release workflow fails if they differ, publishes the
-Feature to GHCR, and creates a GitHub release. The official Feature action
-publishes the SemVer major, minor, and patch tags. Consumers in this repository
-are pinned to `ghcr.io/gildraen/dx/dx:1.0.0`; Renovate can propose upgrades to
-new exact versions.
+Before publishing, the Feature manifest and Git release tag must identify the
+same release; CI rejects a mismatch. The release workflow publishes the
+Feature to GHCR and creates a GitHub release. This repository's own devcontainer
+consumes the Feature from local source (`./src/dx`), not a published release;
+external consumers pin a release tag and let Renovate propose upgrades.
+The installed runtime is a snapshot: shared resource changes require updating
+the Feature release and rebuilding the consumer container to take effect.
 
 ## Developing a DX change (dogfood)
 
 Changes to `dx` are validated in a real consumer repository before release,
 using a **git worktree** (`project/.devcontainer/.dx`), not a copy. See
 [docs/dogfood.md](docs/dogfood.md) for the exact procedure.
+Dogfood selects the live runtime through `remoteEnv.DX_HOME`; the project
+bootstrap reads it directly, without client-specific adapters or discovery
+settings. In this repository, `remoteEnv.DX_HOME` points at
+`${containerWorkspaceFolder}/.devcontainer/src/dx/runtime`, and the root
+[AGENTS.md](AGENTS.md) links directly to that runtime's entry point.
 
 ## Migrating existing repositories
 
-`Niki`, `infra`, `local-llm`, etc. are migrated one at a time from the old
-copy/propagation model. See [docs/migration.md](docs/migration.md).
+Consumer repositories are migrated one at a time from the old copy/propagation
+model. See [docs/migration.md](docs/migration.md) for the current list and
+procedure.
 
 ## Repository layout
 
@@ -99,11 +113,10 @@ copy/propagation model. See [docs/migration.md](docs/migration.md).
 .devcontainer/src/dx/    Dev Container Feature source (devcontainer-feature.json, install.sh, runtime/)
 .github/workflows/       validate/maintenance (dx itself) + reusable-* (consumers) + release
 .devcontainer/test/dx/   Feature test + small runtime/taskfile/JSON/workflow checks
-examples/consumer/       minimal example of a repository consuming dx
 docs/                    architecture, consumer guide, dogfood guide, migration guide
 default.json             Renovate preset consumed by other repositories
 renovate.json            dx's own Renovate config
-Taskfile.yml             tasks to work on dx itself (validate, test, feature:test, status, archive)
+Taskfile.yml             tasks to work on dx itself (validate, test, feature:test)
 ```
 
 ## Useful commands
@@ -113,5 +126,4 @@ task --list
 task validate
 task test                 # inside the dx devcontainer
 task feature:test         # directly on a host with Docker
-task status
 ```

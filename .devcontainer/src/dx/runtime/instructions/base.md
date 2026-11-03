@@ -1,9 +1,6 @@
 ---
 name: dx-base
 description: Baseline agent instructions shared across Gildraen repositories.
-trigger: always
-paths:
-  - "**"
 ---
 
 # DX baseline
@@ -11,8 +8,9 @@ paths:
 ## Provenance
 
 These instructions are shared DX runtime resources, versioned in `Gildraen/dx`
-(`.devcontainer/src/dx/runtime/agents/`). They are consumed by other repositories either
+(`.devcontainer/src/dx/runtime/instructions/`). They are consumed by other repositories either
 through the installed DX runtime (`DX_HOME`) or a local `.dx` dogfood checkout.
+The runtime's `AGENTS.md` explicitly loads these rules for every task.
 Do not fork or copy this content into a consumer repository — extend it with a
 short, project-specific `AGENTS.md` instead.
 
@@ -28,4 +26,5 @@ short, project-specific `AGENTS.md` instead.
   specific tools in the consumer configuration, not by copying DX logic.
 - Keep secrets, tokens, and authentication state out of versioned files.
 
-See [git.md](git.md) for the Git and review workflow rules.
+The shared Git workflow instructions apply alongside this baseline. Use the
+on-demand `dx-review` agent for focused code reviews and corrections.
