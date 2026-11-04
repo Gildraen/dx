@@ -1,9 +1,6 @@
 ---
 name: dx-git-workflow
 description: Regles Git et workflow de contribution partagees Gildraen.
-trigger: always
-paths:
-  - "**"
 ---
 
 # Git workflow

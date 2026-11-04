@@ -14,36 +14,34 @@ Compose the official Features you need with the shared `dx` Feature:
   "name": "my-project",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
-    "ghcr.io/devcontainers/features/node:2": { "version": "lts" },
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers-extra/features/go-task:1": { "version": "3.53.1" },
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-    "ghcr.io/gildraen/dx/dx:1.0.0": {}
+    "ghcr.io/gildraen/dx/dx:1.2.0": {}
   }
 }
 ```
 
 Only add other Features or packages for project-specific requirements
-(Docker-outside-of-Docker, language runtimes, service CLIs, …). The DX common
-tool baseline is deliberately limited and does not cover those tools.
+(Docker-outside-of-Docker, project language runtimes, service CLIs, …). The DX
+common tool baseline is deliberately limited and does not cover those tools.
 
-At `1.0.0`, the DX Feature installs the runtime but not Go Task, `jq`, or
-ripgrep. The `go-task` Feature in this example is consequently required for
-local `task` commands and Remote Taskfiles. A later DX release may guarantee
-the documented common baseline; the unreleased `1.1.0` Feature is prepared to
-do so by composing the dedicated `go-task` and `apt-get-packages` Features.
-Never rely on a tool until the exact published DX version used by the repository
-installs it.
+The tool baseline is defined by the selected DX Feature's manifest. Check that
+manifest before relying on a tool; requirements not included there remain
+project-specific.
 
-This installs the DX runtime at `/opt/dx` (`DX_HOME`): shared agent
-instructions, the portable `dx-mcp` launcher, and Task helpers. The launcher
-runs GitHub's pinned official MCP image
-`ghcr.io/github/github-mcp-server:v1.10.1` through Docker and does not manage a
-GitHub token. To test another image temporarily, run
-`GITHUB_MCP_IMAGE=ghcr.io/github/github-mcp-server:test dx-mcp github`; the
-consumer configuration remains unchanged. The Dev Container keeps its `gh`
-configuration under
-`.devcontainer/.gh`; the authentication file there is ignored locally.
+The Feature copies the versioned DX runtime to `/opt/dx` and sets
+`DX_HOME=/opt/dx` through `containerEnv`: the `AGENTS.md` entry point, shared
+instructions, roles, skills, the portable `dx-mcp` launcher, and Task helpers.
+This environment variable alone does not configure an AI client. The installed
+runtime is a snapshot; to consume shared resource changes, update the Feature
+release and rebuild the container. For live sources, use [dogfood.md](dogfood.md).
+The launcher runs GitHub's pinned official MCP image through Docker and does
+not manage a GitHub token. A project that enables MCP must provide Docker
+access separately until the `.agents/mcp.json` contract is defined. Renovate
+keeps this pin current; the image is not configurable per consumer. The Dev Container keeps
+the GitHub CLI available, but DX does not configure or authenticate it. `gh`
+uses its normal user-level configuration by default; each consumer manages its
+own authentication and may set `GH_CONFIG_DIR` if it needs a custom location.
+If that location is inside the workspace, the consumer must ensure it is
+ignored by Git.
 
 ## 2. Reusable GitHub workflows
 
@@ -54,7 +52,7 @@ on:
   pull_request:
 jobs:
   validate:
-    uses: Gildraen/dx/.github/workflows/reusable-validate.yml@v1.0.0
+    uses: Gildraen/dx/.github/workflows/reusable-validate.yml@<released-tag>
 ```
 
 The reusable workflow runs `task validate` (configurable via the `task-name`
@@ -65,30 +63,29 @@ the remote DX Taskfile, avoiding an interactive trust prompt in CI without
 enabling global `--yes` behavior.
 
 Same pattern for maintenance / link-checking:
-`Gildraen/dx/.github/workflows/reusable-maintenance.yml@v1.0.0`.
+`Gildraen/dx/.github/workflows/reusable-maintenance.yml@<released-tag>`.
 
 ## 3. Remote Taskfile (optional shared helpers)
 
 ```yaml
 # Taskfile.yml
 includes:
-  dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=v1.0.0
+  dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=<released-tag>
 ```
 
 Gives you `task dx:doctor` and `task dx:mcp:github`. Your own
 `validate`/`test`/`lint` tasks stay in your Taskfile.
 
-Remote Taskfiles require Go Task `v3.53.1` or newer. This is the first stable
-release where Remote Taskfiles are generally available, so the Dev Container
-pins that minimum version.
+Remote Taskfiles require a Go Task release with remote include support. The DX
+Feature and reusable validation workflow both provide a compatible release.
 
-The reusable validation workflow installs this same Task version on its GitHub
+The reusable validation workflow installs a compatible Task release on its GitHub
 Actions runner before executing `task validate`. Its availability in CI does
 not mean that the local devcontainer already provides it.
 
-The first released consumer ref is shown as `v1.0.0`; it must exist as a DX
-tag before the consumer is used. CI downloads that exact ref and trusts only
-`github.com` through `TASK_REMOTE_TRUSTED_HOSTS=github.com`.
+The consumer ref must match an existing DX release tag before the consumer is
+used. CI downloads that exact ref and trusts only `github.com` through
+`TASK_REMOTE_TRUSTED_HOSTS=github.com`.
 
 ## 4. Renovate preset
 
@@ -96,7 +93,7 @@ tag before the consumer is used. CI downloads that exact ref and trusts only
 // renovate.json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>Gildraen/dx#v1.0.0"]
+  "extends": ["github>Gildraen/dx#<released-tag>"]
 }
 ```
 
@@ -106,30 +103,60 @@ Renovate then proposes updates to: the `dx` Feature version in
 regex-based custom manager, documented in `default.json`, kept because Task
 has no native Renovate manager).
 
-## 5. `AGENTS.md`
+## 5. Agents and skills
 
-Keep it small: reference the shared instructions, then list only what is
-truly project-specific.
+Keep the root `AGENTS.md` small: a bootstrap plus genuinely project-specific
+rules. The runtime does not require a particular AI client, model, or editor.
+Use this bootstrap in the consumer:
 
-```markdown
+````markdown
 # Project agent instructions
 
-Load the shared DX agent instructions first:
-- when a DX dogfood checkout exists (`./.dx/.devcontainer/src/dx/runtime/agents/`), use it;
-- otherwise use the installed runtime (`$DX_HOME/agents/`, `/opt/dx/agents/`).
-
-Then apply the project-specific rules below.
+Before any work, resolve DX_HOME from the process environment; use /opt/dx
+only when DX_HOME is absent. Read its AGENTS.md and follow the shared guidance.
 
 ## Project-specific rules
 ...
+````
+
+Common loading, selection, and delegation rules belong to the runtime's
+`AGENTS.md`, not to each project bootstrap, role, or skill.
+
+The runtime's `AGENTS.md` explicitly loads `instructions/base.md` and
+`instructions/git.md` before work; no editor-specific activation metadata is
+needed. It then asks the agent to list `$DX_HOME/agents/*.md` and
+`$DX_HOME/skills/*/SKILL.md`, inspect `name` and `description` metadata, and
+read the selected role or workflow before applying it. Directory contents are
+the authoritative list, not a catalog in this guide.
+
+Shared sources live under `.devcontainer/src/dx/runtime/` in `dx` and are
+installed by the Feature. Project-specific roles and skills remain additive
+under `.agents/agents/` and `.agents/skills/` in the consumer. These are
+explicit bootstrap conventions, not universally discovered client paths.
+Do not copy shared content, convert its links, generate provider-specific
+files, or add per-client adapters or user-profile symlinks.
+
+Neither `DX_HOME` nor these files guarantees a native role picker, automatic
+instruction or skill loading, or subagent support. If the client does not read
+the root `AGENTS.md`, attach it explicitly through the client's context or
+initial request before starting work. For example:
+
+```text
+Read the project's AGENTS.md provided in context. Resolve DX_HOME from the
+environment (default /opt/dx when absent), read its AGENTS.md and referenced
+rules, then list roles and skills and load the resources relevant to this task.
 ```
 
-See [examples/consumer/](../examples/consumer/) for a full minimal example.
+Instructions are guidance, not a security enforcement boundary; use execution
+permissions and isolation for enforcement.
+
+`.agents/mcp.json` is reserved for a future MCP configuration standard. Do not
+add one until that contract is documented in `dx`.
 
 ## Runtime state that never belongs in `dx` or in your repository
 
 Tokens, `gh` auth state, and generated MCP configuration are runtime state, not
-the DX baseline. `gh` state is isolated under `.devcontainer/.gh` and ignored.
-The official GitHub MCP server's local stdio OAuth flow keeps its token in
-memory only, so no MCP token file or workspace state directory is required. DX
-uses OAuth as its single authentication mode.
+the DX baseline. DX does not configure or store `gh` state. The official GitHub
+MCP server's local stdio OAuth flow keeps its token in memory only, so no MCP
+token file or workspace state directory is required. DX uses OAuth as its
+single authentication mode.

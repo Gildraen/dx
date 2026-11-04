@@ -51,7 +51,7 @@ cd ~/projects/Niki
 export DX_HOME="$PWD/.devcontainer/.dx/.devcontainer/src/dx/runtime"
 ```
 
-Runtime selection is deterministic:
+The installed `dx-mcp` launcher's runtime selection is deterministic:
 
 ```text
 DX_HOME explicitly set  -> that directory
@@ -59,17 +59,43 @@ otherwise .devcontainer/.dx exists -> <workspace>/.devcontainer/.dx/.devcontaine
 otherwise               -> /opt/dx
 ```
 
+The Feature sets `DX_HOME=/opt/dx` by default, so dogfood must explicitly
+override it as above. The worktree fallback when it is unset belongs to the
+`dx-mcp` launcher, not the agent bootstrap: that bootstrap uses `/opt/dx` when
+`DX_HOME` is absent.
+
 The installed `/usr/local/bin/dx-mcp` is only a small selector. It resolves
 this order on every invocation and then executes the selected runtime's
 `bin/dx-mcp`. Editing `.devcontainer/.dx/.devcontainer/src/dx/runtime/bin/dx-mcp` therefore affects the
 next `dx-mcp` invocation immediately; no rebuild or release is needed. The
 Feature test exercises both the `.devcontainer/.dx` selection and the explicit override.
 
-The shared agent bootstrap already prefers `./.devcontainer/.dx/.devcontainer/src/dx/runtime/agents/` and
-otherwise falls back to `$DX_HOME/agents/` or `/opt/dx/agents/`. Runtime files
-such as agent instructions, the Task helpers, and `dx-mcp` are therefore live
-from the worktree. `dx-mcp github` runs GitHub's official MCP image through
-Docker and does not use a workspace token.
+To test live instructions, roles, and skills in agent sessions, set the
+consumer devcontainer's remote environment:
+
+```jsonc
+"remoteEnv": {
+  "DX_HOME": "${containerWorkspaceFolder}/.devcontainer/.dx/.devcontainer/src/dx/runtime"
+}
+```
+
+Rebuild once to apply the devcontainer configuration. Use the project
+`AGENTS.md` bootstrap from [consumer.md](consumer.md): it resolves `DX_HOME`
+from the environment and reads that runtime's `AGENTS.md`, which loads
+`instructions/base.md` and `instructions/git.md` before work and lists roles
+and skills by metadata. Resource edits are then read directly from the worktree
+when the agent loads them; ask it to reread changed resources in an existing
+session. No discovery settings, adapters, generated files, or link conversions
+are needed. Changing the environment does not configure a client's native
+picker. If the client does not read the project `AGENTS.md`, provide it through
+context or the initial request. Subagents require client support; otherwise
+the current agent applies the selected role and reports that fallback.
+
+This repository's own devcontainer sets `remoteEnv.DX_HOME` to
+`${containerWorkspaceFolder}/.devcontainer/src/dx/runtime`, and its root
+[AGENTS.md](../AGENTS.md) links directly to that local runtime entry point.
+Task can use the local Taskfile include below. `dx-mcp github` runs GitHub's
+official MCP image through Docker and does not use a workspace token.
 
 For Task, temporarily change the consumer's uncommitted include when testing
 the live Taskfile:
@@ -80,15 +106,15 @@ includes:
     taskfile: ./.devcontainer/.dx/.devcontainer/src/dx/runtime/taskfiles/base.yml
 ```
 
-Use Go Task `v3.53.1` or newer. In CI, the reusable validate workflow trusts
+Use the Go Task release supplied by the DX Feature. In CI, the reusable validate workflow trusts
 only `github.com` through `TASK_REMOTE_TRUSTED_HOSTS=github.com`; local runs
 show Task's normal trust prompt on first use.
 
-Restore the versioned remote include before committing the consumer change:
+Restore the released remote include before committing the consumer change:
 
 ```yaml
 includes:
-  dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=v1.0.0
+  dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=<released-tag>
 ```
 
 If the Feature itself changes (`devcontainer-feature.json` or `install.sh`),
@@ -102,16 +128,19 @@ rebuild the container:
 ```
 
 The normal loop is `edit Feature -> rebuild container -> test`. Runtime-only
-changes do not require a rebuild when the consumer reads them through
-`DX_HOME`.
+changes do not require a rebuild once the consumer reads live sources through
+`DX_HOME`. Stable consumers instead read the snapshot installed at `/opt/dx`;
+they need an updated Feature release and a rebuild to receive those changes.
 
 Run the consumer's `task validate` and `task test` in its devcontainer. The dx
 repository CI follows the same model: structural `task validate` runs on the
 runner, `task test` runs in `.devcontainer/devcontainer.json`, and
-`feature:test` runs directly on the runner's Docker daemon. Reusable GitHub
-workflows cannot see a local worktree: push `feature/my-dx-change`, temporarily
-reference `@feature/my-dx-change` from the consumer, run its CI, then restore
-the released tag.
+`feature:test` runs directly on the runner's Docker daemon. The dx devcontainer
+uses `${localWorkspaceFolder}` as its workspace mount and folder, so the native
+`task feature:test` command already runs from a path the host Docker daemon can
+bind-mount. Reusable GitHub workflows cannot see a local worktree: push
+`feature/my-dx-change`, temporarily reference `@feature/my-dx-change` from the
+consumer, run its CI, then restore the released tag.
 
 ## Finish dogfood and release
 
@@ -126,8 +155,8 @@ git worktree prune
 
 Open and merge the PR from `feature/my-dx-change` into `main`. For a release,
 update `.devcontainer/src/dx/devcontainer-feature.json` to the release version, merge it,
-then create and push the matching tag. For example, manifest `1.1.0` requires
-tag `v1.1.0`; the release workflow rejects mismatches before publishing.
+then create and push the matching tag. The manifest and tag must identify the
+same release; the release workflow rejects mismatches before publishing.
 After merge, the branch can be deleted according to the repository policy.
 
 No commit, push, merge, tag, or release is performed by this guide.

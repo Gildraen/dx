@@ -3,18 +3,15 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "remoteUser": "vscode",
   "features": {
-    "ghcr.io/devcontainers/features/node:2": {
-      "version": "lts"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "./src/dx": {}
   },
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached",
+  "workspaceFolder": "${localWorkspaceFolder}",
   "customizations": {
     "vscode": {
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "chat.agent.sandbox.enabled": "off"
+        "terminal.integrated.defaultProfile.linux": "bash"
       },
       "mcp": {
         "servers": {
@@ -27,14 +24,12 @@
         }
       },
       "extensions": [
-        "GitHub.copilot",
-        "GitHub.copilot-chat",
         "bierner.markdown-mermaid"
       ]
     }
   },
   "remoteEnv": {
-    "GH_CONFIG_DIR": "${containerWorkspaceFolder}/.devcontainer/.gh",
+    "DX_HOME": "${containerWorkspaceFolder}/.devcontainer/src/dx/runtime",
     "EDITOR": "code --wait",
     "VISUAL": "code --wait"
   }

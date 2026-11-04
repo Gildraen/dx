@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # Validates that every *.json file in the repo parses correctly.
+# Assumes it is run from the repo root (as Task does).
 set -euo pipefail
-
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$ROOT_DIR"
 
 status=0
 while IFS= read -r -d '' file; do

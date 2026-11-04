@@ -14,39 +14,66 @@ task** — this is a guide for a follow-up migration in each of them.
 | `.github/scripts/dx-check.mjs` | supprimé |
 | `.github/workflows/dx-coherence.yml` | supprimé |
 | `.github/workflows/dx-propagate.yml` | supprimé |
-| `.tools/install-tools.sh` | remplacé par la Dev Container Feature `ghcr.io/gildraen/dx/dx:1.0.0` |
+| `.tools/install-tools.sh` | remplacé par la Dev Container Feature `ghcr.io/gildraen/dx/dx:<released-tag>` |
 | `.tools/ollama/` | supprimé de la baseline commune — à gérer par projet si nécessaire, hors `dx` |
 | `.bin/mcp-run` | `dx-mcp github` (wrapper portable du serveur officiel GitHub MCP) |
 | `.tools/mcp-server-github/` | supprimé — `dx-mcp` utilise l'image Docker officielle versionnée avec OAuth |
-| `.agents/rules/git.md` | `.devcontainer/src/dx/runtime/agents/git.md` (runtime partagé) |
-| gros `AGENTS.md` copié | bootstrap local court + runtime partagé (`$DX_HOME/agents/`) |
+| `.agents/rules/git.md` | `.devcontainer/src/dx/runtime/instructions/git.md` (runtime partagé, chargé explicitement par son `AGENTS.md`) |
+| skills communes copiees | `.devcontainer/src/dx/runtime/skills/` (runtime partage) |
+| gros `AGENTS.md` copié | bootstrap local court + runtime partagé (`$DX_HOME`) |
+| agents projet | `.agents/agents/` dans le repository consommateur |
+| skills projet | `.agents/skills/` dans le repository consommateur |
+| futur `mcp.json` | `.agents/mcp.json` quand le contrat sera defini |
 | `Taskfile.yml` partagé par copie | Remote Taskfile (`.devcontainer/src/dx/runtime/taskfiles/base.yml`) |
-| `validate.yml` copié | `uses: Gildraen/dx/.github/workflows/reusable-validate.yml@vX.Y.Z` |
-| `maintenance.yml` copié | `uses: Gildraen/dx/.github/workflows/reusable-maintenance.yml@vX.Y.Z` |
-| `renovate.json` copié | `"extends": ["github>Gildraen/dx#vX.Y.Z"]` |
-| devcontainer complet copié | petit `devcontainer.json` composant des Features officielles + `ghcr.io/gildraen/dx/dx:1.0.0` |
+| `validate.yml` copié | `uses: Gildraen/dx/.github/workflows/reusable-validate.yml@<released-tag>` |
+| `maintenance.yml` copié | `uses: Gildraen/dx/.github/workflows/reusable-maintenance.yml@<released-tag>` |
+| `renovate.json` copié | `"extends": ["github>Gildraen/dx#<released-tag>"]` |
+| devcontainer complet copié | petit `devcontainer.json` composant des Features officielles + `ghcr.io/gildraen/dx/dx:<released-tag>` |
+
+The shared Feature carries the common tool baseline declared in its manifest:
+Node.js LTS, GitHub CLI, Go Task, `jq`, and ripgrep. Do not keep separate
+consumer Feature entries for those tools unless a repository needs a different
+project-specific version. Docker-outside-of-Docker remains
+project-specific until the future `.agents/mcp.json` contract is defined.
 
 ## Per-repository steps
 
-1. **Pick a released `dx` tag** (start with the first `v1.0.0`).
+1. **Pick a released `dx` tag** that provides the tools required by the consumer.
 2. **Devcontainer**: replace the copied devcontainer.json with a short one
-   (see [examples/consumer/.devcontainer/devcontainer.json](../examples/consumer/.devcontainer/devcontainer.json)).
-   Keep only Features actually needed by that project in addition to
-   `ghcr.io/gildraen/dx/dx:1.0.0`.
-3. **AGENTS.md**: replace the full copy with the bootstrap pattern from
-   [examples/consumer/AGENTS.md](../examples/consumer/AGENTS.md), then keep
-   only the rules genuinely specific to that repository below it.
+   composing official Features plus `ghcr.io/gildraen/dx/dx:<released-tag>` (see
+   [docs/consumer.md](consumer.md)). Keep only Features actually needed by
+   that project in addition to the selected DX Feature release.
+3. **AGENTS.md**: replace the full copy with the bootstrap pattern documented
+   in [docs/consumer.md](consumer.md), then keep only the rules genuinely
+   specific to that repository below it. Keep common
+   skills in `dx` and project-specific agents under `.agents/agents/` and
+   skills under `.agents/skills/` in the consumer repository. The bootstrap
+   resolves `DX_HOME` from the environment (default `/opt/dx` when absent) and
+   reads that runtime's `AGENTS.md`, which explicitly loads
+   `instructions/base.md` and `instructions/git.md` before work. It then lists
+   roles in `agents/*.md` and workflows in `skills/*/SKILL.md` by their `name`
+   and `description`; directory contents are authoritative. Also explicitly
+   list and load relevant project resources. Do not assume universal discovery
+   of these paths or configure provider-specific adapters, generated files,
+   link conversions, or discovery settings. The Feature installs the resources
+   and sets `DX_HOME` through `containerEnv`; it does not configure AI clients.
+   If the client does not read `AGENTS.md`, provide it explicitly through
+   context or the initial request. Delegate only when subagents are supported;
+   otherwise apply the role in the current agent and report that fallback.
+   Remove only obsolete DX-managed files; preserve project-specific resources. Leave
+   `.agents/mcp.json` absent until the MCP contract is defined in `dx`.
 4. **Taskfile.yml**: remove any copied generic tasks. Add the Remote
    Taskfile include for `dx` helpers if useful. Keep the project's own
    `validate`/`test`/`lint` implementations.
 5. **GitHub workflows**: replace copied `validate.yml`/`maintenance.yml`
    with thin wrappers calling the reusable workflows.
 6. **renovate.json**: replace the copied config with
-   `{ "extends": ["github>Gildraen/dx#vX.Y.Z"] }`, then add anything truly
+   `{ "extends": ["github>Gildraen/dx#<released-tag>"] }`, then add anything truly
    project-specific.
-7. **Remove now-unused local files**: `.tools/`, `.bin/mcp-run`,
-   `.agents/`, any dx-drift-related workflow or issue automation specific to
-   that repository.
+7. **Remove now-unused local files**: `.tools/`, `.bin/mcp-run`, obsolete
+   DX-managed agent files, and any dx-drift-related workflow or issue
+   automation specific to that repository. Do not remove project-specific
+   `.agents/agents/` or `.agents/skills/`.
 8. **Validate**: run `task validate` / CI in the migrated repository before
    merging.
 9. **Repeat** for the next repository. There is no bulk/automatic migration
@@ -58,4 +85,8 @@ task** — this is a guide for a follow-up migration in each of them.
   `local-llm`, etc. to bump the Feature version, the reusable workflow refs,
   and the Renovate preset tag.
 - To test a `dx` change live in one of these repositories before release,
-  use the [dogfood workflow](dogfood.md).
+   use the [dogfood workflow](dogfood.md): set `remoteEnv.DX_HOME` to
+   `${containerWorkspaceFolder}/.devcontainer/.dx/.devcontainer/src/dx/runtime`
+   and let the project bootstrap read it directly, without discovery settings.
+- Stable runtime resources are an installed snapshot. Updating the Feature
+   release and rebuilding the consumer container is required to receive changes.

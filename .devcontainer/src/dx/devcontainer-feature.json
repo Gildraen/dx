@@ -1,20 +1,23 @@
 {
     "id": "dx",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "name": "Gildraen DX runtime",
-    "description": "Installs the shared Gildraen developer-experience runtime and common tool baseline (Go Task, jq, ripgrep) under /opt/dx.",
+    "description": "Installs the shared Gildraen developer-experience runtime and common tool baseline under /opt/dx.",
     "documentationURL": "https://github.com/Gildraen/dx",
     "options": {},
+    "containerEnv": {
+        "DX_HOME": "/opt/dx"
+    },
     "dependsOn": {
+        "ghcr.io/devcontainers/features/node:2": {
+            "version": "lts"
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers-extra/features/go-task:1": {
             "version": "3.53.1"
         },
         "ghcr.io/devcontainers-extra/features/apt-get-packages:1": {
-            "packages": "git,jq,ripgrep"
+            "packages": "git,jq,ripgrep,libatomic1"
         }
-    },
-    "installsAfter": [
-        "ghcr.io/devcontainers/features/node",
-        "ghcr.io/devcontainers/features/github-cli"
-    ]
+    }
 }
