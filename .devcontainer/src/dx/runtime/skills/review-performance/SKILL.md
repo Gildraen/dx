@@ -5,10 +5,15 @@ description: Revue de performance (complexite, requetes, allocations, chemins ch
 
 # Revue performance
 
+Role proprietaire : [review](../../agents/review.md).
+
 ## Quand l'utiliser
 
 Changement sur un chemin frequemment execute (boucle chaude, requete
 reseau/BDD, serialisation) ou sur un volume de donnees non borne.
+
+Partir du chemin modifie, du volume attendu et des mesures disponibles ;
+distinguer cout estime et regression mesuree.
 
 ## Checklist
 

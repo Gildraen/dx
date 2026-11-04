@@ -5,9 +5,13 @@ description: Revue de code rapide et generale (lisibilite, style, evidences), ut
 
 # Revue rapide
 
+Role proprietaire : [review](../../agents/review.md).
+
 ## Quand l'utiliser
 
-Mode par defaut pour tout changement, sans risque particulier identifie.
+Passe de surface sur le diff et son contexte immediat, sans risque particulier
+identifie. Relever les signaux necessitant un axe specialise pour le role
+proprietaire, sans reexecuter ici ses checklists.
 
 ## Checklist
 
@@ -16,10 +20,11 @@ Mode par defaut pour tout changement, sans risque particulier identifie.
 - Noms, structure et style coherents avec le reste du fichier/module.
 - Pas de duplication evidente evitable avec le code existant a proximite.
 - Erreurs et cas limites evidents geres, ou explicitement hors scope.
-- Les commandes de validation disponibles (`task validate`, `task test`,
-  lint) sont executees, ou leur absence est justifiee.
+- Executer les checks pertinents disponibles ; si un check n'est pas lance,
+  en donner la raison et signaler l'incertitude restante.
 
 ## Sortie attendue
 
-Liste courte des findings avec fichier/ligne, ou confirmation explicite
-qu'aucun probleme bloquant n'a ete trouve.
+Liste courte des findings de surface et des signaux a transmettre a un axe
+specialise, ou absence de finding dans cette passe. Ne pas presenter ce resultat
+comme une validation des axes non examines.

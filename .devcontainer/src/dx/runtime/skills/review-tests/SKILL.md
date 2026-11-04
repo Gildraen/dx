@@ -5,10 +5,16 @@ description: Revue de la couverture et de la qualite des tests, a utiliser pour 
 
 # Revue tests
 
+Role proprietaire : [review](../../agents/review.md).
+
 ## Quand l'utiliser
 
 Changement qui ajoute, modifie ou corrige un comportement observable
 (fonction, endpoint, regle metier, script).
+
+Comparer les comportements du diff aux assertions des tests correspondants.
+Le resultat porte sur les lacunes du changement, pas sur une cartographie de
+couverture du projet entier.
 
 ## Checklist
 

@@ -5,15 +5,17 @@ description: 'Externaliser une variabilite codee en dur dans une configuration o
 
 # Evolution config
 
+Role proprietaire : [evolution](../../agents/evolution.md).
+
 ## Quand l'utiliser
 
 Utiliser ce skill lorsqu'un comportement varie selon le projet, le contexte,
 un environnement ou une nouvelle entree et que cette variabilite est enfouie
 dans des conditions ou des constantes du code.
 
-Ne pas l'utiliser si la valeur est une garantie de securite, une constante du
-contrat public ou si la configuration ajouterait plus de complexite que de
-maintenance evitee.
+Entree : une variation identifiee et ses consommateurs. Le resultat est un
+contrat de configuration ; la recherche automatique de composants releve de
+`evolution-discovery`, le deploiement d'une rupture de `evolution-migration`.
 
 ## Procedure
 
@@ -36,7 +38,6 @@ maintenance evitee.
 - Les valeurs invalides echouent clairement et sans comportement implicite
   dangereux.
 - Le comportement historique est conserve par defaut lorsque c'est possible.
-- Aucun systeme de plugin ou registre n'est ajoute sans besoin concret.
 
 ## Sortie attendue
 

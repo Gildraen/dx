@@ -91,10 +91,27 @@ reported rather than silently skipped.
 To choose a role, list `agents/*.md`, inspect `name` and `description`, then
 read the selected file in full. For workflows, list `skills/*/SKILL.md` and
 use the same metadata-driven selection. Directory contents are authoritative;
-no central role or skill list is required. Delegate focused work only when the
-client supports subagents with these instructions; otherwise apply the role
-in the current agent and report that fallback. The main agent integrates and
-validates delegated work.
+no central role or skill list is required. Each skill links to its owning
+role, and the role links back to its workflows. Read that role even when a
+skill is requested directly. The role selects and composes the skills needed
+for the task, deciding their order and integration without loading them all.
+
+Responsibilities follow the instruction hierarchy: the runtime guide and
+shared instructions own cross-role execution rules; roles own workflow
+selection, composition, and shared domain rules; skills own bounded procedures,
+specific checks, and results. Child resources inherit these rules rather than
+repeating them. See the
+[runtime hierarchy](../.devcontainer/src/dx/runtime/AGENTS.md#instruction-hierarchy)
+for the canonical contract.
+
+Delegate focused work with an explicit scope, applicable rules, selected role
+and skills, expected result, and edit authorization. Give concurrent writers
+disjoint file ownership. Dependent steps run sequentially; independent bounded
+assignments may run in parallel. If the client cannot run subagents, apply the
+selected role and skills in the current agent and report that fallback. The
+main agent remains responsible for integration and validation. See the
+[delegation policy](../.devcontainer/src/dx/runtime/AGENTS.md#delegate-focused-work)
+for the complete rules.
 
 DX resources and project resources are additive. Project customizations stay
 in `.agents/agents/*.md` and `.agents/skills/*/SKILL.md`; the bootstrap asks the

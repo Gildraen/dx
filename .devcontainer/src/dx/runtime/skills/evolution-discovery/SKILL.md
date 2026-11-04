@@ -5,14 +5,17 @@ description: 'Remplacer une enumeration ou une liste codee en dur par une decouv
 
 # Evolution discovery
 
+Role proprietaire : [evolution](../../agents/evolution.md).
+
 ## Quand l'utiliser
 
 Utiliser ce skill lorsqu'un projet enumere manuellement des fichiers, agents,
 plugins, commandes, routes ou composants qui suivent une convention stable et
 pourraient etre decouverts automatiquement.
 
-Ne pas l'utiliser pour une liste qui constitue un contrat explicite, un ordre
-metier ou une selection de securite.
+Entree : une enumeration et une convention candidate. Le resultat est un
+mecanisme de selection controlee ; rendre une valeur parametrable releve de
+`evolution-config`, migrer ses consommateurs de `evolution-migration`.
 
 ## Procedure
 
@@ -36,7 +39,6 @@ metier ou une selection de securite.
   centrale.
 - La decouverte ne capture pas silencieusement des fichiers inattendus.
 - L'ordre et les erreurs restent deterministes ou sont documentes comme tels.
-- Les tests couvrent au moins un cas nominal et un cas invalide.
 
 ## Sortie attendue
 

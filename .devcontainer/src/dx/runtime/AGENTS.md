@@ -11,6 +11,31 @@ under this directory. Roles and skills contain only their specific guidance;
 they do not repeat the common bootstrap. Pass this established context to
 subagents together with the selected role.
 
+Keep each rule at the narrowest shared level that owns it:
+
+- This guide and the shared instructions own cross-role execution rules.
+- Agents own role boundaries, workflow selection and composition, and rules
+	shared by their workflows.
+- Skills own one bounded procedure, its specific checks, and its result.
+
+Do not repeat inherited rules in each child resource. A skill may be selected
+directly; load its owning role to establish the relevant workflow context.
+Read only the skills needed for the current task, not every available skill.
+
+## Common execution rules
+
+Establish the requested scope and whether the task is analysis or execution
+before acting. A review, audit, verification, or plan does not authorize edits;
+report proposed changes instead. An implementation request authorizes only the
+changes needed for that request. Do not widen scope without agreement.
+
+Ground conclusions and changes in the relevant sources, contracts, and checks.
+Distinguish confirmed defects from ambiguity and optional improvements. Prefer
+the smallest justified change, preserve unrelated work, and do not rewrite
+resources merely to rephrase them. Validate changes with the closest available
+check before broader validation. Report the result, checks actually run, and
+remaining limitations; do not claim unperformed validation.
+
 ## Load the shared rules
 
 Before working on a project, read [base.md](instructions/base.md) and
@@ -31,17 +56,26 @@ Project-specific roles and skills stay in the project's `.agents/agents/` and
 `.agents/skills/`. When present, list and select them by the same metadata
 procedure. They supplement this runtime rather than duplicating it.
 
-## Delegate when supported
+## Delegate focused work
 
-If the client supports subagents, delegate focused work using the selected
-role's instructions. Give each subagent its scope, applicable rules, expected
-result, and whether edits are allowed. Parallelize only independent work.
-The main agent remains responsible for integration, validation, and reporting.
-Delegation does not authorize a commit or push.
+Actively look for bounded subtasks that benefit from specialized expertise or
+a narrower context, and delegate them to subagents even when coordination
+takes longer. Prefer focused assignments over having one agent accumulate
+unrelated context. Compose several focused skills when a task spans distinct
+procedures; the selected role decides their order and integration. Run dependent
+steps sequentially and independent bounded assignments in parallel.
 
-If the client cannot run a subagent with these instructions, apply the role
-in the current agent and report that fallback. File availability does not
-guarantee native picker discovery, automatic skill loading, or subagent support.
+If the client cannot run a subagent, apply the selected role and skills in the
+current agent and report this fallback. If no existing agent fits a subtask,
+create a temporary
+specialized agent for it; tell the user when creating one is necessary and
+briefly state its intended specialty and scope. Give each subagent its scope,
+applicable rules, selected role and skills, expected result, and whether edits
+are allowed. Give concurrent writers disjoint file ownership. A subagent must
+not delegate its unchanged assignment again; further delegation needs a smaller
+distinct scope and must be supported by the client. The main agent remains
+responsible for integration, validation, and reporting. Delegation does not
+authorize a commit or push.
 
 ## Runtime location
 

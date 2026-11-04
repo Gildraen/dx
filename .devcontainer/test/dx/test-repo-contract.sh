@@ -10,6 +10,8 @@ bash -n .devcontainer/test/dx/test-dx-mcp-resolution.sh
 bash -n .devcontainer/test/dx/test-dx-mcp-image.sh
 bash -n .devcontainer/test/dx/test-task-doctor.sh
 bash -n .devcontainer/test/dx/test-resource-discovery.sh
+bash -n .devcontainer/test/dx/test-runtime-hierarchy.sh
+bash .devcontainer/test/dx/test-runtime-hierarchy.sh
 
 # Shared skills follow the Agent Skills frontmatter contract.
 for skill_dir in .devcontainer/src/dx/runtime/skills/*/; do
@@ -43,6 +45,7 @@ if (devcontainer.workspaceFolder !== marker) process.exit(1);
 if (!devcontainer.workspaceMount.includes(`source=${marker}`) || !devcontainer.workspaceMount.includes(`target=${marker}`)) process.exit(1);
 if (devcontainer.remoteEnv.HOST_PROJECT_PATH != null || devcontainer.mounts != null) process.exit(1);
 if (devcontainer.remoteEnv.GH_CONFIG_DIR != null) process.exit(1);
+if (devcontainer.remoteEnv.GIT_SSH_COMMAND != null || devcontainer.remoteEnv.DX_SSH_DIR != null) process.exit(1);
 EOF
 
 # Feature manifest contract: must depend on the documented tool baseline and never chain after another Feature.
@@ -58,6 +61,19 @@ const required = [
 for (const k of required) if (d[k] == null) process.exit(1);
 if (f.installsAfter != null) process.exit(1);
 "
+
+node <<'EOF'
+const assert = require('node:assert/strict');
+const feature = require('./.devcontainer/src/dx/devcontainer-feature.json');
+assert.equal(feature.containerEnv.GH_CONFIG_DIR, '/var/lib/dx/devcontainer/.gh');
+assert.deepEqual(feature.mounts, [{
+  source: '${localWorkspaceFolder}/.devcontainer',
+  target: '/var/lib/dx/devcontainer',
+  type: 'bind',
+}]);
+assert.equal(feature.containerEnv.GIT_SSH_COMMAND, undefined);
+assert.equal(feature.postStartCommand, undefined);
+EOF
 
 # CI contract: must trust the Remote Taskfile host, and Renovate must be free to bump Go Task upward.
 grep -q 'TASK_REMOTE_TRUSTED_HOSTS: github.com' .github/workflows/reusable-validate.yml

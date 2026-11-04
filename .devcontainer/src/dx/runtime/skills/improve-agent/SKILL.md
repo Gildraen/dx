@@ -5,6 +5,8 @@ description: Workflow pour auditer et ameliorer un ou plusieurs agents pour clie
 
 # Amelioration d'agent
 
+Role proprietaire : [agent-manager](../../agents/agent-manager.md).
+
 ## Quand l'utiliser
 
 Utiliser ce skill lorsqu'un agent existant doit etre relu, corrige, rendu plus
@@ -12,8 +14,8 @@ precis ou audite avec tous les agents d'un repertoire ou du runtime.
 
 ## Procedure
 
-1. Definir le perimetre : agent nomme, agents d'un dossier, agents partages du
-   runtime ou agents du projet. Ne pas elargir le perimetre sans le signaler.
+1. Relever les agents cibles et le comportement de role a evaluer : selection,
+   decisions, delegation ou sortie attendue.
 2. Lire chaque agent en entier ainsi que ses skills, instructions, delegations,
    tests et references directement lies.
 3. Pour chaque agent, verifier :
@@ -26,37 +28,17 @@ precis ou audite avec tous les agents d'un repertoire ou du runtime.
    - clarté de la methode, des criteres de decision et de la sortie attendue ;
    - doublons ou contradictions avec d'autres agents ;
    - liens, chemins de chargement et tests, sans garantie de decouverte native.
-4. Classer chaque constat : confirme, amelioration utile, non pertinent,
-   ambigu ou hors perimetre. Ne jamais modifier un agent uniquement parce
-   qu'il pourrait etre formule autrement.
-5. Pour chaque modification proposee, expliquer le probleme observe, le
-   comportement vise et le risque de regression. Preferer la plus petite
-   modification qui augmente precision, pertinence ou efficacité.
-6. Appliquer les ameliorations confirmees, puis relire l'agent complet et ses
-   references. Mettre a jour les tests ou la documentation si le contrat
-   change.
-7. Executer les validations disponibles et signaler les comportements qui ne
-   peuvent pas etre verifies automatiquement.
-
-## Principes de challenge
-
-- Une demande d'amelioration n'est pas une preuve qu'un agent est deficient.
-- Une instruction generale ne doit pas etre transformee en agent pour la
-  rendre plus visible.
-- Une reformulation stylistique ne justifie pas une modification sans gain
-  concret de decouverte, decision, securite ou maintenabilite.
-- Un agent doit avoir un seul role principal et des frontieres explicites.
-- Conserver le comportement existant lorsque le gain n'est pas demontre.
+4. Pour chaque ecart, relier la regle du role a un scenario d'invocation :
+   activation attendue, skill selectionne, delegation ou refus attendu.
+   Proposer une correction et un controle qui distinguerait les deux versions.
+5. Si l'ecriture est autorisee, appliquer les corrections retenues et ajuster
+   les references, tests ou documents affectes par un changement de contrat.
+   Sinon, livrer les propositions sans les appliquer.
+6. Controler le frontmatter, les liens et le chargement du role ; rejouer les
+   scenarios disponibles, en distinguant lecture statique et invocation reelle.
 
 ## Sortie attendue
 
-Pour chaque agent audite :
-
-- verdict de pertinence ;
-- constats verifies et preuves ;
-- changements appliques ou refuses, avec justification ;
-- validations executees et resultat ;
-- risques residuels et prochaines actions eventuelles.
-
-Terminer par une synthese des agents ameliores, conserves sans changement et
-candidats a une refonte ou une suppression.
+Decision par agent : conserver, corriger ou proposer une refonte, avec le
+scenario qui la justifie et les corrections proposees ou appliquees. Distinguer
+les contrats verifies statiquement des comportements effectivement exerces.
