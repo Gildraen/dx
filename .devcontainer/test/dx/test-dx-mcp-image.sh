@@ -22,6 +22,10 @@ chmod +x "$workdir/docker"
 default_output="$(PATH="$workdir:/usr/bin:/bin" .devcontainer/src/dx/runtime/bin/dx-mcp github)"
 [[ "$default_output" == *"ghcr.io/github/github-mcp-server:v1.10.1"* ]] || fail "default image is not pinned"
 
+override_output="$(GITHUB_MCP_IMAGE="ghcr.io/example/override:latest" PATH="$workdir:/usr/bin:/bin" .devcontainer/src/dx/runtime/bin/dx-mcp github)"
+[[ "$override_output" == *"ghcr.io/github/github-mcp-server:v1.10.1"* ]] || fail "environment override changed the pinned image"
+[[ "$override_output" != *"ghcr.io/example/override:latest"* ]] || fail "environment override was used"
+
 forwarded_output="$(PATH="$workdir:/usr/bin:/bin" .devcontainer/src/dx/runtime/bin/dx-mcp github --read-only --toolsets issues)"
 [[ "$forwarded_output" == *"--read-only --toolsets issues"* ]] || fail "server arguments were not forwarded"
 

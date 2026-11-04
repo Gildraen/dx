@@ -1,6 +1,6 @@
 ---
 name: tests-audit
-description: 'Cartographier la couverture de tests reelle d un projet entier (modules, scripts, workflows, taskfiles), identifier les zones non testees ou mal testees et les prioriser par risque, sans ecrire aucun test ; a utiliser par dx-tests avant toute completion de la suite de tests.'
+description: 'Cartographier la couverture de tests reelle d''un projet entier (modules, scripts, workflows, taskfiles), identifier les zones non testees ou mal testees et les prioriser par risque, sans ecrire aucun test ; a utiliser par dx-tests avant toute completion de la suite de tests.'
 ---
 
 # Audit de couverture de tests

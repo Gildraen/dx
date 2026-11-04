@@ -17,8 +17,8 @@ current list, the admission policy, and why each tool qualifies.
 
 ## What it provides
 
-- A Dev Container **Feature** (`ghcr.io/gildraen/dx/dx`) that installs the
-  shared runtime (agent instructions, skills, the portable `dx-mcp` launcher,
+- A Dev Container **Feature** (`ghcr.io/gildraen/dx/dx:<released-tag>`) that
+  installs the shared runtime (agent instructions, skills, the portable `dx-mcp` launcher,
   and Task helpers) to
   `DX_HOME` (`/opt/dx`).
 - **Reusable GitHub Actions workflows** for the `validate`/`maintenance`

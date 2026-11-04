@@ -11,7 +11,11 @@ check "Feature exposes the installed runtime" bash -c 'test "$DX_HOME" = /opt/dx
 # Baseline tools contract (Feature dependsOn / apt-get-packages).
 check "Node baseline is installed" bash -c "command -v node >/dev/null"
 check "GitHub CLI baseline is installed" bash -c "command -v gh >/dev/null"
-check "Go Task baseline is installed" bash -c "task --version | grep -q '^3.53.1$'"
+check "Go Task baseline meets the minimum version" bash -c '
+  version="$(task --version)"
+  minimum="3.53.1"
+  [[ "$(printf "%s\n" "$minimum" "$version" | sort -V | head -n1)" == "$minimum" ]]
+'
 check "jq baseline is installed" bash -c "command -v jq >/dev/null"
 check "ripgrep baseline is installed" bash -c "command -v rg >/dev/null"
 

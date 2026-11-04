@@ -21,9 +21,19 @@ for skill_dir in .devcontainer/src/dx/runtime/skills/*/; do
 done
 # Skill reference contract: an agent that names a skill by its exact hyphenated
 # name (e.g. `review-quick`) commits to that skill actually existing.
-while IFS= read -r skill_name; do
-  test -f ".devcontainer/src/dx/runtime/skills/$skill_name/SKILL.md"
-done < <(grep -ohP '`\K[a-z][a-z0-9]*(-[a-z0-9]+)+(?=`)' .devcontainer/src/dx/runtime/agents/*.md | sort -u)
+node <<'EOF'
+const fs = require('node:fs');
+const path = require('node:path');
+const agentRoot = '.devcontainer/src/dx/runtime/agents';
+const skillRoot = '.devcontainer/src/dx/runtime/skills';
+for (const file of fs.readdirSync(agentRoot)) {
+  const contents = fs.readFileSync(path.join(agentRoot, file), 'utf8');
+  for (const match of contents.matchAll(/`([a-z][a-z0-9]*(?:-[a-z0-9]+)+)`/g)) {
+    const skillPath = path.join(skillRoot, match[1], 'SKILL.md');
+    if (!fs.existsSync(skillPath)) throw new Error(`missing referenced skill: ${match[1]}`);
+  }
+}
+EOF
 
 # Devcontainer contract: must mount the workspace by path, not bake in a host-specific location.
 node <<'EOF'

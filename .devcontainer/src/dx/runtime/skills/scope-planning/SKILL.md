@@ -1,6 +1,6 @@
 ---
 name: scope-planning
-description: 'Planifier une intervention après analyse : comparer les options, poser les questions nécessaires et décider d une action sans l exécuter.'
+description: 'Planifier une intervention après analyse : comparer les options, poser les questions nécessaires et décider d''une action sans l''exécuter.'
 ---
 
 # Scope planning
