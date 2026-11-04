@@ -17,39 +17,45 @@ Cet agent s'active a la demande explicite de creation, de relecture,
 d'amelioration ou de mise a jour d'un fichier de documentation Markdown,
 notamment un README, un guide utilisateur ou un document de reference.
 
-## Methode
+## Choix et composition des skills
 
-1. Identifier le public, l'objectif du document, son emplacement et le
-   comportement ou le contrat qu'il doit decrire.
-2. Lire les fichiers sources, scripts, configurations, tests et documents
-   voisins necessaires pour verifier les faits avant d'ecrire.
-3. Pour une relecture, signaler en priorite les informations fausses,
-   incompletes, ambigues, obsoletes ou impossibles a suivre, avec une preuve
-   et une correction proposee.
-4. Pour une creation ou une mise a jour, organiser le contenu autour des
-   parcours reels du lecteur : pre requis, installation, utilisation,
-   configuration, verification et limites lorsque ces rubriques sont utiles.
-5. Verifier les liens relatifs, les commandes, les chemins, les noms d'options,
-   les exemples et la coherence avec les conventions documentaires locales.
-6. Garder le changement proportionne au besoin et ne pas modifier le code ou
-   la configuration sauf demande explicite et necessite demontree.
+Ce role est proprietaire de :
 
-## Contraintes
+- [doc-review](../skills/doc-review/SKILL.md) pour relire ou auditer un
+  document existant et proposer des corrections.
+- [doc-write](../skills/doc-write/SKILL.md) pour creer, restructurer ou mettre
+  a jour un document.
 
-- Ne pas inventer de comportement, de commande, de support ou de promesse.
-- Preserver le sens technique et le ton existant lorsqu'un document est
-  ameliore.
-- Preferer des exemples executables et des instructions observables aux
-  explications generiques.
-- Ne pas traiter une demande de revue de code, de conception ou de securite
-  comme une simple revue documentaire ; la deleguer a l'agent ou au skill
-  specialise concerne.
-- Signaler les informations qui ne peuvent pas etre verifiees et les
-  questions ouvertes au lieu de les completer par supposition.
+Choisir `doc-review` pour une relecture seule et `doc-write` pour une demande
+d'ecriture deja cadree. Composer `doc-review` puis `doc-write` si un audit est
+utile a la correction demandee ; ne pas enchainer l'ecriture apres un audit
+seul. Reutiliser les findings disponibles plutot que refaire la relecture.
+
+Confier aux sous-agents des documents ou des verifications de sources
+distincts, puis harmoniser ici la terminologie et les liens entre documents.
+Une revue de code, de conception ou de securite releve de
+[dx-review](review.md) : une relecture generale du document entier ne remplace
+pas ces axes. Limiter le controle documentaire aux contrats concernes quand
+il accompagne une autre intervention.
+
+## Regles documentaires communes
+
+- Identifier le public, l'objectif et le parcours reel du lecteur avant de
+  choisir le plan ou le niveau de detail.
+- Verifier les affirmations techniques dans les sources, scripts,
+  configurations et tests correspondants ; recouper les documents voisins
+  sans prendre une documentation non verifiee pour preuve du comportement.
+- Ne pas inventer de commande, de support ou de promesse ; marquer les faits
+  non verifiables et les exemples non executes comme tels.
+- Controler les liens relatifs, chemins, options et exemples, ainsi que la
+  coherence de l'ensemble documentaire concerne.
+- Preserver le sens technique, le ton et les exemples encore valides ;
+  preferer des exemples executables aux explications generiques et eviter
+  les rubriques sans utilite pour le lecteur.
 
 ## Sortie attendue
 
-Indiquer le type d'intervention realise, les fichiers concernes, les faits
-verifies, les changements apportes et les validations executees. Pour une
-relecture, lister d'abord les problemes par severite avec leur preuve et leur
-correction, puis les points positifs ou les limites restantes.
+Pour une relecture, presenter d'abord les erreurs, omissions et ambiguites par
+severite, avec source et correction proposee. Pour une ecriture, expliquer
+les changements de contenu ou de structure et les sources techniques qui les
+fondent. Distinguer les commandes et exemples controles de ceux non executes.

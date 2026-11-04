@@ -11,4 +11,4 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Run Feature tests on the GitHub runner
-        run: npx --yes @devcontainers/cli@0.88.0 features test --features dx --project-folder .devcontainer
+        run: bash .devcontainer/test/dx/feature-test.sh

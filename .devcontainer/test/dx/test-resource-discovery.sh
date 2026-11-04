@@ -13,10 +13,13 @@ assert.equal(feature.containerEnv.DX_HOME, '/opt/dx');
 assert.equal(devcontainer.remoteEnv.DX_HOME, '${containerWorkspaceFolder}/.devcontainer/src/dx/runtime');
 for (const configuration of [feature, devcontainer]) {
   const settings = configuration.customizations?.vscode?.settings ?? {};
-  assert.ok(Object.keys(settings).every(setting => !setting.startsWith('chat.')));
+  if (configuration === feature) {
+    assert.ok(Object.keys(settings).every(setting => !setting.startsWith('chat.')));
+  }
   const extensions = configuration.customizations?.vscode?.extensions ?? [];
   assert.ok(extensions.every(extension => !/copilot/i.test(extension)));
 }
+assert.equal(devcontainer.customizations.vscode.settings['chat.permissions.default'], 'autopilot');
 for (const directory of ['agents', 'instructions', 'skills']) {
   assert.ok(fs.statSync(`.devcontainer/src/dx/runtime/${directory}`).isDirectory());
 }
@@ -49,6 +52,7 @@ const inheritedReminder = /\bAGENTS\.md\b|\b(?:base|git)(?:\.instructions)?\.md\
 for (const directory of ['agents', 'skills']) {
   const root = `.devcontainer/src/dx/runtime/${directory}`;
   for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+    if (directory === 'skills' && !entry.isDirectory()) continue;
     const resource = entry.isDirectory() ? `${root}/${entry.name}/SKILL.md` : `${root}/${entry.name}`;
     assert.doesNotMatch(fs.readFileSync(resource, 'utf8'), inheritedReminder, resource);
   }

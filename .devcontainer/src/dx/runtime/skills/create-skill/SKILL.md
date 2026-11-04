@@ -5,6 +5,8 @@ description: Workflow pour creer un skill pour clients IA compatibles, partage o
 
 # Creation de skill
 
+Role proprietaire : [skill-manager](../../agents/skill-manager.md).
+
 ## Quand l'utiliser
 
 Utiliser ce skill lorsqu'une demande vise la creation d'un nouveau skill, le
@@ -13,14 +15,14 @@ structure.
 
 ## Procedure
 
-1. Clarifier la tache repetable a outiller, ses declencheurs et ses limites.
-   Verifier qu'il s'agit d'un workflow a la demande et non d'une regle
-   toujours applicable, d'une persona ou d'une tache ponctuelle parametree.
+1. Partir de la tache repetable retenue : entrees necessaires, declencheurs,
+   condition d'arret et resultat attendu.
 2. Determiner la portee :
    - partage DX -> `.devcontainer/src/dx/runtime/skills/<nom>/SKILL.md` ;
    - projet -> `.agents/skills/<nom>/SKILL.md`.
-3. Verifier qu'une instruction, un agent ou un prompt ne correspond pas mieux
-   au besoin qu'un skill, et qu'aucun skill existant ne couvre deja la tache.
+3. Identifier son role proprietaire et les procedures voisines dont il recoit
+   ou auxquelles il transmet un resultat. Referencer le role pour une
+   invocation directe, sans recopier ses regles ni sa logique de routage.
 4. Ecrire un frontmatter au format Agent Skills avec `name` et `description`,
    et `name` identique au nom du dossier :
    ```yaml
@@ -29,28 +31,17 @@ structure.
    description: '<ce que fait le skill et quand l'utiliser, mots-cles inclus>'
    ---
    ```
-5. Rediger le corps : quand l'utiliser, procedure pas a pas, criteres de
-   qualite, sortie attendue. Garder le fichier sous 500 lignes et deplacer le
-   detail volumineux vers `references/`, `scripts/` ou `assets/` avec des
-   chemins relatifs `./`.
-6. Si le skill est partage, verifier que `docs/architecture.md`,
-   `docs/consumer.md` et les tests Feature
-   (`.devcontainer/test/dx/test.sh`) refletent le nouveau skill.
-7. Verifier les references, les liens, le frontmatter et les conventions
-   documentaires concernees. Garder une source unique et verifier son
-   integration au chargement commun. Ne pas ajouter
-   d'adaptateur ni de lien symbolique par IA, de schema ou de reglage client.
-
-## Criteres de qualite
-
-- La description contient des mots-cles permettant la decouverte du skill et
-  precise quand l'utiliser.
-- Le nom du dossier correspond exactement au champ `name`.
-- La procedure est autonome et actionnable sans contexte externe manquant.
-- Aucune API client n'est imposee.
-- Le SKILL.md reste concis; le detail secondaire est externalise.
-- Le skill ne duplique pas un autre skill existant ni une instruction
-  toujours applicable.
+5. Rediger la procedure avec ses controles et son resultat. Relier les
+   ressources necessaires par des chemins relatifs `./`, puis exercer un cas
+   d'usage avec les entrees retenues.
+6. Si le skill est partage, verifier sa prise en compte par les tests de
+   decouverte et les contrats de `docs/architecture.md` et `docs/consumer.md`.
+   Le test Feature `.devcontainer/test/dx/test.sh` decouvre les dossiers par
+   convention : ne pas y ajouter une enumeration. Ajuster seulement les
+   consommateurs dont le contrat change.
+7. Verifier le frontmatter, la correspondance nom/dossier, les references et
+    les liens depuis le chemin de chargement retenu, pas seulement depuis le
+    repertoire de travail de l'auteur.
 
 ## Sortie attendue
 

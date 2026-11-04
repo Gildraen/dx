@@ -5,6 +5,8 @@ description: 'Conduire une refactorisation vers une structure plus dynamique ave
 
 # Evolution migration
 
+Role proprietaire : [evolution](../../agents/evolution.md).
+
 ## Quand l'utiliser
 
 Utiliser ce skill lorsqu'une refactorisation dynamique modifie une interface,
@@ -13,6 +15,10 @@ par plusieurs consommateurs.
 
 Pour une refactorisation locale sans migration ni consommateur externe,
 utiliser plutot `evolution-discovery` ou `evolution-config`.
+
+Entree : contrats actuel/cible et consommateurs identifies. Ce skill organise
+leur transition ; il ne redecide pas le mecanisme de configuration ou de
+decouverte deja retenu.
 
 ## Procedure
 
@@ -34,7 +40,6 @@ utiliser plutot `evolution-discovery` ou `evolution-config`.
 - Tous les consommateurs identifies ont une voie de migration explicite.
 - La nouvelle convention est testee avant la suppression de l'ancienne.
 - Les erreurs de migration sont detectables et actionnables.
-- Le diff reste proportionne et ne masque pas une rupture d'interface.
 
 ## Sortie attendue
 

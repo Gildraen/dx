@@ -5,6 +5,8 @@ description: Workflow pour creer un agent pour clients IA compatibles, partage o
 
 # Creation d'agent
 
+Role proprietaire : [agent-manager](../../agents/agent-manager.md).
+
 ## Quand l'utiliser
 
 Utiliser ce skill lorsqu'une demande vise la creation d'un nouvel agent, le
@@ -13,14 +15,14 @@ structure.
 
 ## Procedure
 
-1. Clarifier le role, les utilisateurs, le declencheur de la demande et les
-   limites de l'agent.
-   Verifier qu'aucun agent existant ne couvre deja ce role.
+1. Partir du besoin de role retenu : utilisateurs, declencheur, decisions
+   propres et limites de l'agent.
 2. Determiner la portee :
    - partage DX -> `.devcontainer/src/dx/runtime/agents/<nom>.md` ;
    - projet -> `.agents/agents/<nom>.md`.
-3. Verifier qu'une instruction, un skill ou un prompt ne correspond pas mieux
-   au besoin qu'un agent.
+3. Identifier les skills que le role possede ou compose, leur ordre et les
+   cas a deleguer. Placer les regles communes de cette famille dans le role,
+   pas dans chacune de ses procedures.
 4. Ecrire le frontmatter neutre limite a `name` et `description` :
    ```yaml
    ---
@@ -28,21 +30,12 @@ structure.
    description: <role et cas d'utilisation>
    ---
    ```
-5. Rediger un role unique avec objectif, activation, contraintes, methode et
-   format de sortie.
-6. Garder une source unique et verifier son integration au chargement commun.
-   Ne pas ajouter
-   d'adaptateur ni de lien symbolique par IA, de schema ou de reglage client.
+5. Rediger le role avec objectif, activation, regles de domaine, selection et
+   composition des skills, limites de delegation et format de sortie.
+6. Exercer un scenario nominal et un scenario de refus ou de delegation pour
+   verifier les frontieres du nouveau role.
 7. Verifier les references, les liens, le frontmatter, les tests Feature et
    les conventions documentaires concernees.
-
-## Criteres de qualite
-
-- La description contient des mots-cles permettant la decouverte de l'agent.
-- Le role est assez etroit pour produire des decisions coherentes.
-- Les besoins d'outillage restent limites au role, sans API client imposee.
-- L'agent ne duplique pas une instruction toujours applicable.
-- L'agent explique les cas qu'il refuse ou qu'il delegue.
 
 ## Sortie attendue
 

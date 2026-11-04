@@ -5,6 +5,8 @@ description: 'Analyser le périmètre d une demande sans modifier le projet : su
 
 # Scope analysis
 
+Role propriétaire : [evolution](../../agents/evolution.md).
+
 ## Quand l'utiliser
 
 Utiliser ce skill lorsqu'un agent doit comprendre une demande avant d'agir,
@@ -27,14 +29,10 @@ fichier.
 6. Arrêter l'analyse dès qu'une hypothèse falsifiable, un périmètre défendable
    et une validation discriminante sont établis.
 
-## Contraintes
-
-- Ne modifier aucun fichier, configuration, dépendance ou état généré.
-- Ne pas transformer une inconnue en fait et signaler les preuves manquantes.
-- Ne pas proposer de refonte détaillée : garder les options pour
-  `scope-planning`.
-- Ne pas conclure à un bug sans chemin de code, contrat ou comportement
-  observable qui l'étaye.
+Le résultat est une entrée pour `scope-planning` lorsqu'un choix reste à
+faire, ou pour la procédure d'évolution retenue lorsque la décision existe
+déjà. L'analyse s'arrête au périmètre et au contrôle discriminant, pas au plan
+de refonte.
 
 ## Sortie attendue
 

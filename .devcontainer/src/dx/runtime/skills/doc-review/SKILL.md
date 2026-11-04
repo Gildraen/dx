@@ -5,6 +5,8 @@ description: 'Relire et auditer un document Markdown existant (README, guide, re
 
 # Relecture de documentation
 
+Role proprietaire : [documentation](../../agents/documentation.md).
+
 ## Quand l'utiliser
 
 Utiliser ce skill pour auditer un document Markdown existant : verifier son
@@ -12,34 +14,20 @@ exactitude, sa completude et sa clarte sans le reecrire soi-meme.
 
 Ne pas l'utiliser pour creer ou restructurer un document ; utiliser
 `doc-write` pour cela, en s'appuyant eventuellement sur les findings produits
-ici. Ne pas l'utiliser pour une revue de code, de conception ou de securite.
+ici.
 
 ## Procedure
 
-1. Identifier le public vise et l'objectif annonce ou implicite du document.
-2. Lire les fichiers sources, scripts, configurations, tests et documents
-   voisins necessaires pour verifier chaque affirmation du document.
+1. Partir du document cible, de son public et de son objectif ; relever les
+   parcours que le lecteur doit pouvoir suivre.
+2. Associer les affirmations du document aux contrats sources correspondants
+   et reperer les etapes manquantes dans les parcours retenus.
 3. Relever en priorite les informations fausses, incompletes, ambigues,
    obsoletes ou impossibles a suivre, chacune avec une preuve (fichier,
    commande ou comportement observe) et une correction proposee.
-4. Verifier les liens relatifs, les commandes, les chemins, les noms
-   d'options et les exemples ; signaler ceux qui sont casses ou perimes.
-5. Verifier la coherence avec les documents voisins et les conventions
-   documentaires locales lorsque le document appartient a un ensemble
-   partage.
-6. Distinguer les problemes bloquants (information fausse ou dangereuse) des
-   ameliorations souhaitables (clarte, structure) sans les confondre.
-7. Ne pas appliquer de correctif ; transmettre les findings pour une decision
-   ou un passage a `doc-write`, sauf demande explicite de correction directe.
-
-## Criteres de qualite
-
-- Chaque finding cite une preuve verifiable, pas une impression.
-- Les findings sont classes par severite, du plus bloquant au plus mineur.
-- Les points positifs et les limites non couvertes par la revue sont
-  signales, pas seulement les problemes.
-- Aucune supposition ne comble un point non verifiable ; il est signale comme
-  tel.
+4. Relier chaque finding au passage concerne et au parcours rendu incorrect
+   ou incomplet. Transmettre les corrections retenues a `doc-write` si une
+   mise a jour est demandee ; la relecture s'arrete aux findings.
 
 ## Sortie attendue
 

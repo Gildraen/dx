@@ -10,6 +10,7 @@ required_files=(
   ".devcontainer/src/dx/runtime/instructions/base.md"
   ".devcontainer/src/dx/runtime/instructions/git.md"
   ".devcontainer/test/dx/test-resource-discovery.sh"
+  ".devcontainer/test/dx/test-runtime-hierarchy.sh"
   ".devcontainer/src/dx/devcontainer-feature.json"
   "default.json"
   "renovate.json"

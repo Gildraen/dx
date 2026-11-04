@@ -37,11 +37,62 @@ The launcher runs GitHub's pinned official MCP image through Docker and does
 not manage a GitHub token. A project that enables MCP must provide Docker
 access separately until the `.agents/mcp.json` contract is defined. Renovate
 keeps this pin current; the image is not configurable per consumer. The Dev Container keeps
-the GitHub CLI available, but DX does not configure or authenticate it. `gh`
-uses its normal user-level configuration by default; each consumer manages its
-own authentication and may set `GH_CONFIG_DIR` if it needs a custom location.
-If that location is inside the workspace, the consumer must ensure it is
-ignored by Git.
+the GitHub CLI available; DX does not authenticate it automatically.
+
+### Git credentials and GitHub CLI state
+
+Git uses native [VS Code Dev Containers credential sharing](https://code.visualstudio.com/remote/advancedcontainers/sharing-git-credentials):
+the extension copies the host's `.gitconfig`, reuses its credential helper for
+HTTPS, and forwards a running host SSH agent. Configure Git identity and
+credentials on the host. DX does not set `GIT_SSH_COMMAND`, generate SSH keys,
+or authenticate Git automatically.
+
+The Feature sets `containerEnv.GH_CONFIG_DIR=/var/lib/dx/devcontainer/.gh`
+and declares this bind mount:
+
+```json
+{
+  "source": "${localWorkspaceFolder}/.devcontainer",
+  "target": "/var/lib/dx/devcontainer",
+  "type": "bind"
+}
+```
+
+The host workspace root must contain `.devcontainer`. Consumers with Dev
+Container configurations elsewhere must adapt the mounts in their own
+configuration; the source is not resolved relative to `devcontainer.json`.
+DX uses no named volume, directory preparation in `install.sh`, state copy,
+helper script, or startup command for this storage. `gh` creates `.gh` when
+it writes configuration.
+
+Files live directly in the host's `.devcontainer/.gh` and survive container
+rebuilds and workspace moves if those files are retained. Existing host state
+at that location is reused directly; no migration is needed. Ownership and
+permissions come from the host filesystem, not a DX UID adjustment. Windows
+mounts may expose mode `777`; DX does not guarantee mode `700`. This is `gh`
+configuration, not an SSH private key. Consumers must ensure the remote user
+can write to the mounted directory. To use other storage, override
+`GH_CONFIG_DIR` through `remoteEnv` and manage that storage in the consumer.
+
+For GitHub API access through `gh`, run `gh auth login` only when neither
+`GH_TOKEN` nor `GITHUB_TOKEN` nor existing authentication state is available.
+This authentication is distinct from Git/SSH credentials. For GitHub HTTPS
+only, if no credential helper is configured and you explicitly want Git to
+reuse `gh` authentication, run `gh auth setup-git`. DX does not run it or
+overwrite an existing helper automatically.
+
+Without a keyring, `gh` may store tokens in plaintext: treat this directory
+as secret storage, never commit its state or bake it into an image. The
+consumer must exclude it from Git, either with a parent ignore rule or a
+consumer-provided `.devcontainer/.gh/.gitignore` containing:
+
+```gitignore
+*
+!.gitignore
+```
+
+DX does not create this ignore file. Any alternative workspace storage must
+also be ignored by Git.
 
 ## 2. Reusable GitHub workflows
 
@@ -73,8 +124,9 @@ includes:
   dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=<released-tag>
 ```
 
-Gives you `task dx:doctor` and `task dx:mcp:github`. Your own
-`validate`/`test`/`lint` tasks stay in your Taskfile.
+Gives you `task dx:doctor` and `task dx:mcp:github`.
+`task dx:doctor` checks the runtime offline, not authentication.
+Your own `validate`/`test`/`lint` tasks stay in your Taskfile.
 
 Remote Taskfiles require a Go Task release with remote include support. The DX
 Feature and reusable validation workflow both provide a compatible release.
@@ -155,8 +207,10 @@ add one until that contract is documented in `dx`.
 
 ## Runtime state that never belongs in `dx` or in your repository
 
-Tokens, `gh` auth state, and generated MCP configuration are runtime state, not
-the DX baseline. DX does not configure or store `gh` state. The official GitHub
-MCP server's local stdio OAuth flow keeps its token in memory only, so no MCP
-token file or workspace state directory is required. DX uses OAuth as its
-single authentication mode.
+Tokens, `gh` auth state, and generated MCP configuration are runtime state,
+never versioned DX or consumer content. DX provides a default `gh`
+configuration location backed by the host's `.devcontainer` bind mount, not
+credentials. The consumer owns its storage permissions and Git ignore rules.
+The official GitHub MCP server's local stdio OAuth flow keeps its token in
+memory only, so no MCP token file or workspace state directory is required.
+DX uses OAuth as its single MCP authentication mode.

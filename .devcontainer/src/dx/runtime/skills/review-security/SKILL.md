@@ -5,11 +5,16 @@ description: Revue de securite (OWASP Top 10, secrets, permissions, entrees non 
 
 # Revue securite
 
+Role proprietaire : [review](../../agents/review.md).
+
 ## Quand l'utiliser
 
 Changement touchant l'authentification/autorisation, une entree utilisateur,
 un secret ou token, une permission de fichier/processus, ou une dependance
 externe.
+
+Partir des entrees et frontieres de confiance touchees par le diff ; relier
+chaque risque au chemin accessible et aux privileges requis pour l'exploiter.
 
 ## Checklist (alignee OWASP Top 10)
 

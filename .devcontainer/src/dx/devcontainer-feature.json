@@ -6,8 +6,16 @@
     "documentationURL": "https://github.com/Gildraen/dx",
     "options": {},
     "containerEnv": {
-        "DX_HOME": "/opt/dx"
+        "DX_HOME": "/opt/dx",
+        "GH_CONFIG_DIR": "/var/lib/dx/devcontainer/.gh"
     },
+    "mounts": [
+        {
+            "source": "${localWorkspaceFolder}/.devcontainer",
+            "target": "/var/lib/dx/devcontainer",
+            "type": "bind"
+        }
+    ],
     "dependsOn": {
         "ghcr.io/devcontainers/features/node:2": {
             "version": "lts"

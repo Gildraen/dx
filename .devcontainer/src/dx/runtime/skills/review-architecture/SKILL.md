@@ -5,11 +5,16 @@ description: Revue de conception (couplage, responsabilites, contrats d'interfac
 
 # Revue architecture
 
+Role proprietaire : [review](../../agents/review.md).
+
 ## Quand l'utiliser
 
 Changement qui modifie une interface partagee, deplace des responsabilites
 entre modules, ou introduit une nouvelle abstraction/dependance
 structurante.
+
+Partir du diff et des interfaces touchees ; suivre leurs consommateurs pour
+evaluer les contrats, sans refaire les autres axes de revue.
 
 ## Checklist
 
