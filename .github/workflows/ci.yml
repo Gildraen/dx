@@ -1,0 +1,23 @@
+name: validate and test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    uses: ./.github/workflows/reusable-validate.yml
+    secrets: inherit
+
+  devcontainer-test:
+    uses: ./.github/workflows/reusable-devcontainer-test.yml
+    secrets: inherit
+
+  feature-test:
+    uses: ./.github/workflows/reusable-feature-test.yml
+    secrets: inherit

@@ -1,0 +1,27 @@
+{
+  "name": "@gildraen/dx",
+  "version": "1.2.0",
+  "description": "Gildraen DX runtime - Feature, workflows, reusable workflows, preset, and runtime shared across projects",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gildraen/dx"
+  },
+  "keywords": [
+    "devcontainer",
+    "feature",
+    "dx",
+    "developer-experience"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "release": "semantic-release"
+  },
+  "devDependencies": {
+    "semantic-release": "^23.0.0",
+    "@semantic-release/github": "^9.0.0",
+    "@semantic-release/changelog": "^6.0.0",
+    "@semantic-release/git": "^10.0.0"
+  }
+}
