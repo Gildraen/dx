@@ -80,13 +80,28 @@ GitHub's official container image; DX does not install an npm package or
 manage a token store.
 
 The Feature copies the versioned runtime to `/opt/dx` and declares
-`DX_HOME=/opt/dx` through `containerEnv`. It does not configure AI clients.
+`DX_HOME=/opt/dx` through `containerEnv`. It also contributes the VS Code
+setting `chat.agentFilesLocations` for `.agents/agents/`, so canonical project
+agents appear in the VS Code picker.
+For native Copilot discovery, it also symlinks shared runtime agents and skills
+from `DX_HOME` into the remote container user's `~/.copilot/agents/` and
+`~/.copilot/skills/`. These links point back to the canonical runtime; they do
+not copy resources into the workspace or host home, and conflicting existing
+entries are preserved.
 The project's small `AGENTS.md` asks the agent to resolve `DX_HOME` from the
 process environment (default `/opt/dx` when absent) and read its `AGENTS.md`.
 That entry point explicitly loads `instructions/base.md` and
 `instructions/git.md` before any work. These rules apply through explicit
 loading, not editor-specific activation metadata. Missing rules must be
 reported rather than silently skipped.
+
+That runtime guide also directs the agent to inspect project roles in
+`.agents/agents/*.md` and project skills in `.agents/skills/*/SKILL.md`.
+The Feature delivers this routing instruction as part of the installed
+runtime; the consumer's root `AGENTS.md` must load it. This is explicit prompt
+loading for all clients; the Feature additionally configures VS Code's picker
+for project agents. The agent location setting is supported but editor-specific,
+so independent Copilot clients do not inherit it.
 
 To choose a role, list `agents/*.md`, inspect `name` and `description`, then
 read the selected file in full. For workflows, list `skills/*/SKILL.md` and
@@ -116,18 +131,22 @@ for the complete rules.
 DX resources and project resources are additive. Project customizations stay
 in `.agents/agents/*.md` and `.agents/skills/*/SKILL.md`; the bootstrap asks the
 agent to list them and load relevant resources explicitly, as described in
-[consumer.md](consumer.md). These paths are project conventions, not universal
-client discovery locations. There are no provider-specific adapters, link
-conversions, generated resource files, or user-profile symlinks. Shared content
-must not be copied into consumers.
+[consumer.md](consumer.md). These are the sole canonical project locations;
+do not keep duplicate project resources in client-specific directories. The
+paths are not universal native discovery locations, so the runtime bootstrap
+loads them explicitly. The Feature contributes VS Code picker discovery for
+project agents and native Copilot user locations for shared resources. The
+Copilot profile entries are symlinks to the canonical runtime, not copied
+resource files.
 `.agents/mcp.json` is reserved for a later MCP configuration contract and
 should not be introduced before that contract is documented here.
 
-Neither file availability nor `DX_HOME` guarantees a native role picker,
-automatic loading, or subagent support. If a client does not read the project's
-`AGENTS.md`, provide it explicitly through context or the initial request.
-Instructions guide the agent; they are not a security enforcement boundary.
-Permissions and isolation must be enforced by the execution environment.
+For clients other than VS Code, file availability and `DX_HOME` do not guarantee
+a native role picker or automatic loading; the explicit `AGENTS.md` bootstrap
+is the loading contract. The Feature adds `.agents/agents/` to the VS Code
+picker only. Subagent support also depends on the client. Instructions guide
+the agent; they are not a security enforcement boundary. Permissions and
+isolation must be enforced by the execution environment.
 
 Stable consumers use the installed snapshot; runtime changes require updating
 the Feature release and rebuilding their container. Dogfood explicitly sets

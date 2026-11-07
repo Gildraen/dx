@@ -14,8 +14,11 @@ assert.equal(devcontainer.remoteEnv.DX_HOME, '${containerWorkspaceFolder}/.devco
 for (const configuration of [feature, devcontainer]) {
   const settings = configuration.customizations?.vscode?.settings ?? {};
   if (configuration === feature) {
-    assert.ok(Object.keys(settings).every(setting => !setting.startsWith('chat.')));
+    assert.deepEqual(settings['chat.agentFilesLocations'], {
+      '.agents/agents': true,
+    });
   }
+  assert.equal(settings['chat.agentSkillsLocations'], undefined);
   const extensions = configuration.customizations?.vscode?.extensions ?? [];
   assert.ok(extensions.every(extension => !/copilot/i.test(extension)));
 }
@@ -46,6 +49,10 @@ assert.ok(bootstrap.includes('(instructions/base.md)'));
 assert.ok(bootstrap.includes('(instructions/git.md)'));
 assert.ok(bootstrap.includes('agents/'));
 assert.ok(bootstrap.includes('skills/*/SKILL.md'));
+assert.ok(bootstrap.includes('`.agents/agents/*.md`'));
+assert.ok(bootstrap.includes('`.agents/skills/*/SKILL.md`'));
+assert.ok(bootstrap.includes('the sole canonical locations for'));
+assert.ok(bootstrap.includes('Do not keep duplicate copies in client-specific'));
 assert.ok(bootstrap.includes('If the client cannot run a subagent'));
 assert.ok(bootstrap.includes('## Instruction hierarchy'));
 const inheritedReminder = /\bAGENTS\.md\b|\b(?:base|git)(?:\.instructions)?\.md\b|instructions?\s+partag[eé]es?/i;
@@ -58,7 +65,13 @@ for (const directory of ['agents', 'skills']) {
   }
 }
 assert.ok(fs.readFileSync('AGENTS.md', 'utf8').includes('(.devcontainer/src/dx/runtime/AGENTS.md)'));
-assert.doesNotMatch(fs.readFileSync('.devcontainer/src/dx/install.sh', 'utf8'), /copilot|\.claude|\.github\/agents/i);
+const installer = fs.readFileSync('.devcontainer/src/dx/install.sh', 'utf8');
+assert.ok(installer.includes('_REMOTE_USER_HOME'));
+assert.ok(installer.includes('copilot_root="$_REMOTE_USER_HOME/.copilot"'));
+assert.ok(installer.includes('copilot_agents="$copilot_root/agents"'));
+assert.ok(installer.includes('copilot_skills="$copilot_root/skills"'));
+assert.ok(installer.includes('Keeping existing Copilot resource'));
+assert.doesNotMatch(installer, /\.agents\/agents/);
 EOF
 
-echo "DX runtime configuration is independent of the AI client"
+echo "Project resources use .agents; shared DX resources link to Copilot native locations"

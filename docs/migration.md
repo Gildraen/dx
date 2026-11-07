@@ -52,11 +52,19 @@ project-specific until the future `.agents/mcp.json` contract is defined.
    reads that runtime's `AGENTS.md`, which explicitly loads
    `instructions/base.md` and `instructions/git.md` before work. It then lists
    roles in `agents/*.md` and workflows in `skills/*/SKILL.md` by their `name`
-   and `description`; directory contents are authoritative. Also explicitly
-   list and load relevant project resources. Do not assume universal discovery
-   of these paths or configure provider-specific adapters, generated files,
-   link conversions, or discovery settings. The Feature installs the resources
-   and sets `DX_HOME` through `containerEnv`; it does not configure AI clients.
+   and `description`; directory contents are authoritative. The runtime then
+   explicitly lists and loads project resources only from `.agents/agents/`
+   and `.agents/skills/`, the sole canonical project locations. Do not keep
+   duplicate project copies in client-specific directories or configure
+   per-consumer discovery settings. The Feature contributes the supported
+   VS Code `chat.agentFilesLocations` setting for `.agents/agents/`; it does
+   not make that editor-specific setting available to Copilot CLI or the
+   Copilot app. It does not set the deprecated `chat.agentSkillsLocations`.
+   For native Copilot discovery, the Feature symlinks shared resources from
+   `DX_HOME` into the remote container user's `~/.copilot/agents/` and
+   `~/.copilot/skills/`, preserving existing entries without changing the host
+   workspace. The Feature installs the routing instructions and sets `DX_HOME`
+   through `containerEnv`.
    If the client does not read `AGENTS.md`, provide it explicitly through
    context or the initial request. Delegate only when subagents are supported;
    otherwise apply the role in the current agent and report that fallback.
@@ -73,7 +81,8 @@ project-specific until the future `.agents/mcp.json` contract is defined.
 7. **Remove now-unused local files**: `.tools/`, `.bin/mcp-run`, obsolete
    DX-managed agent files, and any dx-drift-related workflow or issue
    automation specific to that repository. Do not remove project-specific
-   `.agents/agents/` or `.agents/skills/`.
+   `.agents/agents/` or `.agents/skills/`; those are the only canonical project
+   locations and should not be duplicated into client-specific directories.
 8. **Validate**: run `task validate` / CI in the migrated repository before
    merging.
 9. **Repeat** for the next repository. There is no bulk/automatic migration

@@ -184,19 +184,35 @@ the authoritative list, not a catalog in this guide.
 Shared sources live under `.devcontainer/src/dx/runtime/` in `dx` and are
 installed by the Feature. Project-specific roles and skills remain additive
 under `.agents/agents/` and `.agents/skills/` in the consumer. These are
-explicit bootstrap conventions, not universally discovered client paths.
-Do not copy shared content, convert its links, generate provider-specific
-files, or add per-client adapters or user-profile symlinks.
+the sole canonical project locations. Do not keep duplicate project resources
+in client-specific directories. The Feature installs the runtime guide under
+`DX_HOME`; after the consumer's root `AGENTS.md` loads that guide, it explicitly
+inspects both project paths and selects relevant resources by metadata. This
+directs prompt loading for every client. The Feature also adds `.agents/agents/`
+to the VS Code agent picker through `chat.agentFilesLocations`. This setting
+is supported, not deprecated, but is VS Code-specific; Copilot CLI and the
+Copilot app do not inherit it. `chat.agentSkillsLocations` is deprecated as
+VS Code moves skills to harness-native locations; editor-only skill search
+paths are not portable, so DX does not set it. Instead, the Feature links
+shared DX resources from `DX_HOME` into the container user's native
+`~/.copilot/agents/` and `~/.copilot/skills/` directories. These are symlinks
+inside the container home, not writes to the host `.agents` or copies of the
+canonical resources. If a user already has an entry at a shared resource's
+destination, the Feature preserves it and skips that link. Other clients use
+the explicit runtime bootstrap. Do not copy shared content into the workspace
+or generate additional resource copies.
 
-Neither `DX_HOME` nor these files guarantees a native role picker, automatic
-instruction or skill loading, or subagent support. If the client does not read
-the root `AGENTS.md`, attach it explicitly through the client's context or
-initial request before starting work. For example:
+Outside VS Code, neither `DX_HOME` nor these files guarantees a native role
+picker, automatic instruction or skill loading, or subagent support. If the
+client does not read the root `AGENTS.md`, attach it explicitly through the
+context or initial request before starting work. For example:
 
 ```text
 Read the project's AGENTS.md provided in context. Resolve DX_HOME from the
 environment (default /opt/dx when absent), read its AGENTS.md and referenced
-rules, then list roles and skills and load the resources relevant to this task.
+rules, then list `$DX_HOME/agents/*.md`, `$DX_HOME/skills/*/SKILL.md`,
+`.agents/agents/*.md`, and `.agents/skills/*/SKILL.md`. Select relevant
+resources from their metadata and load them before proceeding.
 ```
 
 Instructions are guidance, not a security enforcement boundary; use execution
