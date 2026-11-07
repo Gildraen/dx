@@ -33,15 +33,6 @@ check "shared agents present" bash -c '
 		test -f "$agent"
 	done
 '
-check "shared agents are linked into Copilot native location" bash -c '
-	set -e
-	shopt -s nullglob
-	for agent in /opt/dx/agents/*.md; do
-		link="$HOME/.copilot/agents/$(basename "$agent")"
-		test -L "$link"
-		test "$(readlink -f "$link")" = "$(readlink -f "$agent")"
-	done
-'
 check "shared skills directory present" bash -c "test -f /opt/dx/skills/README.md"
 check "shared skills present" bash -c '
 	set -e
@@ -50,16 +41,6 @@ check "shared skills present" bash -c '
 	test "${#dirs[@]}" -gt 0
 	for dir in "${dirs[@]}"; do
 		test -f "${dir}SKILL.md"
-	done
-'
-check "shared skills are linked into Copilot native location" bash -c '
-	set -e
-	shopt -s nullglob
-	for skill in /opt/dx/skills/*/; do
-		[[ -f "${skill}SKILL.md" ]] || continue
-		link="$HOME/.copilot/skills/$(basename "$skill")"
-		test -L "$link"
-		test "$(readlink -f "$link")" = "$(readlink -f "${skill%/}")"
 	done
 '
 check "shared taskfile present" bash -c "test -f /opt/dx/taskfiles/base.yml"

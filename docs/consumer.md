@@ -193,14 +193,14 @@ to the VS Code agent picker through `chat.agentFilesLocations`. This setting
 is supported, not deprecated, but is VS Code-specific; Copilot CLI and the
 Copilot app do not inherit it. `chat.agentSkillsLocations` is deprecated as
 VS Code moves skills to harness-native locations; editor-only skill search
-paths are not portable, so DX does not set it. Instead, the Feature links
-shared DX resources from `DX_HOME` into the container user's native
-`~/.copilot/agents/` and `~/.copilot/skills/` directories. These are symlinks
-inside the container home, not writes to the host `.agents` or copies of the
-canonical resources. If a user already has an entry at a shared resource's
-destination, the Feature preserves it and skips that link. Other clients use
-the explicit runtime bootstrap. Do not copy shared content into the workspace
-or generate additional resource copies.
+paths are not portable, so DX does not set it. The Feature does not install
+shared DX resources into Copilot user directories. The DX checkout adds its
+source runtime path to `chat.agentFilesLocations` through
+`.devcontainer/devcontainer.json`; consumer repositories do not inherit that
+checkout-specific path, and the setting cannot point to the Feature's installed
+`/opt/dx` runtime. Consumers use the explicit runtime bootstrap for shared
+resources; do not copy shared content into the workspace or generate additional
+resource copies.
 
 Outside VS Code, neither `DX_HOME` nor these files guarantees a native role
 picker, automatic instruction or skill loading, or subagent support. If the

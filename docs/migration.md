@@ -60,11 +60,13 @@ project-specific until the future `.agents/mcp.json` contract is defined.
    VS Code `chat.agentFilesLocations` setting for `.agents/agents/`; it does
    not make that editor-specific setting available to Copilot CLI or the
    Copilot app. It does not set the deprecated `chat.agentSkillsLocations`.
-   For native Copilot discovery, the Feature symlinks shared resources from
-   `DX_HOME` into the remote container user's `~/.copilot/agents/` and
-   `~/.copilot/skills/`, preserving existing entries without changing the host
-   workspace. The Feature installs the routing instructions and sets `DX_HOME`
-   through `containerEnv`.
+   The Feature does not install shared resources into Copilot user directories.
+   The DX checkout adds its source runtime path to the VS Code
+   `chat.agentFilesLocations` setting in `.devcontainer/devcontainer.json`;
+   consumer repositories do not inherit that checkout-specific path, and it
+   cannot point to the Feature's installed `/opt/dx` runtime. Shared resources
+   are loaded through the runtime bootstrap. The Feature installs the routing
+   instructions and sets `DX_HOME` through `containerEnv`.
    If the client does not read `AGENTS.md`, provide it explicitly through
    context or the initial request. Delegate only when subagents are supported;
    otherwise apply the role in the current agent and report that fallback.

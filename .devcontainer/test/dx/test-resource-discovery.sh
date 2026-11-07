@@ -17,6 +17,11 @@ for (const configuration of [feature, devcontainer]) {
     assert.deepEqual(settings['chat.agentFilesLocations'], {
       '.agents/agents': true,
     });
+  } else {
+    assert.deepEqual(settings['chat.agentFilesLocations'], {
+      '.agents/agents': true,
+      '.devcontainer/src/dx/runtime/agents': true,
+    });
   }
   assert.equal(settings['chat.agentSkillsLocations'], undefined);
   const extensions = configuration.customizations?.vscode?.extensions ?? [];
@@ -65,13 +70,10 @@ for (const directory of ['agents', 'skills']) {
   }
 }
 assert.ok(fs.readFileSync('AGENTS.md', 'utf8').includes('(.devcontainer/src/dx/runtime/AGENTS.md)'));
+assert.ok(fs.readdirSync('.devcontainer/src/dx/runtime/agents').some(file => file.endsWith('.md')));
 const installer = fs.readFileSync('.devcontainer/src/dx/install.sh', 'utf8');
-assert.ok(installer.includes('_REMOTE_USER_HOME'));
-assert.ok(installer.includes('copilot_root="$_REMOTE_USER_HOME/.copilot"'));
-assert.ok(installer.includes('copilot_agents="$copilot_root/agents"'));
-assert.ok(installer.includes('copilot_skills="$copilot_root/skills"'));
-assert.ok(installer.includes('Keeping existing Copilot resource'));
+assert.doesNotMatch(installer, /_REMOTE_USER_HOME|\.copilot|link_resource/);
 assert.doesNotMatch(installer, /\.agents\/agents/);
 EOF
 
-echo "Project resources use .agents; shared DX resources link to Copilot native locations"
+echo "Project resources use .agents; DX agents use Dev Container settings"
