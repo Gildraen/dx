@@ -5,7 +5,7 @@ description: 'Creer, restructurer ou mettre a jour un document Markdown (README,
 
 # Ecriture de documentation
 
-Role proprietaire : [documentation](../../agents/documentation.md).
+Role proprietaire : [documentation](../../agents/documentation.agent.md).
 
 ## Quand l'utiliser
 

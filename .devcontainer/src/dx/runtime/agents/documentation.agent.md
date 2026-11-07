@@ -34,7 +34,7 @@ seul. Reutiliser les findings disponibles plutot que refaire la relecture.
 Confier aux sous-agents des documents ou des verifications de sources
 distincts, puis harmoniser ici la terminologie et les liens entre documents.
 Une revue de code, de conception ou de securite releve de
-[dx-review](review.md) : une relecture generale du document entier ne remplace
+[dx-review](review.agent.md) : une relecture generale du document entier ne remplace
 pas ces axes. Limiter le controle documentaire aux contrats concernes quand
 il accompagne une autre intervention.
 

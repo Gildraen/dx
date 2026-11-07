@@ -5,7 +5,7 @@ description: 'Cartographier la couverture de tests reelle d''un projet entier (m
 
 # Audit de couverture de tests
 
-Role proprietaire : [tests](../../agents/tests.md).
+Role proprietaire : [tests](../../agents/tests.agent.md).
 
 ## Quand l'utiliser
 

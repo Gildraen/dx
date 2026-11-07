@@ -5,7 +5,7 @@ description: 'Externaliser une variabilite codee en dur dans une configuration o
 
 # Evolution config
 
-Role proprietaire : [evolution](../../agents/evolution.md).
+Role proprietaire : [evolution](../../agents/evolution.agent.md).
 
 ## Quand l'utiliser
 

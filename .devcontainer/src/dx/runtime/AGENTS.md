@@ -2,6 +2,9 @@
 
 This directory is the shared DX runtime, not a consumer project. Its Markdown
 resources do not require a particular AI client, model, or editor integration.
+Agent files use the `.agent.md` naming convention for compatibility with
+VS Code custom search locations. Their content and `name`/`description`
+metadata remain client-neutral; native discovery depends on the client.
 
 ## Instruction hierarchy
 
@@ -46,13 +49,13 @@ resource instead of silently continuing without it.
 
 ## Select a role or workflow
 
-List the Markdown files in `agents/` and read their `name` and `description`
+List `agents/*.agent.md` and read their `name` and `description`
 metadata to select a relevant role. Read the complete role before using it.
 List `skills/*/SKILL.md` to find reusable workflows by their metadata, then
 read the selected workflow and its referenced resources as needed. Directory
 contents are authoritative; no central list of roles or workflows is required.
 
-Also inspect the project's `.agents/agents/*.md` and
+Also inspect the project's `.agents/agents/*.agent.md` and
 `.agents/skills/*/SKILL.md` from the repository root. Read each resource's
 `name` and `description` metadata and load relevant project resources using the
 same selection procedure. The shared and project resource sets are additive;

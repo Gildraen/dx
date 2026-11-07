@@ -5,7 +5,7 @@ description: Revue de code rapide et generale (lisibilite, style, evidences), ut
 
 # Revue rapide
 
-Role proprietaire : [review](../../agents/review.md).
+Role proprietaire : [review](../../agents/review.agent.md).
 
 ## Quand l'utiliser
 

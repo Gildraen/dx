@@ -5,7 +5,7 @@ description: 'Relire et auditer un document Markdown existant (README, guide, re
 
 # Relecture de documentation
 
-Role proprietaire : [documentation](../../agents/documentation.md).
+Role proprietaire : [documentation](../../agents/documentation.agent.md).
 
 ## Quand l'utiliser
 

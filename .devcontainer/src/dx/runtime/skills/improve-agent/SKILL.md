@@ -5,7 +5,7 @@ description: Workflow pour auditer et ameliorer un ou plusieurs agents pour clie
 
 # Amelioration d'agent
 
-Role proprietaire : [agent-manager](../../agents/agent-manager.md).
+Role proprietaire : [agent-manager](../../agents/agent-manager.agent.md).
 
 ## Quand l'utiliser
 

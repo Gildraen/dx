@@ -68,8 +68,7 @@ it writes configuration.
 Files live directly in the host's `.devcontainer/.gh` and survive container
 rebuilds and workspace moves if those files are retained. Existing host state
 at that location is reused directly; no migration is needed. Ownership and
-permissions come from the host filesystem, not a DX UID adjustment. Windows
-mounts may expose mode `777`; DX does not guarantee mode `700`. This is `gh`
+permissions come from the host filesystem, not a DX UID adjustment. This is `gh`
 configuration, not an SSH private key. Consumers must ensure the remote user
 can write to the mounted directory. To use other storage, override
 `GH_CONFIG_DIR` through `remoteEnv` and manage that storage in the consumer.
@@ -176,7 +175,7 @@ Common loading, selection, and delegation rules belong to the runtime's
 
 The runtime's `AGENTS.md` explicitly loads `instructions/base.md` and
 `instructions/git.md` before work; no editor-specific activation metadata is
-needed. It then asks the agent to list `$DX_HOME/agents/*.md` and
+needed. It then asks the agent to list `$DX_HOME/agents/*.agent.md` and
 `$DX_HOME/skills/*/SKILL.md`, inspect `name` and `description` metadata, and
 read the selected role or workflow before applying it. Directory contents are
 the authoritative list, not a catalog in this guide.
@@ -190,7 +189,9 @@ in client-specific directories. The Feature installs the runtime guide under
 inspects both project paths and selects relevant resources by metadata. This
 directs prompt loading for every client. The Feature also adds `.agents/agents/`
 to the VS Code agent picker through `chat.agentFilesLocations`. This setting
-is supported, not deprecated, but is VS Code-specific; Copilot CLI and the
+requires `.agent.md` files in custom directories such as `.agents/agents/`;
+plain `.md` files are recognized only in VS Code's native agent folders.
+The setting is supported, not deprecated, but is VS Code-specific; Copilot CLI and the
 Copilot app do not inherit it. `chat.agentSkillsLocations` is deprecated as
 VS Code moves skills to harness-native locations; editor-only skill search
 paths are not portable, so DX does not set it. The Feature does not install
@@ -210,8 +211,8 @@ context or initial request before starting work. For example:
 ```text
 Read the project's AGENTS.md provided in context. Resolve DX_HOME from the
 environment (default /opt/dx when absent), read its AGENTS.md and referenced
-rules, then list `$DX_HOME/agents/*.md`, `$DX_HOME/skills/*/SKILL.md`,
-`.agents/agents/*.md`, and `.agents/skills/*/SKILL.md`. Select relevant
+rules, then list `$DX_HOME/agents/*.agent.md`, `$DX_HOME/skills/*/SKILL.md`,
+`.agents/agents/*.agent.md`, and `.agents/skills/*/SKILL.md`. Select relevant
 resources from their metadata and load them before proceeding.
 ```
 

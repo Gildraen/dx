@@ -5,7 +5,7 @@ description: Revue de la couverture et de la qualite des tests, a utiliser pour 
 
 # Revue tests
 
-Role proprietaire : [review](../../agents/review.md).
+Role proprietaire : [review](../../agents/review.agent.md).
 
 ## Quand l'utiliser
 

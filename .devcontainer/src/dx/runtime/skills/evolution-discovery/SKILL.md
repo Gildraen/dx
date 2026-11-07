@@ -5,7 +5,7 @@ description: 'Remplacer une enumeration ou une liste codee en dur par une decouv
 
 # Evolution discovery
 
-Role proprietaire : [evolution](../../agents/evolution.md).
+Role proprietaire : [evolution](../../agents/evolution.agent.md).
 
 ## Quand l'utiliser
 

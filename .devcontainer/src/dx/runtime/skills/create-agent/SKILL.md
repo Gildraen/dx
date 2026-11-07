@@ -5,7 +5,7 @@ description: Workflow pour creer un agent pour clients IA compatibles, partage o
 
 # Creation d'agent
 
-Role proprietaire : [agent-manager](../../agents/agent-manager.md).
+Role proprietaire : [agent-manager](../../agents/agent-manager.agent.md).
 
 ## Quand l'utiliser
 
@@ -18,8 +18,8 @@ structure.
 1. Partir du besoin de role retenu : utilisateurs, declencheur, decisions
    propres et limites de l'agent.
 2. Determiner la portee :
-   - partage DX -> `.devcontainer/src/dx/runtime/agents/<nom>.md` ;
-   - projet -> `.agents/agents/<nom>.md`.
+   - partage DX -> `.devcontainer/src/dx/runtime/agents/<nom>.agent.md` ;
+   - projet -> `.agents/agents/<nom>.agent.md`.
 3. Identifier les skills que le role possede ou compose, leur ordre et les
    cas a deleguer. Placer les regles communes de cette famille dans le role,
    pas dans chacune de ses procedures.

@@ -5,7 +5,7 @@ description: Revue de performance (complexite, requetes, allocations, chemins ch
 
 # Revue performance
 
-Role proprietaire : [review](../../agents/review.md).
+Role proprietaire : [review](../../agents/review.agent.md).
 
 ## Quand l'utiliser
 

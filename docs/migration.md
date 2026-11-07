@@ -51,7 +51,7 @@ project-specific until the future `.agents/mcp.json` contract is defined.
    resolves `DX_HOME` from the environment (default `/opt/dx` when absent) and
    reads that runtime's `AGENTS.md`, which explicitly loads
    `instructions/base.md` and `instructions/git.md` before work. It then lists
-   roles in `agents/*.md` and workflows in `skills/*/SKILL.md` by their `name`
+   roles in `agents/*.agent.md` and workflows in `skills/*/SKILL.md` by their `name`
    and `description`; directory contents are authoritative. The runtime then
    explicitly lists and loads project resources only from `.agents/agents/`
    and `.agents/skills/`, the sole canonical project locations. Do not keep

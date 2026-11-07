@@ -5,7 +5,7 @@ description: Revue de securite (OWASP Top 10, secrets, permissions, entrees non 
 
 # Revue securite
 
-Role proprietaire : [review](../../agents/review.md).
+Role proprietaire : [review](../../agents/review.agent.md).
 
 ## Quand l'utiliser
 

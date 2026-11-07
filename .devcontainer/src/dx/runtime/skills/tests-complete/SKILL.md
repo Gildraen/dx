@@ -5,7 +5,7 @@ description: 'Ecrire ou completer les tests et scripts de test pour combler des 
 
 # Completion de la suite de tests
 
-Role proprietaire : [tests](../../agents/tests.md).
+Role proprietaire : [tests](../../agents/tests.agent.md).
 
 ## Quand l'utiliser
 
