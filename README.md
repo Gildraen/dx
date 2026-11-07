@@ -41,13 +41,13 @@ Consumer repositories keep all project-specific roles in `.agents/agents/`
 and skills in `.agents/skills/`; these are their sole canonical locations.
 The runtime bootstrap lists and loads relevant resources there alongside the
 shared resources in `DX_HOME`. The DX Feature adds `.agents/agents/` to the
-VS Code agent picker with `chat.agentFilesLocations`. It also links shared DX
-agents and skills from `DX_HOME` into the container user's native
-`~/.copilot/agents` and `~/.copilot/skills` locations. These are symlinks, not
-copies, and do not modify the host workspace; existing Copilot entries are
-preserved. For other clients, the project `AGENTS.md` bootstrap remains the
-explicit loading path. If a client does not read that file, provide it in the
-context or initial request.
+VS Code agent picker with `chat.agentFilesLocations`. This DX checkout adds its
+runtime agent directory to the same VS Code setting in
+`.devcontainer/devcontainer.json`; consumer repositories do not inherit that
+checkout-specific path. The Feature does not modify Copilot user directories.
+For other clients, the project `AGENTS.md` bootstrap remains the explicit loading path.
+If a client does not read that file, provide it in the context or initial
+request.
 Subagents are used only when the client supports them; otherwise the current
 agent applies the selected role and reports that fallback.
 `.agents/mcp.json` is reserved for a future MCP configuration standard and is

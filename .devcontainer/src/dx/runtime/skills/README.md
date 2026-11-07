@@ -7,9 +7,8 @@ Feature.
 Keep only cross-repository workflows here. Project-specific skills have one
 canonical source in the consumer repository under `.agents/skills/`; do not
 duplicate them in client-specific directories. Shared skills remain under
-`$DX_HOME/skills/`; the DX Feature exposes them to Copilot using symlinks in
-the container user's `~/.copilot/skills/`, while preserving the runtime as the
-canonical source.
+`$DX_HOME/skills/` and are loaded through the runtime bootstrap. The DX Feature
+does not copy or link them into client-specific directories.
 
 ## Selection and composition
 

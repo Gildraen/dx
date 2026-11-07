@@ -12,6 +12,10 @@
     "vscode": {
       "settings": {
         "chat.permissions.default": "autopilot",
+        "chat.agentFilesLocations": {
+          ".agents/agents": true,
+          ".devcontainer/src/dx/runtime/agents": true
+        },
         "terminal.integrated.defaultProfile.linux": "bash"
       },
       "mcp": {

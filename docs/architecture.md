@@ -83,11 +83,10 @@ The Feature copies the versioned runtime to `/opt/dx` and declares
 `DX_HOME=/opt/dx` through `containerEnv`. It also contributes the VS Code
 setting `chat.agentFilesLocations` for `.agents/agents/`, so canonical project
 agents appear in the VS Code picker.
-For native Copilot discovery, it also symlinks shared runtime agents and skills
-from `DX_HOME` into the remote container user's `~/.copilot/agents/` and
-`~/.copilot/skills/`. These links point back to the canonical runtime; they do
-not copy resources into the workspace or host home, and conflicting existing
-entries are preserved.
+This DX checkout adds its runtime agent directory to
+`chat.agentFilesLocations` in `.devcontainer/devcontainer.json`, alongside the
+project `.agents/agents/` location. Consumers do not inherit this checkout-
+specific path, and the Feature does not modify a user's Copilot directories.
 The project's small `AGENTS.md` asks the agent to resolve `DX_HOME` from the
 process environment (default `/opt/dx` when absent) and read its `AGENTS.md`.
 That entry point explicitly loads `instructions/base.md` and
@@ -135,9 +134,8 @@ agent to list them and load relevant resources explicitly, as described in
 do not keep duplicate project resources in client-specific directories. The
 paths are not universal native discovery locations, so the runtime bootstrap
 loads them explicitly. The Feature contributes VS Code picker discovery for
-project agents and native Copilot user locations for shared resources. The
-Copilot profile entries are symlinks to the canonical runtime, not copied
-resource files.
+project agents. The DX checkout's Dev Container setting also exposes its
+runtime agents in the VS Code picker; consumers do not inherit that path.
 `.agents/mcp.json` is reserved for a later MCP configuration contract and
 should not be introduced before that contract is documented here.
 
