@@ -5,7 +5,7 @@ description: Verifier, challenger et corriger les findings d'une revue de code a
 
 # Revue - correction des findings
 
-Role proprietaire : [review](../../agents/review.md).
+Role proprietaire : [review](../../agents/review.agent.md).
 
 ## Quand l'utiliser
 

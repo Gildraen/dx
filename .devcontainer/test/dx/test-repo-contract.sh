@@ -37,13 +37,12 @@ for (const file of fs.readdirSync(agentRoot)) {
 }
 EOF
 
-# Devcontainer contract: must mount the workspace by path, not bake in a host-specific location.
+# Devcontainer contract: use the default workspace bind mount.
 node <<'EOF'
 const devcontainer = require('./.devcontainer/devcontainer.json');
-const marker = '${localWorkspaceFolder}';
-if (devcontainer.workspaceFolder !== marker) process.exit(1);
-if (!devcontainer.workspaceMount.includes(`source=${marker}`) || !devcontainer.workspaceMount.includes(`target=${marker}`)) process.exit(1);
-if (devcontainer.remoteEnv.HOST_PROJECT_PATH != null || devcontainer.mounts != null) process.exit(1);
+if (devcontainer.workspaceFolder != null || devcontainer.workspaceMount != null) process.exit(1);
+if (devcontainer.mounts != null || devcontainer.postCreateCommand != null) process.exit(1);
+if (devcontainer.remoteEnv.HOST_PROJECT_PATH != null) process.exit(1);
 if (devcontainer.remoteEnv.GH_CONFIG_DIR != null) process.exit(1);
 if (devcontainer.remoteEnv.GIT_SSH_COMMAND != null || devcontainer.remoteEnv.DX_SSH_DIR != null) process.exit(1);
 EOF

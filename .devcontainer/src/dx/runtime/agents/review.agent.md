@@ -48,7 +48,7 @@ que rejouer tous les axes pour les verifier.
 Confier aux sous-agents des axes ou composants distincts, puis regrouper les
 findings de meme cause en conservant leurs impacts specialises. Une lacune de
 tests sur le diff releve de `review-tests` ; un audit ou une completion de
-suite releve de [dx-tests](tests.md).
+suite releve de [dx-tests](tests.agent.md).
 
 ## Regles communes de revue
 

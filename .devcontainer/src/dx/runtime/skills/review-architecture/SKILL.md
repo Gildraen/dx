@@ -5,7 +5,7 @@ description: Revue de conception (couplage, responsabilites, contrats d'interfac
 
 # Revue architecture
 
-Role proprietaire : [review](../../agents/review.md).
+Role proprietaire : [review](../../agents/review.agent.md).
 
 ## Quand l'utiliser
 

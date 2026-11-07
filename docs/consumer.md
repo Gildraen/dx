@@ -68,8 +68,7 @@ it writes configuration.
 Files live directly in the host's `.devcontainer/.gh` and survive container
 rebuilds and workspace moves if those files are retained. Existing host state
 at that location is reused directly; no migration is needed. Ownership and
-permissions come from the host filesystem, not a DX UID adjustment. Windows
-mounts may expose mode `777`; DX does not guarantee mode `700`. This is `gh`
+permissions come from the host filesystem, not a DX UID adjustment. This is `gh`
 configuration, not an SSH private key. Consumers must ensure the remote user
 can write to the mounted directory. To use other storage, override
 `GH_CONFIG_DIR` through `remoteEnv` and manage that storage in the consumer.
@@ -190,7 +189,9 @@ in client-specific directories. The Feature installs the runtime guide under
 inspects both project paths and selects relevant resources by metadata. This
 directs prompt loading for every client. The Feature also adds `.agents/agents/`
 to the VS Code agent picker through `chat.agentFilesLocations`. This setting
-is supported, not deprecated, but is VS Code-specific; Copilot CLI and the
+requires `.agent.md` files in custom directories such as `.agents/agents/`;
+plain `.md` files are recognized only in VS Code's native agent folders.
+The setting is supported, not deprecated, but is VS Code-specific; Copilot CLI and the
 Copilot app do not inherit it. `chat.agentSkillsLocations` is deprecated as
 VS Code moves skills to harness-native locations; editor-only skill search
 paths are not portable, so DX does not set it. The Feature does not install

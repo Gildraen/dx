@@ -36,7 +36,7 @@ for (const directory of ['agents', 'instructions']) {
   const files = fs.readdirSync(root);
   assert.ok(files.length > 0);
   for (const file of files) {
-    assert.match(file, /^[a-z][a-z0-9-]*\.md$/);
+    assert.match(file, directory === 'agents' ? /^[a-z][a-z0-9-]*\.agent\.md$/ : /^[a-z][a-z0-9-]*\.md$/);
     assert.doesNotMatch(fs.readFileSync(`${root}/${file}`, 'utf8'), /^applyTo:/m);
   }
 }
@@ -70,7 +70,7 @@ for (const directory of ['agents', 'skills']) {
   }
 }
 assert.ok(fs.readFileSync('AGENTS.md', 'utf8').includes('(.devcontainer/src/dx/runtime/AGENTS.md)'));
-assert.ok(fs.readdirSync('.devcontainer/src/dx/runtime/agents').some(file => file.endsWith('.md')));
+assert.ok(fs.readdirSync('.devcontainer/src/dx/runtime/agents').some(file => file.endsWith('.agent.md')));
 const installer = fs.readFileSync('.devcontainer/src/dx/install.sh', 'utf8');
 assert.doesNotMatch(installer, /_REMOTE_USER_HOME|\.copilot|link_resource/);
 assert.doesNotMatch(installer, /\.agents\/agents/);

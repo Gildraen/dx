@@ -47,7 +47,7 @@ un plan borne sans adopter les trois skills de refactorisation.
 
 Confier aux sous-agents l'examen de familles de consommateurs distinctes,
 puis integrer leurs contraintes dans le contrat cible. Confier les axes de
-securite, performance ou architecture a [dx-review](review.md) plutot que
+securite, performance ou architecture a [dx-review](review.agent.md) plutot que
 les remplacer par une analyse de perimetre.
 
 ## Regles communes d'evolution

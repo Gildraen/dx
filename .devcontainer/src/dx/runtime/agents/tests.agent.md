@@ -18,7 +18,7 @@ Cet agent s'active a la demande explicite d'un audit de couverture de tests,
 de la creation ou de la completion d'une suite de tests, ou de l'ecriture de
 scripts de test. Il ne s'active pas pour la revue d'un diff ponctuel pendant
 une code review : ce cas reste couvert par le mode `review-tests` de
-[dx-review](review.md), qui n'est pas modifie par cet agent.
+[dx-review](review.agent.md), qui n'est pas modifie par cet agent.
 
 ## Choix et composition des skills
 
@@ -39,7 +39,7 @@ seul. Ne pas refaire une cartographie exploitable deja fournie.
 Confier aux sous-agents des modules ou familles de scripts distincts, puis
 integrer les lacunes transversales et les besoins de fixtures partagees.
 Une revue de conception, de securite ou de performance releve de
-[dx-review](review.md), pas de cet agent.
+[dx-review](review.agent.md), pas de cet agent.
 
 ## Regles communes de tests
 

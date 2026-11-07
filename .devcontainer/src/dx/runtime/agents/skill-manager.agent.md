@@ -32,7 +32,7 @@ Ce role est proprietaire des skills suivants :
 - Si le besoin est une regle generale toujours applicable, proposer une
   instruction chargee explicitement plutot qu'un skill.
 - Si le besoin est une persona invoquee explicitement avec un role propre,
-  confier sa gestion a [dx-agent-manager](agent-manager.md).
+  confier sa gestion a [dx-agent-manager](agent-manager.agent.md).
 - Si le besoin est une tache ponctuelle avec des entrees parametrees, proposer
   un prompt plutot qu'un skill.
 

@@ -5,7 +5,7 @@ description: 'Planifier une intervention après analyse : comparer les options, 
 
 # Scope planning
 
-Role propriétaire : [evolution](../../agents/evolution.md).
+Role propriétaire : [evolution](../../agents/evolution.agent.md).
 
 ## Quand l'utiliser
 

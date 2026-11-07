@@ -136,11 +136,14 @@ Run the consumer's `task validate` and `task test` in its devcontainer. The dx
 repository CI follows the same model: structural `task validate` runs on the
 runner, `task test` runs in `.devcontainer/devcontainer.json`, and
 `feature:test` runs directly on the runner's Docker daemon. The dx devcontainer
-uses `${localWorkspaceFolder}` as its workspace mount and folder, so the native
-`task feature:test` command already runs from a path the host Docker daemon can
-bind-mount. Reusable GitHub workflows cannot see a local worktree: push
-`feature/my-dx-change`, temporarily reference `@feature/my-dx-change` from the
-consumer, run its CI, then restore the released tag.
+uses the standard workspace bind mount, so edits in the container stay visible
+in the checkout. Run `task feature:test` from the host checkout, where the
+Docker daemon can bind-mount the CLI's temporary project paths. With the
+standard workspace mount, those paths differ inside the devcontainer.
+Reusable GitHub workflows cannot see a local worktree:
+push `feature/my-dx-change`, temporarily reference
+`@feature/my-dx-change` from the consumer, run its CI, then restore the released
+tag.
 
 ## Finish dogfood and release
 

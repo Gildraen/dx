@@ -30,7 +30,7 @@ Ce role est proprietaire des skills suivants :
 - Si le besoin est une regle generale toujours applicable, proposer une
   instruction chargee explicitement plutot qu'un agent.
 - Si le besoin est une procedure reutilisable, proposer un skill plutot qu'un
-  agent et confier sa gestion a [dx-skill-manager](skill-manager.md).
+  agent et confier sa gestion a [dx-skill-manager](skill-manager.agent.md).
 
 Composer les deux skills pour une demande mixte, pas pour chaque intervention.
 Pour un audit de plusieurs agents, confier aux sous-agents des roles distincts

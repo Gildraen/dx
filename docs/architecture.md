@@ -87,6 +87,8 @@ This DX checkout adds its runtime agent directory to
 `chat.agentFilesLocations` in `.devcontainer/devcontainer.json`, alongside the
 project `.agents/agents/` location. Consumers do not inherit this checkout-
 specific path, and the Feature does not modify a user's Copilot directories.
+Agents in these custom search locations must use the `.agent.md` suffix.
+VS Code only recognizes plain `.md` agent files in its native agent folders.
 The project's small `AGENTS.md` asks the agent to resolve `DX_HOME` from the
 process environment (default `/opt/dx` when absent) and read its `AGENTS.md`.
 That entry point explicitly loads `instructions/base.md` and

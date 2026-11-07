@@ -5,7 +5,7 @@ description: Workflow pour auditer et ameliorer un ou plusieurs skills pour clie
 
 # Amelioration de skill
 
-Role proprietaire : [skill-manager](../../agents/skill-manager.md).
+Role proprietaire : [skill-manager](../../agents/skill-manager.agent.md).
 
 ## Quand l'utiliser
 
