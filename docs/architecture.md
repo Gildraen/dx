@@ -97,14 +97,14 @@ loading, not editor-specific activation metadata. Missing rules must be
 reported rather than silently skipped.
 
 That runtime guide also directs the agent to inspect project roles in
-`.agents/agents/*.md` and project skills in `.agents/skills/*/SKILL.md`.
+`.agents/agents/*.agent.md` and project skills in `.agents/skills/*/SKILL.md`.
 The Feature delivers this routing instruction as part of the installed
 runtime; the consumer's root `AGENTS.md` must load it. This is explicit prompt
 loading for all clients; the Feature additionally configures VS Code's picker
 for project agents. The agent location setting is supported but editor-specific,
 so independent Copilot clients do not inherit it.
 
-To choose a role, list `agents/*.md`, inspect `name` and `description`, then
+To choose a role, list `agents/*.agent.md`, inspect `name` and `description`, then
 read the selected file in full. For workflows, list `skills/*/SKILL.md` and
 use the same metadata-driven selection. Directory contents are authoritative;
 no central role or skill list is required. Each skill links to its owning
@@ -130,7 +130,7 @@ main agent remains responsible for integration and validation. See the
 for the complete rules.
 
 DX resources and project resources are additive. Project customizations stay
-in `.agents/agents/*.md` and `.agents/skills/*/SKILL.md`; the bootstrap asks the
+in `.agents/agents/*.agent.md` and `.agents/skills/*/SKILL.md`; the bootstrap asks the
 agent to list them and load relevant resources explicitly, as described in
 [consumer.md](consumer.md). These are the sole canonical project locations;
 do not keep duplicate project resources in client-specific directories. The

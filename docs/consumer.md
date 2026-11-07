@@ -175,7 +175,7 @@ Common loading, selection, and delegation rules belong to the runtime's
 
 The runtime's `AGENTS.md` explicitly loads `instructions/base.md` and
 `instructions/git.md` before work; no editor-specific activation metadata is
-needed. It then asks the agent to list `$DX_HOME/agents/*.md` and
+needed. It then asks the agent to list `$DX_HOME/agents/*.agent.md` and
 `$DX_HOME/skills/*/SKILL.md`, inspect `name` and `description` metadata, and
 read the selected role or workflow before applying it. Directory contents are
 the authoritative list, not a catalog in this guide.
@@ -211,8 +211,8 @@ context or initial request before starting work. For example:
 ```text
 Read the project's AGENTS.md provided in context. Resolve DX_HOME from the
 environment (default /opt/dx when absent), read its AGENTS.md and referenced
-rules, then list `$DX_HOME/agents/*.md`, `$DX_HOME/skills/*/SKILL.md`,
-`.agents/agents/*.md`, and `.agents/skills/*/SKILL.md`. Select relevant
+rules, then list `$DX_HOME/agents/*.agent.md`, `$DX_HOME/skills/*/SKILL.md`,
+`.agents/agents/*.agent.md`, and `.agents/skills/*/SKILL.md`. Select relevant
 resources from their metadata and load them before proceeding.
 ```
 

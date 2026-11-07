@@ -34,7 +34,7 @@ The runtime is independent of the AI client, model, and editor. A small project
 `AGENTS.md` resolves `DX_HOME` from the environment (default `/opt/dx` when
 absent) and asks the agent to read that runtime's `AGENTS.md`. The runtime
 explicitly loads `instructions/base.md` and `instructions/git.md` before work,
-then lists roles in `agents/*.md` and workflows in `skills/*/SKILL.md` by their
+then lists roles in `agents/*.agent.md` and workflows in `skills/*/SKILL.md` by their
 `name` and `description` metadata. Directory contents are authoritative.
 
 Consumer repositories keep all project-specific roles in `.agents/agents/`

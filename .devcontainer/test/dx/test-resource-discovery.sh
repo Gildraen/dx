@@ -52,9 +52,9 @@ for (const file of fs.readdirSync(agentRoot)) {
 const bootstrap = fs.readFileSync('.devcontainer/src/dx/runtime/AGENTS.md', 'utf8');
 assert.ok(bootstrap.includes('(instructions/base.md)'));
 assert.ok(bootstrap.includes('(instructions/git.md)'));
-assert.ok(bootstrap.includes('agents/'));
+assert.ok(bootstrap.includes('`agents/*.agent.md`'));
 assert.ok(bootstrap.includes('skills/*/SKILL.md'));
-assert.ok(bootstrap.includes('`.agents/agents/*.md`'));
+assert.ok(bootstrap.includes('`.agents/agents/*.agent.md`'));
 assert.ok(bootstrap.includes('`.agents/skills/*/SKILL.md`'));
 assert.ok(bootstrap.includes('the sole canonical locations for'));
 assert.ok(bootstrap.includes('Do not keep duplicate copies in client-specific'));

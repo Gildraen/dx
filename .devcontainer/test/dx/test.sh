@@ -22,12 +22,12 @@ check "jq baseline is installed" bash -c "command -v jq >/dev/null"
 check "ripgrep baseline is installed" bash -c "command -v rg >/dev/null"
 check "stable runtime installed at /opt/dx" bash -c "test -d /opt/dx"
 check "shared bootstrap present" bash -c "test -f /opt/dx/AGENTS.md"
-check "project resources are discovered from .agents" bash -c 'grep -Fq ".agents/agents/*.md" /opt/dx/AGENTS.md && grep -Fq ".agents/skills/*/SKILL.md" /opt/dx/AGENTS.md'
+check "project resources are discovered from .agents" bash -c 'grep -Fq ".agents/agents/*.agent.md" /opt/dx/AGENTS.md && grep -Fq ".agents/skills/*/SKILL.md" /opt/dx/AGENTS.md'
 check "shared instructions present" bash -c "test -f /opt/dx/instructions/base.md && test -f /opt/dx/instructions/git.md"
 check "shared agents present" bash -c '
 	set -e
 	shopt -s nullglob
-	agents=(/opt/dx/agents/*.md)
+	agents=(/opt/dx/agents/*.agent.md)
 	test "${#agents[@]}" -gt 0
 	for agent in "${agents[@]}"; do
 		test -f "$agent"
