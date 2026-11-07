@@ -52,9 +52,18 @@ List `skills/*/SKILL.md` to find reusable workflows by their metadata, then
 read the selected workflow and its referenced resources as needed. Directory
 contents are authoritative; no central list of roles or workflows is required.
 
+Also inspect the project's `.agents/agents/*.md` and
+`.agents/skills/*/SKILL.md` from the repository root. Read each resource's
+`name` and `description` metadata and load relevant project resources using the
+same selection procedure. The shared and project resource sets are additive;
+do not copy project resources into `DX_HOME` or assume a native client picker
+discovers these paths.
+
 Project-specific roles and skills stay in the project's `.agents/agents/` and
-`.agents/skills/`. When present, list and select them by the same metadata
-procedure. They supplement this runtime rather than duplicating it.
+`.agents/skills/` only. These are the sole canonical locations for
+project-specific resources. Do not keep duplicate copies in client-specific
+directories; clients that do not discover these paths use this explicit
+loading procedure.
 
 ## Delegate focused work
 

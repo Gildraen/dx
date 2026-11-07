@@ -37,13 +37,19 @@ explicitly loads `instructions/base.md` and `instructions/git.md` before work,
 then lists roles in `agents/*.md` and workflows in `skills/*/SKILL.md` by their
 `name` and `description` metadata. Directory contents are authoritative.
 
-Consumer repositories may add project-specific roles in `.agents/agents/`
-and skills in `.agents/skills/`; their bootstrap asks the agent to list and
-read relevant resources there too. These paths and `DX_HOME` do not configure
-a client's native picker or guarantee automatic loading. If a client does not
-read the project's `AGENTS.md`, provide it explicitly in the context or initial
-request. Subagents are used only when the client supports them; otherwise the
-current agent applies the selected role and reports that fallback.
+Consumer repositories keep all project-specific roles in `.agents/agents/`
+and skills in `.agents/skills/`; these are their sole canonical locations.
+The runtime bootstrap lists and loads relevant resources there alongside the
+shared resources in `DX_HOME`. The DX Feature adds `.agents/agents/` to the
+VS Code agent picker with `chat.agentFilesLocations`. It also links shared DX
+agents and skills from `DX_HOME` into the container user's native
+`~/.copilot/agents` and `~/.copilot/skills` locations. These are symlinks, not
+copies, and do not modify the host workspace; existing Copilot entries are
+preserved. For other clients, the project `AGENTS.md` bootstrap remains the
+explicit loading path. If a client does not read that file, provide it in the
+context or initial request.
+Subagents are used only when the client supports them; otherwise the current
+agent applies the selected role and reports that fallback.
 `.agents/mcp.json` is reserved for a future MCP configuration standard and is
 not part of the current contract.
 

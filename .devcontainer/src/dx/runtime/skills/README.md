@@ -4,8 +4,12 @@ This directory is the canonical home for reusable Gildraen skills that are
 versioned with `dx` and installed to `$DX_HOME/skills/` by the Dev Container
 Feature.
 
-Keep only cross-repository workflows here. Project-specific skills stay in the
-consumer repository under `.agents/skills/`.
+Keep only cross-repository workflows here. Project-specific skills have one
+canonical source in the consumer repository under `.agents/skills/`; do not
+duplicate them in client-specific directories. Shared skills remain under
+`$DX_HOME/skills/`; the DX Feature exposes them to Copilot using symlinks in
+the container user's `~/.copilot/skills/`, while preserving the runtime as the
+canonical source.
 
 ## Selection and composition
 

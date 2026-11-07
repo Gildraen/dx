@@ -5,6 +5,15 @@
     "description": "Installs the shared Gildraen developer-experience runtime and common tool baseline under /opt/dx.",
     "documentationURL": "https://github.com/Gildraen/dx",
     "options": {},
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "chat.agentFilesLocations": {
+                    ".agents/agents": true
+                }
+            }
+        }
+    },
     "containerEnv": {
         "DX_HOME": "/opt/dx",
         "GH_CONFIG_DIR": "/var/lib/dx/devcontainer/.gh"
