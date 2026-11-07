@@ -1,7 +1,7 @@
 # Consuming `dx`
 
-This describes how a repository consumes the stable, released version of
-`dx`. For working on `dx` itself using a real project as a testbed, see
+This guide covers installing and configuring `dx` in a repository. For
+working on `dx` itself using a real project as a testbed, see
 [dogfood.md](dogfood.md).
 
 ## 1. Dev Container Feature
@@ -21,11 +21,12 @@ Compose the official Features you need with the shared `dx` Feature:
 
 Only add other Features or packages for project-specific requirements
 (Docker-outside-of-Docker, project language runtimes, service CLIs, …). The DX
-common tool baseline is deliberately limited and does not cover those tools.
+Feature does not provide those tools.
 
-The tool baseline is defined by the selected DX Feature's manifest. Check that
-manifest before relying on a tool; requirements not included there remain
-project-specific.
+The [Feature manifest](../.devcontainer/src/dx/devcontainer-feature.json)
+declares Node.js LTS, GitHub CLI, Go Task 3.53.1, Git, `jq`, ripgrep and
+`libatomic1`. Check the manifest of the selected release before relying on a
+tool; requirements not included there remain project-specific.
 
 The Feature copies the versioned DX runtime to `/opt/dx` and sets
 `DX_HOME=/opt/dx` through `containerEnv`: the `AGENTS.md` entry point, shared
@@ -35,9 +36,9 @@ runtime is a snapshot; to consume shared resource changes, update the Feature
 release and rebuild the container. For live sources, use [dogfood.md](dogfood.md).
 The launcher runs GitHub's pinned official MCP image through Docker and does
 not manage a GitHub token. A project that enables MCP must provide Docker
-access separately until the `.agents/mcp.json` contract is defined. Renovate
-keeps this pin current; the image is not configurable per consumer. The Dev Container keeps
-the GitHub CLI available; DX does not authenticate it automatically.
+access and configure its MCP client separately. Renovate proposes updates to
+the image pin; the launcher has no per-consumer image setting. DX does not
+authenticate the GitHub CLI automatically.
 
 ### Git credentials and GitHub CLI state
 
@@ -61,15 +62,13 @@ and declares this bind mount:
 The host workspace root must contain `.devcontainer`. Consumers with Dev
 Container configurations elsewhere must adapt the mounts in their own
 configuration; the source is not resolved relative to `devcontainer.json`.
-DX uses no named volume, directory preparation in `install.sh`, state copy,
-helper script, or startup command for this storage. `gh` creates `.gh` when
-it writes configuration.
+`gh` creates `.gh` when it writes configuration.
 
 Files live directly in the host's `.devcontainer/.gh` and survive container
 rebuilds and workspace moves if those files are retained. Existing host state
-at that location is reused directly; no migration is needed. Ownership and
-permissions come from the host filesystem, not a DX UID adjustment. This is `gh`
-configuration, not an SSH private key. Consumers must ensure the remote user
+at that location is reused directly. Ownership and permissions come from the
+host filesystem. This is `gh` configuration and may contain tokens; it is not
+SSH private-key storage. Consumers must ensure the remote user
 can write to the mounted directory. To use other storage, override
 `GH_CONFIG_DIR` through `remoteEnv` and manage that storage in the consumer.
 
@@ -127,15 +126,15 @@ Gives you `task dx:doctor` and `task dx:mcp:github`.
 `task dx:doctor` checks the runtime offline, not authentication.
 Your own `validate`/`test`/`lint` tasks stay in your Taskfile.
 
-Remote Taskfiles require a Go Task release with remote include support. The DX
-Feature and reusable validation workflow both provide a compatible release.
+Remote Taskfiles require Go Task 3.53.1 or newer. The DX Feature and reusable
+validation workflow both provide a compatible release.
 
 The reusable validation workflow installs a compatible Task release on its GitHub
 Actions runner before executing `task validate`. Its availability in CI does
 not mean that the local devcontainer already provides it.
 
-The consumer ref must match an existing DX release tag before the consumer is
-used. CI downloads that exact ref and trusts only `github.com` through
+The consumer ref must exist in Git before the consumer is used; publishing the
+Feature does not create Git tags. CI downloads that exact ref and trusts only `github.com` through
 `TASK_REMOTE_TRUSTED_HOSTS=github.com`.
 
 ## 4. Renovate preset
@@ -151,8 +150,7 @@ used. CI downloads that exact ref and trusts only `github.com` through
 Renovate then proposes updates to: the `dx` Feature version in
 `devcontainer.json` (native devcontainer manager), reusable workflow refs
 (native github-actions manager), and the Remote Taskfile ref (a single
-regex-based custom manager, documented in `default.json`, kept because Task
-has no native Renovate manager).
+regex-based custom manager defined in [default.json](../default.json)).
 
 ## 5. Agents and skills
 
@@ -187,21 +185,18 @@ the sole canonical project locations. Do not keep duplicate project resources
 in client-specific directories. The Feature installs the runtime guide under
 `DX_HOME`; after the consumer's root `AGENTS.md` loads that guide, it explicitly
 inspects both project paths and selects relevant resources by metadata. This
-directs prompt loading for every client. The Feature also adds `.agents/agents/`
+is the client-neutral loading procedure. The Feature also adds `.agents/agents/`
 to the VS Code agent picker through `chat.agentFilesLocations`. This setting
 requires `.agent.md` files in custom directories such as `.agents/agents/`;
 plain `.md` files are recognized only in VS Code's native agent folders.
-The setting is supported, not deprecated, but is VS Code-specific; Copilot CLI and the
-Copilot app do not inherit it. `chat.agentSkillsLocations` is deprecated as
-VS Code moves skills to harness-native locations; editor-only skill search
-paths are not portable, so DX does not set it. The Feature does not install
-shared DX resources into Copilot user directories. The DX checkout adds its
+Copilot CLI and the Copilot app do not inherit this VS Code setting.
+The Feature does not install shared DX resources
+into Copilot user directories. The DX checkout adds its
 source runtime path to `chat.agentFilesLocations` through
 `.devcontainer/devcontainer.json`; consumer repositories do not inherit that
-checkout-specific path, and the setting cannot point to the Feature's installed
-`/opt/dx` runtime. Consumers use the explicit runtime bootstrap for shared
-resources; do not copy shared content into the workspace or generate additional
-resource copies.
+checkout-specific path. Consumers use the explicit runtime bootstrap for
+shared resources. Native discovery of shared roles requires client support and
+client-specific configuration; `DX_HOME` alone does not configure it.
 
 Outside VS Code, neither `DX_HOME` nor these files guarantees a native role
 picker, automatic instruction or skill loading, or subagent support. If the
@@ -217,10 +212,24 @@ resources from their metadata and load them before proceeding.
 ```
 
 Instructions are guidance, not a security enforcement boundary; use execution
-permissions and isolation for enforcement.
+permissions and isolation for enforcement. The runtime requests delegation,
+but a managed subagent tool and its permissions depend on the client. When
+subagents are unavailable, apply the selected role in the current agent and
+report that fallback.
 
-`.agents/mcp.json` is reserved for a future MCP configuration standard. Do not
-add one until that contract is documented in `dx`.
+## 6. GitHub MCP client
+
+Configure your MCP client's stdio server command as `dx-mcp` with the argument
+`github`. The launcher requires a Docker CLI and accessible daemon, starts the
+official GitHub MCP server with OAuth, and binds its callback port to
+`127.0.0.1:8085`. Ensure this port is available and the authentication flow can
+reach it in your environment. MCP client configuration belongs to the project
+or client, not to the shared agent bootstrap.
+
+GitHub MCP OAuth authentication is separate from Git/SSH and `gh`
+authentication. The launcher does not forward `GH_TOKEN` or `GITHUB_TOKEN` to
+the server. Configure application-level client access separately from runtime
+resource loading through `DX_HOME`.
 
 ## Runtime state that never belongs in `dx` or in your repository
 
@@ -228,6 +237,6 @@ Tokens, `gh` auth state, and generated MCP configuration are runtime state,
 never versioned DX or consumer content. DX provides a default `gh`
 configuration location backed by the host's `.devcontainer` bind mount, not
 credentials. The consumer owns its storage permissions and Git ignore rules.
-The official GitHub MCP server's local stdio OAuth flow keeps its token in
-memory only, so no MCP token file or workspace state directory is required.
-DX uses OAuth as its single MCP authentication mode.
+Treat generated machine-specific client settings as potentially secret;
+inspect their handling locally and keep authentication state out of Git and
+container images.

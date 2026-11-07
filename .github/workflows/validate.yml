@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      # Same schema check the publish step runs, so a bad manifest fails here instead of after the release tag is pushed.
+      # Same schema check the publish step runs, so a bad manifest fails before Feature publication.
       - uses: devcontainers/action@1082abd5d2bf3a11abccba70eef98df068277772 # v1
         with:
           validate-only: "true"
