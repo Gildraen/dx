@@ -74,12 +74,23 @@ assert.equal(feature.containerEnv.GIT_SSH_COMMAND, undefined);
 assert.equal(feature.postStartCommand, undefined);
 EOF
 
-# CI contract: must trust the Remote Taskfile host.
-grep -q 'TASK_REMOTE_TRUSTED_HOSTS: github.com' .github/workflows/reusable-validate.yml
-
-# CI contract: Go Task must stay at or above the minimum version Remote Taskfiles require (currently 3.53.1).
-task_version="$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' .github/workflows/reusable-validate.yml)"
-[[ "$(printf '%s\n' '3.53.1' "$task_version" | sort -V | head -n1)" == '3.53.1' ]]
+for workflow in validate devcontainer-test maintenance; do
+  npx --yes js-yaml ".github/workflows/reusable-$workflow.yml" | node -e '
+    const assert = require("node:assert/strict");
+    const fs = require("node:fs");
+    const workflow = JSON.parse(fs.readFileSync(0, "utf8"));
+    const name = process.argv[1];
+    const jobs = Object.values(workflow.jobs);
+    assert.equal(jobs.length, 1);
+    const job = jobs[0];
+    assert.equal(job.uses, `Gildraen/ci-workflows/.github/workflows/reusable-${name}.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`);
+    assert.equal(job.steps, undefined);
+    assert.equal(job["runs-on"], undefined);
+    const inputs = Object.keys(workflow.on.workflow_call?.inputs ?? {});
+    assert.deepEqual(Object.keys(job.with ?? {}).sort(), inputs.sort());
+    for (const input of inputs) assert.equal(job.with[input], "${{ inputs." + input + " }}");
+  ' "$workflow"
+done
 
 # Doc version contract: docs must reference the Feature's actual released version (from the manifest), never a stale or floating tag.
 feature_version="$(node -p "require('./.devcontainer/src/dx/devcontainer-feature.json').version")"

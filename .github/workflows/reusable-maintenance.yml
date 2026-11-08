@@ -14,18 +14,8 @@ on:
 
 jobs:
   check-links:
-    name: Check docs links
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Check links
-        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
-        with:
-          args: >
-            --no-progress
-            --exclude-loopback
-            ${{ inputs.link-check-excludes }}
-            ${{ inputs.link-check-paths }}
-          fail: true
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108
+    with:
+      link-check-paths: ${{ inputs.link-check-paths }}
+      link-check-excludes: ${{ inputs.link-check-excludes }}
+    secrets: inherit
