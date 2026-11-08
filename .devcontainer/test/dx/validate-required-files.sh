@@ -12,7 +12,6 @@ required_files=(
   ".devcontainer/test/dx/test-resource-discovery.sh"
   ".devcontainer/test/dx/test-runtime-hierarchy.sh"
   ".devcontainer/src/dx/devcontainer-feature.json"
-  "renovate.json"
   ".devcontainer/devcontainer.json"
   ".github/workflows/validate.yml"
   ".github/workflows/maintenance.yml"

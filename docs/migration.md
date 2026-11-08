@@ -8,12 +8,12 @@ and verification.
 ## Prerequisites
 
 Work on a dedicated branch with a known Git status. Identify the project's
-required tools, Task contracts, CI jobs, Renovate rules and AI resources before
+required tools, Task contracts, CI jobs and AI resources before
 changing configuration. Preserve business settings, forwarded ports, mounts,
 environment requirements and project-specific agents and skills.
 
 Choose a published DX Feature version and existing Git references for the
-reusable workflows, Remote Taskfile and Renovate preset. The OCI version and
+reusable workflows and Remote Taskfile. The OCI version and
 Git refs are independent: publishing the Feature does not create a Git tag or
 GitHub release. Replace `<released-tag>` in the consumer examples with an
 existing Git tag; do not infer it from the Feature's version.
@@ -48,11 +48,10 @@ project's requirements.
    `TASK_REMOTE_TRUSTED_HOSTS=github.com`; additional project dependencies
    must be available on the runner. It executes the selected task on that
    runner, not inside the consumer Dev Container.
-4. **GitHub workflows and Renovate**: integrate calls to the reusable validate
+4. **GitHub workflows**: integrate calls to the reusable validate
    and maintenance workflows without dropping application jobs, triggers or
-   required permissions. Extend the DX Renovate preset alongside the project's
-   rules. Use existing Git refs in all three configurations; consult
-   [consumer.md](consumer.md) for the workflow, include and preset syntax.
+   required permissions. Use existing Git refs for workflows and the Remote
+   Taskfile; consult [consumer.md](consumer.md) for the workflow and include syntax.
 5. **AI resources**: add the client-neutral root `AGENTS.md` bootstrap from
    [consumer.md](consumer.md), preserving project-specific rules. It resolves
    `DX_HOME` and loads the runtime guide and shared rules explicitly. Keep

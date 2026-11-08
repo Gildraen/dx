@@ -72,9 +72,6 @@ assert.deepEqual(feature.mounts, [{
 }]);
 assert.equal(feature.containerEnv.GIT_SSH_COMMAND, undefined);
 assert.equal(feature.postStartCommand, undefined);
-const renovate = require('./renovate.json');
-assert.deepEqual(renovate.extends, ['github>Gildraen/renovate-config']);
-assert.equal(renovate.customManagers, undefined);
 EOF
 
 # CI contract: DX calls the separately versioned workflows from the published repository.
@@ -89,7 +86,6 @@ rg -qF "ghcr.io/gildraen/dx/dx:${feature_version}" docs/consumer.md
 rg -qF 'Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v1.0.0' docs/consumer.md
 rg -qF 'Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@v1.0.0' docs/consumer.md
 ! rg -qP 'base\.yml\?ref=v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
-! rg -qP 'github>Gildraen/dx#v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 
 # dx-mcp image contract (actual behavior, not just static text).
 bash .devcontainer/test/dx/test-dx-mcp-image.sh

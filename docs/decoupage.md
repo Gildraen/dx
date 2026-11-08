@@ -9,12 +9,10 @@ du runtime ; le [guide consommateur](consumer.md) decrit le bootstrap local.
 
 Les sources de la Feature, du runtime et du Taskfile distant sont dans
 `Gildraen/dx`. Les workflows CI portables sont dans
-[Gildraen/ci-workflows](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/README.md). Le preset
-Renovate partage est dans
-[Gildraen/renovate-config](https://github.com/Gildraen/renovate-config) ; DX
-le consomme via `github>Gildraen/renovate-config`. La Feature distribue un
-snapshot du runtime par OCI sous `ghcr.io/gildraen/dx/dx`. Les workflows,
-le Taskfile distant et le preset Renovate sont consommes par references Git.
+[Gildraen/ci-workflows](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/README.md).
+La Feature distribue un snapshot du runtime par OCI sous
+`ghcr.io/gildraen/dx/dx`. Les workflows et le Taskfile distant sont consommes
+par references Git.
 La version OCI et les refs Git sont choisies independamment.
 
 Le [workflow de publication](../.github/workflows/release.yml) est declenche
@@ -37,7 +35,6 @@ Ce workflow ne cree pas de references Git pour les autres composants.
 | [CI devcontainer-test](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/.github/workflows/reusable-devcontainer-test.yml) | Appeler `task test` dans le conteneur consommateur | Référence Git indépendante ; aucune image poussée |
 | [CI maintenance](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/.github/workflows/reusable-maintenance.yml) | Appeler le contrôle de liens du dépôt consommateur | Référence Git indépendante ; interface décrite dans le dépôt source |
 | [CI Feature-test](../.github/workflows/reusable-feature-test.yml) | Tester le produit Feature DX | [Script DX](../.devcontainer/test/dx/feature-test.sh) dans le checkout appelant |
-| [Preset Renovate partage](https://github.com/Gildraen/renovate-config/blob/main/default.json) | Configurer les mises a jour partagees depuis `Gildraen/renovate-config` | `github>Gildraen/renovate-config`, regles recommandees, digests Actions, manager devcontainer et regex Task pour `Gildraen/dx` |
 | [Configuration DX](../.devcontainer/devcontainer.json), [regles racine](../AGENTS.md), [Taskfile DX](../Taskfile.yml) | Developper et verifier DX | Feature locale, runtime source, Docker-outside-of-Docker, configuration MCP et contrats du depot |
 
 ## Couplages du runtime
@@ -71,9 +68,8 @@ Les dépôts consommateurs sélectionnent leur référence Git; les jobs opèren
 sur leur checkout et leurs contrats Task. DX conserve les appels et le workflow
 Feature-test, spécifique à ce dépôt.
 
-Le Taskfile distant selectionne une URL Git, un chemin et une ref. La regex
-Renovate reconnait les includes `Gildraen/dx.git//...?ref=vX.Y.Z` et consulte
-les tags Git via `github-tags`. Cette interface est distincte des tags OCI.
+Le Taskfile distant selectionne une URL Git, un chemin et une ref.
+Cette interface est distincte des tags OCI.
 
 ## Controles presents
 
