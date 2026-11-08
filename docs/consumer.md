@@ -6,7 +6,9 @@ working on `dx` itself using a real project as a testbed, see
 
 ## 1. Dev Container Feature
 
-Compose the official Features you need with the shared `dx` Feature:
+For this branch's integration test, use its local Feature checkout (see
+[dogfood.md](dogfood.md) to create `.devcontainer/.dx`). The component refs
+below are published Git commits:
 
 ```jsonc
 // .devcontainer/devcontainer.json
@@ -14,10 +16,18 @@ Compose the official Features you need with the shared `dx` Feature:
   "name": "my-project",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
-    "ghcr.io/gildraen/dx/dx:1.2.0": {}
+    "./.dx/.devcontainer/src/dx": {
+      "agentsRef": "b65f27291bff63349fb221c38241350514275de9",
+      "toolsRef": "935bd0b6e03438a218cc7afec9fd5786b79a8c14"
+    }
   }
 }
 ```
+
+For an installed release, replace the local Feature key with
+`ghcr.io/gildraen/dx/dx:<released-version>` and select a published version
+whose manifest exposes `agentsRef` and `toolsRef`. A previously published
+Feature does not acquire this branch's options automatically.
 
 Only add other Features or packages for project-specific requirements
 (Docker-outside-of-Docker, project language runtimes, service CLIs, …). The DX
@@ -28,12 +38,17 @@ declares Node.js LTS, GitHub CLI, Go Task 3.53.1, Git, `jq`, ripgrep and
 `libatomic1`. Check the manifest of the selected release before relying on a
 tool; requirements not included there remain project-specific.
 
-The Feature copies the versioned DX runtime to `/opt/dx` and sets
-`DX_HOME=/opt/dx` through `containerEnv`: the `AGENTS.md` entry point, shared
-instructions, roles, skills, the portable `dx-mcp` launcher, and Task helpers.
-This environment variable alone does not configure an AI client. The installed
-runtime is a snapshot; to consume shared resource changes, update the Feature
-release and rebuild the container. For live sources, use [dogfood.md](dogfood.md).
+The Feature acquires `Gildraen/dx-agents` at `agentsRef` into `/opt/dx/components/agents`
+and `Gildraen/dx-tools` at `toolsRef` into `/opt/dx/components/tools`. These options are
+independent and default to the commits shown above. It sets `DX_AGENTS_HOME`
+and `DX_TOOLS_HOME` to those locations, retaining `DX_HOME=/opt/dx` and
+compatibility symlinks for `AGENTS.md`, `instructions/`, `agents/`, `skills/`,
+`bin/` and `taskfiles/`. Shared roles are under
+`/opt/dx/components/agents/agents/`; `/opt/dx/agents` links to that directory,
+not to the component root.
+No copy of either component is versioned in the Feature source. The installed
+checkouts are snapshots; change the relevant ref and rebuild to update one
+without changing the Feature version. For live sources, use [dogfood.md](dogfood.md).
 The launcher runs GitHub's pinned official MCP image through Docker and does
 not manage a GitHub token. A project that enables MCP must provide Docker
 access and configure its MCP client separately. The launcher has no
@@ -101,29 +116,41 @@ on:
   pull_request:
 jobs:
   validate:
-    uses: Gildraen/dx/.github/workflows/reusable-validate.yml@<released-tag>
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108
 ```
 
 The reusable workflow runs `task validate` (configurable via the `task-name`
 input) in your repository. Your `Taskfile.yml` defines what `validate` (and
-`test`, `lint`, …) means for your stack — `dx` only enforces the contract,
-not the implementation. It sets `TASK_REMOTE_TRUSTED_HOSTS=github.com` for
-the remote DX Taskfile, avoiding an interactive trust prompt in CI without
-enabling global `--yes` behavior.
+`test`, `lint`, …) means for your stack — the workflow only enforces the contract,
+not the implementation. It preserves `TASK_REMOTE_TRUSTED_HOSTS=github.com`
+for includes hosted on `github.com`, avoiding an interactive trust prompt for
+those URLs without enabling global `--yes` behavior. The Remote Taskfile
+example below uses that host.
 
 Same pattern for maintenance / link-checking:
-`Gildraen/dx/.github/workflows/reusable-maintenance.yml@<released-tag>`.
+`Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`.
+For tests in the consumer container, use
+`Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`;
+the container must provide `task test`. DX's `reusable-feature-test.yml` is
+local to the Feature repository, not part of these portable workflows.
+
+DX also exposes three compatibility wrappers at
+`Gildraen/dx/.github/workflows/reusable-{validate,devcontainer-test,maintenance}.yml`.
+They delegate to the external workflows at the SHA above and forward their
+inputs without copying implementations. Callers using floating DX references
+can retain these paths.
 
 ## 3. Remote Taskfile (optional shared helpers)
 
 ```yaml
 # Taskfile.yml
 includes:
-  dx: https://github.com/Gildraen/dx.git//.devcontainer/src/dx/runtime/taskfiles/base.yml?ref=<released-tag>
+  dx: https://github.com/Gildraen/dx-tools/raw/935bd0b6e03438a218cc7afec9fd5786b79a8c14/taskfiles/base.yml
 ```
 
 Gives you `task dx:doctor` and `task dx:mcp:github`.
-`task dx:doctor` checks the runtime offline, not authentication.
+`task dx:doctor` checks `DX_TOOLS_HOME` offline, with a `DX_HOME` compatibility
+fallback, not authentication.
 Your own `validate`/`test`/`lint` tasks stay in your Taskfile.
 
 Remote Taskfiles require Go Task 3.53.1 or newer. The DX Feature and reusable
@@ -133,9 +160,20 @@ The reusable validation workflow installs a compatible Task release on its GitHu
 Actions runner before executing `task validate`. Its availability in CI does
 not mean that the local devcontainer already provides it.
 
-The consumer ref must exist in Git before the consumer is used; publishing the
-Feature does not create Git tags. CI downloads that exact ref and trusts only `github.com` through
-`TASK_REMOTE_TRUSTED_HOSTS=github.com`.
+The commit must exist in the tools repository. Task 3.53.1 does not support a
+commit SHA with the Git include syntax `.git//taskfiles/base.yml?ref=<SHA>`;
+use the raw HTTP URL above instead.
+
+For a manual invocation, either accept Task's host trust prompt or restrict
+non-interactive trust to `github.com`:
+
+```sh
+TASK_REMOTE_TRUSTED_HOSTS=github.com task dx:doctor
+```
+
+The reusable validation workflow already sets this environment value, so the
+same include works locally and in CI. Do not use global `--yes`. Trust must
+be set in the environment invoking Task.
 
 ## 4. Agents and skills
 
@@ -146,52 +184,70 @@ Use this bootstrap in the consumer:
 ````markdown
 # Project agent instructions
 
-Before any work, resolve DX_HOME from the process environment; use /opt/dx
-only when DX_HOME is absent. Read its AGENTS.md and follow the shared guidance.
+Before any work, resolve DX_AGENTS_HOME from the process environment; use
+/opt/dx/components/agents only when DX_AGENTS_HOME is absent. Read its AGENTS.md and
+follow the shared guidance.
 
 ## Project-specific rules
 ...
 ````
 
-Common loading, selection, and delegation rules belong to the runtime's
+Common loading, selection, and delegation rules belong to dx-agents'
 `AGENTS.md`, not to each project bootstrap, role, or skill.
 
-The runtime's `AGENTS.md` explicitly loads `instructions/base.md` and
+The shared `AGENTS.md` explicitly loads `instructions/base.md` and
 `instructions/git.md` before work; no editor-specific activation metadata is
-needed. It then asks the agent to list `$DX_HOME/agents/*.agent.md` and
-`$DX_HOME/skills/*/SKILL.md`, inspect `name` and `description` metadata, and
+needed. It then asks the agent to list `$DX_AGENTS_HOME/agents/*.agent.md` and
+`$DX_AGENTS_HOME/skills/*/SKILL.md`, inspect `name` and `description` metadata, and
 read the selected role or workflow before applying it. Directory contents are
 the authoritative list, not a catalog in this guide.
 
-Shared sources live under `.devcontainer/src/dx/runtime/` in `dx` and are
-installed by the Feature. Project-specific roles and skills remain additive
+Shared sources live at the root of `Gildraen/dx-agents` and can be used
+independently of the Feature, Docker, MCP and the tools component. For a local
+checkout pinned to the same commit, from the consumer root:
+
+```sh
+git clone https://github.com/Gildraen/dx-agents.git .devcontainer/components/agents
+git -C .devcontainer/components/agents checkout --detach b65f27291bff63349fb221c38241350514275de9
+export DX_AGENTS_HOME="$PWD/.devcontainer/components/agents"
+```
+
+This example creates a separate Git checkout, not a copy owned by the
+consumer. Keep it out of the consumer's tracked files, or declare it as a
+pinned submodule. Tools can likewise be checked out independently:
+
+```sh
+git clone https://github.com/Gildraen/dx-tools.git .devcontainer/components/tools
+git -C .devcontainer/components/tools checkout --detach 935bd0b6e03438a218cc7afec9fd5786b79a8c14
+export DX_TOOLS_HOME="$PWD/.devcontainer/components/tools"
+export PATH="$DX_TOOLS_HOME/bin:$PATH"
+```
+
+Project-specific roles and skills remain additive
 under `.agents/agents/` and `.agents/skills/` in the consumer. These are
 the sole canonical project locations. Do not keep duplicate project resources
-in client-specific directories. The Feature installs the runtime guide under
-`DX_HOME`; after the consumer's root `AGENTS.md` loads that guide, it explicitly
+in client-specific directories. After the consumer's root `AGENTS.md` loads
+`$DX_AGENTS_HOME/AGENTS.md`, that guide explicitly
 inspects both project paths and selects relevant resources by metadata. This
-is the client-neutral loading procedure. The Feature also adds `.agents/agents/`
-to the VS Code agent picker through `chat.agentFilesLocations`. This setting
-requires `.agent.md` files in custom directories such as `.agents/agents/`;
-plain `.md` files are recognized only in VS Code's native agent folders.
-Copilot CLI and the Copilot app do not inherit this VS Code setting.
-The Feature does not install shared DX resources
-into Copilot user directories. The DX checkout adds its
-source runtime path to `chat.agentFilesLocations` through
-`.devcontainer/devcontainer.json`; consumer repositories do not inherit that
-checkout-specific path. Consumers use the explicit runtime bootstrap for
-shared resources. Native discovery of shared roles requires client support and
-client-specific configuration; `DX_HOME` alone does not configure it.
+is the client-neutral loading procedure. Native discovery uses local paths:
+`$DX_AGENTS_HOME/agents` for roles and `$DX_AGENTS_HOME/skills` for skills.
+For the separate checkout above these are `.devcontainer/components/agents/agents`
+and `.devcontainer/components/agents/skills`; for installed resources they are
+`/opt/dx/components/agents/agents` and `/opt/dx/components/agents/skills`. VS Code custom agent
+directories require `.agent.md` files. Configure discovery using the client's
+supported mechanisms; a GitHub URL is not a native agent or skill directory.
+The Feature does not install resources into Copilot user directories.
 
-Outside VS Code, neither `DX_HOME` nor these files guarantees a native role
+Neither `DX_AGENTS_HOME` nor these files guarantees a native role
 picker, automatic instruction or skill loading, or subagent support. If the
 client does not read the root `AGENTS.md`, attach it explicitly through the
 context or initial request before starting work. For example:
 
 ```text
-Read the project's AGENTS.md provided in context. Resolve DX_HOME from the
-environment (default /opt/dx when absent), read its AGENTS.md and referenced
-rules, then list `$DX_HOME/agents/*.agent.md`, `$DX_HOME/skills/*/SKILL.md`,
+Read the project's AGENTS.md provided in context. Resolve DX_AGENTS_HOME from
+the environment (default /opt/dx/components/agents when absent), read its AGENTS.md and
+referenced rules, then list `$DX_AGENTS_HOME/agents/*.agent.md`,
+`$DX_AGENTS_HOME/skills/*/SKILL.md`,
 `.agents/agents/*.agent.md`, and `.agents/skills/*/SKILL.md`. Select relevant
 resources from their metadata and load them before proceeding.
 ```
@@ -201,6 +257,9 @@ permissions and isolation for enforcement. The runtime requests delegation,
 but a managed subagent tool and its permissions depend on the client. When
 subagents are unavailable, apply the selected role in the current agent and
 report that fallback.
+Cross-repository use consists of loading these local shared files explicitly
+and giving the selected rules, role, scope and permissions to the client's
+subagent tool; it does not invoke an agent directly from a remote URL.
 
 ## 5. GitHub MCP client
 
@@ -214,7 +273,14 @@ or client, not to the shared agent bootstrap.
 GitHub MCP OAuth authentication is separate from Git/SSH and `gh`
 authentication. The launcher does not forward `GH_TOKEN` or `GITHUB_TOKEN` to
 the server. Configure application-level client access separately from runtime
-resource loading through `DX_HOME`.
+resource loading through `DX_AGENTS_HOME`.
+
+## 6. Renovate preset
+
+DX uses the shared preset reference
+`github>Gildraen/renovate-config#86fd839c709a05f0ba9cea46c5e2aae2a3b35dae`
+in `extends`, pinned to a published commit independently of the Feature and
+component refs.
 
 ## Runtime state that never belongs in `dx` or in your repository
 
