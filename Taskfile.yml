@@ -14,12 +14,13 @@ tasks:
       - bash .devcontainer/test/dx/validate-json.sh
       - bash .devcontainer/test/dx/validate-workflows.sh
       - task --taskfile Taskfile.yml --list >/dev/null
-      - task --taskfile .devcontainer/src/dx/runtime/taskfiles/base.yml --list >/dev/null
+      - task --taskfile .devcontainer/components/tools/taskfiles/base.yml --list >/dev/null
 
   test:
     desc: Run the dx test suite inside the dx devcontainer (non-Feature tests).
     cmds:
       - bash .devcontainer/test/dx/test-repo-contract.sh
+      - bash .devcontainer/test/dx/test-resource-discovery.sh
       - bash .devcontainer/test/dx/test-dx-mcp-resolution.sh
       - bash .devcontainer/test/dx/test-install.sh
 
