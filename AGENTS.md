@@ -1,8 +1,9 @@
 # dx - Guide agent de developpement
 
 Ce repository est le developpement du produit `dx` lui-meme : la Feature Dev
-Container, les workflows reusable, le preset Renovate et le runtime DX
-partages avec les autres repos Gildraen.
+Container, les workflows reusable et le runtime DX partages avec les autres
+repos Gildraen. Il consomme le preset Renovate partage de
+[Gildraen/renovate-config](https://github.com/Gildraen/renovate-config).
 
 Ce fichier concerne le developpement de `dx`. Il ne doit pas etre copie dans
 les repositories consommateurs — voir [docs/consumer.md](docs/consumer.md)
@@ -10,8 +11,8 @@ pour le bootstrap consommateur.
 
 ## Role
 
-- Source canonique de la DX partagee (Feature, reusable workflows, preset
-  Renovate, runtime) — voir [docs/architecture.md](docs/architecture.md).
+- Source canonique de la DX partagee (Feature, reusable workflows, runtime)
+  — voir [docs/architecture.md](docs/architecture.md).
 - Les instructions partagees et skills generiques destinees aux consommateurs
   vivent dans `.devcontainer/src/dx/runtime/instructions/`,
   `.devcontainer/src/dx/runtime/agents/` et

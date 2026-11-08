@@ -12,6 +12,8 @@ Definir le cadre Git minimal pour toute modification d'un repository Gildraen.
 ## Regles
 
 - Travailler sur une branche dediee, jamais directement sur `main`.
+- Pour chaque nouvelle demande impliquant des modifications, creer une worktree Git dediee sur cette branche avant toute edition. Effectuer les editions et validations dans cette worktree, pas dans le checkout principal.
+- Reutiliser la worktree de la tache pour ses suites et transmettre son chemin aux sous-agents. Ne pas modifier ni supprimer les worktrees des autres taches. Une analyse en lecture seule ne necessite pas de nouvelle worktree.
 - Ne jamais commit ni push sans approbation explicite de l'utilisateur.
 - Utiliser des messages de commit conventionnels (`<type>: <description courte>`) qui decrivent la decision.
 - Ouvrir une PR vers `main` et s'assurer que la validation CI passe avant merge.

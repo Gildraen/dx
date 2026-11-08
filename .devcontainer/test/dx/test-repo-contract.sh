@@ -72,6 +72,9 @@ assert.deepEqual(feature.mounts, [{
 }]);
 assert.equal(feature.containerEnv.GIT_SSH_COMMAND, undefined);
 assert.equal(feature.postStartCommand, undefined);
+const renovate = require('./renovate.json');
+assert.deepEqual(renovate.extends, ['github>Gildraen/renovate-config']);
+assert.equal(renovate.customManagers, undefined);
 EOF
 
 # CI contract: must trust the Remote Taskfile host, and Renovate must be free to bump Go Task upward.
