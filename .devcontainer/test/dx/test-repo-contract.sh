@@ -92,9 +92,15 @@ for workflow in validate devcontainer-test maintenance; do
   ' "$workflow"
 done
 
-# Doc version contract: docs must reference the Feature's actual released version (from the manifest), never a stale or floating tag.
-feature_version="$(node -p "require('./.devcontainer/src/dx/devcontainer-feature.json').version")"
-rg -qF "ghcr.io/gildraen/dx/dx:${feature_version}" docs/consumer.md
+node <<'EOF'
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const feature = require('./.devcontainer/src/dx/devcontainer-feature.json');
+const consumer = fs.readFileSync('docs/consumer.md', 'utf8');
+assert.match(feature.version, /^\d+\.\d+\.\d+$/);
+assert.ok(consumer.includes('ghcr.io/gildraen/dx/dx:<released-version>'));
+for (const component of ['agents', 'tools']) assert.ok(consumer.includes(feature.options[`${component}Ref`].default));
+EOF
 ! rg -qP 'reusable-(validate|maintenance)\.yml@v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 ! rg -qP 'base\.yml\?ref=v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 
