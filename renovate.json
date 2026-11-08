@@ -1,17 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "dx's own Renovate config: dogfoods the shared preset it publishes.",
+  "description": "DX Renovate configuration: consumes the shared Gildraen preset.",
   "extends": [
-    "local>Gildraen/dx"
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Bump the GitHub MCP server image pinned in dx-mcp (own file, not part of the shared consumer preset).",
-      "fileMatch": ["(^|/)dx-mcp$"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\nGITHUB_MCP_IMAGE=\"[^:\"]+:(?<currentValue>v\\d+\\.\\d+\\.\\d+)\""
-      ]
-    }
+    "github>Gildraen/renovate-config"
   ]
 }

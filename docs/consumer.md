@@ -143,14 +143,15 @@ Feature does not create Git tags. CI downloads that exact ref and trusts only `g
 // renovate.json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>Gildraen/dx#<released-tag>"]
+  "extends": ["github>Gildraen/renovate-config"]
 }
 ```
 
 Renovate then proposes updates to: the `dx` Feature version in
 `devcontainer.json` (native devcontainer manager), reusable workflow refs
-(native github-actions manager), and the Remote Taskfile ref (a single
-regex-based custom manager defined in [default.json](../default.json)).
+(native github-actions manager), and the Remote Taskfile ref (a regex-based
+custom manager defined in the shared
+[preset](https://github.com/Gildraen/renovate-config/blob/main/default.json)).
 
 ## 5. Agents and skills
 

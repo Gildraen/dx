@@ -1,13 +1,16 @@
 # Composants DX
 
 Reference pour les mainteneurs et les consommateurs : responsabilites,
-dependances et interfaces des composants presents dans ce depot.
+dependances et interfaces des composants fournis ou integres par ce depot.
 L'[architecture](architecture.md) decrit leur integration et le chargement
 du runtime ; le [guide consommateur](consumer.md) decrit le bootstrap local.
 
 ## Sources et distribution
 
-Les sources des composants sont dans `Gildraen/dx`. La Feature distribue un
+Les sources de la Feature, du runtime, des workflows et du Taskfile distant
+sont dans `Gildraen/dx`. Le preset Renovate partage est dans
+[Gildraen/renovate-config](https://github.com/Gildraen/renovate-config) ; DX
+le consomme via `github>Gildraen/renovate-config`. La Feature distribue un
 snapshot du runtime par OCI sous `ghcr.io/gildraen/dx/dx`. Les workflows,
 le Taskfile distant et le preset Renovate sont consommes par references Git.
 La version OCI et les refs Git sont choisies independamment.
@@ -32,7 +35,7 @@ Ce workflow ne cree pas de references Git pour les autres composants.
 | [CI devcontainer-test](../.github/workflows/reusable-devcontainer-test.yml) | Executer `task test` dans le conteneur consommateur | `.devcontainer/devcontainer.json` et Task disponible dans ce conteneur ; aucune image poussee |
 | [CI maintenance](../.github/workflows/reusable-maintenance.yml) | Verifier les liens avec lychee | Inputs `link-check-paths` et `link-check-excludes` sur le checkout appelant |
 | [CI Feature-test](../.github/workflows/reusable-feature-test.yml) | Tester le produit Feature DX | [Script DX](../.devcontainer/test/dx/feature-test.sh) dans le checkout appelant |
-| [Preset Renovate](../default.json) | Configurer les mises a jour partagees | Preset GitHub, regles recommandees, digests Actions, manager devcontainer et regex Task pour `Gildraen/dx` |
+| [Preset Renovate partage](https://github.com/Gildraen/renovate-config/blob/main/default.json) | Configurer les mises a jour partagees depuis `Gildraen/renovate-config` | `github>Gildraen/renovate-config`, regles recommandees, digests Actions, manager devcontainer et regex Task pour `Gildraen/dx` |
 | [Configuration DX](../.devcontainer/devcontainer.json), [regles racine](../AGENTS.md), [Taskfile DX](../Taskfile.yml) | Developper et verifier DX | Feature locale, runtime source, Docker-outside-of-Docker, configuration MCP et contrats du depot |
 
 ## Couplages du runtime

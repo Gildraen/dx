@@ -24,7 +24,9 @@ The Feature provides Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and
 - The `dx` CI keeps structural validation on the runner, runs `task test` in
   this repository's devcontainer, and runs the Feature tests directly on the
   runner's Docker daemon.
-- A **Renovate preset** (`default.json`) consumer repositories extend.
+- Integration with the shared **Renovate preset** from
+  [Gildraen/renovate-config](https://github.com/Gildraen/renovate-config), which
+  DX and consumer repositories extend.
 - A **Remote Taskfile** of small, generic helpers
   (`.devcontainer/src/dx/runtime/taskfiles/base.yml`).
 
@@ -75,12 +77,13 @@ jobs:
 
 ```jsonc
 // renovate.json
-{ "extends": ["github>Gildraen/dx#<released-tag>"] }
+{ "extends": ["github>Gildraen/renovate-config"] }
 ```
 
-The Feature uses published OCI versions; workflows, Taskfiles and the preset
-use existing Git references managed separately. Feature publication does not
-create Git tags for these components.
+The Feature uses published OCI versions; workflows and Taskfiles use existing
+Git references managed separately. The Renovate preset is consumed from
+`Gildraen/renovate-config`. Feature publication does not create Git tags for
+these components.
 Renovate proposes upgrades afterwards. Full walkthrough:
 [docs/consumer.md](docs/consumer.md).
 
@@ -127,7 +130,6 @@ existing repository.
 .github/workflows/       validate/maintenance (dx itself) + reusable-* (consumers) + release
 .devcontainer/test/dx/   Feature test + small runtime/taskfile/JSON/workflow checks
 docs/                    architecture, consumer guide, dogfood guide, migration guide
-default.json             Renovate preset consumed by other repositories
 renovate.json            dx's own Renovate config
 Taskfile.yml             tasks to work on dx itself (validate, test, feature:test)
 ```

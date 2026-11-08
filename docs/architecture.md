@@ -1,8 +1,10 @@
 # Architecture
 
 `Gildraen/dx` provides the shared development environment, AI runtime, MCP
-launcher, Task helpers, reusable CI workflows, and Renovate preset used by
-consumer repositories. This document describes their integration; the
+launcher, Task helpers, and reusable CI workflows used by consumer repositories.
+It integrates the shared Renovate preset from
+[Gildraen/renovate-config](https://github.com/Gildraen/renovate-config).
+This document describes their integration; the
 [component reference](decoupage.md) lists responsibilities and interfaces.
 
 ## The four categories
@@ -30,7 +32,7 @@ These references are selected independently of the Feature version.
 | MCP launcher | [dx-mcp](../.devcontainer/src/dx/runtime/bin/dx-mcp) | `/opt/dx/bin/dx-mcp`, wrapper in `/usr/local/bin/dx-mcp` |
 | Task helpers | [base.yml](../.devcontainer/src/dx/runtime/taskfiles/base.yml) | Remote Taskfile; also installed in `/opt/dx/taskfiles/` |
 | CI | `.github/workflows/reusable-*.yml` | GitHub reusable workflow calls |
-| Renovate | [default.json](../default.json) | Consumer preset reference |
+| Renovate | [Gildraen/renovate-config/default.json](https://github.com/Gildraen/renovate-config/blob/main/default.json) | `github>Gildraen/renovate-config` |
 | Project roles and skills | Consumer `.agents/agents/*.agent.md`, `.agents/skills/*/SKILL.md` | Explicit loading; VS Code picker for project agents |
 
 ## Runtime: `DX_HOME`
