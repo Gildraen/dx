@@ -2,8 +2,6 @@
 
 `Gildraen/dx` provides the shared development environment, AI runtime, MCP
 launcher, Task helpers, and reusable CI workflows used by consumer repositories.
-It integrates the shared Renovate preset from
-[Gildraen/renovate-config](https://github.com/Gildraen/renovate-config).
 This document describes their integration; the
 [component reference](decoupage.md) lists responsibilities and interfaces.
 
@@ -11,13 +9,13 @@ This document describes their integration; the
 
 | Category | Delivery | Resources |
 | --- | --- | --- |
-| Referenceable | Consumer selects a Git source and ref | Reusable workflows, Remote Taskfile, Renovate preset |
+| Referenceable | Consumer selects a Git source and ref | Reusable workflows, Remote Taskfile |
 | Installable | Dev Container Feature installs a runtime snapshot | Tools, AI resources, MCP launcher, Task helpers |
-| Local bootstrap | Files in the consumer repository configure integration | `devcontainer.json`, `AGENTS.md`, `Taskfile.yml`, workflow callers, `renovate.json` |
+| Local bootstrap | Files in the consumer repository configure integration | `devcontainer.json`, `AGENTS.md`, `Taskfile.yml`, workflow callers |
 | Project-specific | Owned by the consumer | Business logic, services, ports, project commands, agents and skills |
 
-The Feature is distributed through OCI at `ghcr.io/gildraen/dx/dx`. Workflows,
-the Remote Taskfile, and the Renovate preset are resolved through Git references.
+The Feature is distributed through OCI at `ghcr.io/gildraen/dx/dx`. Workflows
+and the Remote Taskfile are resolved through Git references.
 These references are selected independently of the Feature version.
 
 ## What lives where
@@ -32,7 +30,6 @@ These references are selected independently of the Feature version.
 | MCP launcher | [dx-mcp](../.devcontainer/src/dx/runtime/bin/dx-mcp) | `/opt/dx/bin/dx-mcp`, wrapper in `/usr/local/bin/dx-mcp` |
 | Task helpers | [base.yml](../.devcontainer/src/dx/runtime/taskfiles/base.yml) | Remote Taskfile; also installed in `/opt/dx/taskfiles/` |
 | CI | `.github/workflows/reusable-*.yml` | GitHub reusable workflow calls |
-| Renovate | [Gildraen/renovate-config/default.json](https://github.com/Gildraen/renovate-config/blob/main/default.json) | `github>Gildraen/renovate-config` |
 | Project roles and skills | Consumer `.agents/agents/*.agent.md`, `.agents/skills/*/SKILL.md` | Explicit loading; VS Code picker for project agents |
 
 ## Runtime: `DX_HOME`
@@ -133,7 +130,7 @@ the consumer's `.devcontainer` directory at `/var/lib/dx/devcontainer`.
 GitHub CLI authentication state therefore persists in the local `.gh`
 directory and must not be committed.
 
-## Task, CI, and Renovate
+## Task and CI
 
 The shared Taskfile exposes `doctor` and `mcp:github`. The consumer defines its
 own `validate`, `test`, and `lint` contracts. `doctor` reports the resolved
@@ -145,13 +142,9 @@ the caller's container; maintenance checks selected Markdown paths with lychee.
 Feature-test invokes the DX-specific Feature test script. Their source paths
 and inputs are listed in [decoupage.md](decoupage.md).
 
-The Renovate preset enables recommended rules, GitHub Action digest pinning,
-the devcontainer manager, and a regex manager for DX Remote Taskfile references
-using `vX.Y.Z` Git tags. Those tags are Git references, not OCI Feature tags.
-
 The [release workflow](../.github/workflows/release.yml) publishes only the
 Feature through the Dev Containers action. Its manifest version identifies the
 OCI artifact; the CLI manages version aliases in the repository namespace.
 Repository tagging is disabled. Publishing the Feature does not create Git refs for workflows,
-Taskfiles, or presets. DX does not run a file-propagation or drift-checking
+or Taskfiles. DX does not run a file-propagation or drift-checking
 engine for consumers.

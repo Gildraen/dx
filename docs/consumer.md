@@ -36,8 +36,8 @@ runtime is a snapshot; to consume shared resource changes, update the Feature
 release and rebuild the container. For live sources, use [dogfood.md](dogfood.md).
 The launcher runs GitHub's pinned official MCP image through Docker and does
 not manage a GitHub token. A project that enables MCP must provide Docker
-access and configure its MCP client separately. Renovate proposes updates to
-the image pin; the launcher has no per-consumer image setting. DX does not
+access and configure its MCP client separately. The launcher has no
+per-consumer image setting. DX does not
 authenticate the GitHub CLI automatically.
 
 ### Git credentials and GitHub CLI state
@@ -137,23 +137,7 @@ The consumer ref must exist in Git before the consumer is used; publishing the
 Feature does not create Git tags. CI downloads that exact ref and trusts only `github.com` through
 `TASK_REMOTE_TRUSTED_HOSTS=github.com`.
 
-## 4. Renovate preset
-
-```jsonc
-// renovate.json
-{
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>Gildraen/renovate-config"]
-}
-```
-
-Renovate then proposes updates to: the `dx` Feature version in
-`devcontainer.json` (native devcontainer manager), reusable workflow refs
-(native github-actions manager), and the Remote Taskfile ref (a regex-based
-custom manager defined in the shared
-[preset](https://github.com/Gildraen/renovate-config/blob/main/default.json)).
-
-## 5. Agents and skills
+## 4. Agents and skills
 
 Keep the root `AGENTS.md` small: a bootstrap plus genuinely project-specific
 rules. The runtime does not require a particular AI client, model, or editor.
@@ -218,7 +202,7 @@ but a managed subagent tool and its permissions depend on the client. When
 subagents are unavailable, apply the selected role in the current agent and
 report that fallback.
 
-## 6. GitHub MCP client
+## 5. GitHub MCP client
 
 Configure your MCP client's stdio server command as `dx-mcp` with the argument
 `github`. The launcher requires a Docker CLI and accessible daemon, starts the

@@ -72,12 +72,9 @@ assert.deepEqual(feature.mounts, [{
 }]);
 assert.equal(feature.containerEnv.GIT_SSH_COMMAND, undefined);
 assert.equal(feature.postStartCommand, undefined);
-const renovate = require('./renovate.json');
-assert.deepEqual(renovate.extends, ['github>Gildraen/renovate-config']);
-assert.equal(renovate.customManagers, undefined);
 EOF
 
-# CI contract: must trust the Remote Taskfile host, and Renovate must be free to bump Go Task upward.
+# CI contract: must trust the Remote Taskfile host.
 grep -q 'TASK_REMOTE_TRUSTED_HOSTS: github.com' .github/workflows/reusable-validate.yml
 
 # CI contract: Go Task must stay at or above the minimum version Remote Taskfiles require (currently 3.53.1).
@@ -89,7 +86,6 @@ feature_version="$(node -p "require('./.devcontainer/src/dx/devcontainer-feature
 rg -qF "ghcr.io/gildraen/dx/dx:${feature_version}" docs/consumer.md
 ! rg -qP 'reusable-(validate|maintenance)\.yml@v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 ! rg -qP 'base\.yml\?ref=v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
-! rg -qP 'github>Gildraen/dx#v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 
 # dx-mcp image contract (actual behavior, not just static text).
 bash .devcontainer/test/dx/test-dx-mcp-image.sh
