@@ -8,6 +8,9 @@
     "customizations": {
         "vscode": {
             "settings": {
+                "chat.defaultToCopilotHarness": false,
+                "chat.editor.preferCopilotHarness": false,
+                "chat.editor.localAgent.enabled": true,
                 "chat.agentFilesLocations": {
                     ".agents/agents": true
                 }

@@ -3,21 +3,19 @@
 Shared, consumable developer experience (DX) for Gildraen
 repositories.
 
-**Principle: reference / consume / install the DX, don't copy it.** A
-consumer repository keeps only what is genuinely project-specific, plus the
-small bootstrap files that a few tools still require locally.
+A consumer repository references shared workflows, Task helpers and the Renovate
+preset, and installs the runtime through the Dev Container Feature. Its bootstrap
+files and project-specific configuration remain in that repository.
 
 ## Shared tool baseline
 
-`dx` also defines a small common tool baseline for Gildraen projects, admitted
-only when a shared DX contract requires a tool or it is expected to be used
-durably across most projects — see
-[docs/architecture.md](docs/architecture.md#shared-tool-baseline) for the
-current list, the admission policy, and why each tool qualifies.
+The Feature provides Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and
+`libatomic1` through its declared Feature dependencies. See
+[docs/architecture.md](docs/architecture.md#shared-tool-baseline).
 
 ## What it provides
 
-- A Dev Container **Feature** (`ghcr.io/gildraen/dx/dx:<released-tag>`) that
+- A Dev Container **Feature** (`ghcr.io/gildraen/dx/dx:<released-version>`) that
   installs the shared runtime (agent instructions, skills, the portable `dx-mcp` launcher,
   and Task helpers) to
   `DX_HOME` (`/opt/dx`).
@@ -50,8 +48,6 @@ If a client does not read that file, provide it in the context or initial
 request.
 Subagents are used only when the client supports them; otherwise the current
 agent applies the selected role and reports that fallback.
-`.agents/mcp.json` is reserved for a future MCP configuration standard and is
-not part of the current contract.
 
 The `dx-mcp github` command is a small portable entry point for GitHub's
 official MCP server. It runs a pinned version of the official
@@ -66,7 +62,7 @@ See [docs/architecture.md](docs/architecture.md) for the full model.
 ```jsonc
 // .devcontainer/devcontainer.json
 "features": {
-  "ghcr.io/gildraen/dx/dx:<released-tag>": {}
+  "ghcr.io/gildraen/dx/dx:<released-version>": {}
 }
 ```
 
@@ -82,17 +78,29 @@ jobs:
 { "extends": ["github>Gildraen/dx#<released-tag>"] }
 ```
 
-Use the same existing release tag for the Feature, workflows, and preset;
+The Feature uses published OCI versions; workflows, Taskfiles and the preset
+use existing Git references managed separately. Feature publication does not
+create Git tags for these components.
 Renovate proposes upgrades afterwards. Full walkthrough:
 [docs/consumer.md](docs/consumer.md).
 
 ## Releases
 
-Before publishing, the Feature manifest and Git release tag must identify the
-same release; CI rejects a mismatch. The release workflow publishes the
-Feature to GHCR and creates a GitHub release. This repository's own devcontainer
+Every push to `main` runs the release workflow. Choose a new stable version in
+the Feature manifest and update the consumer example before merging. The
+workflow only checks out the pushed commit and calls the native Dev Containers
+action to publish the Feature to GHCR. The action and its CLI are pinned.
+Version selection is manual; the CLI skips an already published Feature
+version. Publication produces OCI artifacts without Git tags or GitHub releases.
+Validation and container tests stay in PR CI. A new push cancels the previous
+run; a rerun does not guarantee repair of partially updated OCI aliases.
+
+See [the component reference](docs/decoupage.md) for the boundaries
+between Feature, IA resources, MCP, Task, workflows and Renovate.
+
+This repository's own devcontainer
 consumes the Feature from local source (`./src/dx`), not a published release;
-external consumers pin a release tag and let Renovate propose upgrades.
+external consumers select a published Feature version and Renovate proposes upgrades.
 The installed runtime is a snapshot: shared resource changes require updating
 the Feature release and rebuilding the consumer container to take effect.
 
@@ -109,9 +117,8 @@ settings. In this repository, `remoteEnv.DX_HOME` points at
 
 ## Migrating existing repositories
 
-Consumer repositories are migrated one at a time from the old copy/propagation
-model. See [docs/migration.md](docs/migration.md) for the current list and
-procedure.
+See [docs/migration.md](docs/migration.md) for the integration procedure for an
+existing repository.
 
 ## Repository layout
 
