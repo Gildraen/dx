@@ -51,6 +51,6 @@ check "launcher detects dogfood runtime" bash -c "grep -Fq '\$PWD/.devcontainer/
 check "explicit DX_HOME has priority" bash -c "grep -Fq 'if [ -z \"\${DX_HOME:-}\" ]' /usr/local/bin/dx-mcp"
 check "dx-mcp reports usage without a server argument" bash -c "dx-mcp 2>&1 | grep -q 'usage: dx-mcp github'"
 check "official GitHub MCP image is pinned" bash -c "grep -q 'ghcr.io/github/github-mcp-server:v1.10.1' /opt/dx/bin/dx-mcp"
-bash "$(dirname "${BASH_SOURCE[0]}")/test-dx-mcp-resolution.sh"
+DX_MCP_WRAPPER=/usr/local/bin/dx-mcp DX_MCP_LEGACY=true bash "$(dirname "${BASH_SOURCE[0]}")/test-dx-mcp-resolution.sh"
 
 reportResults
