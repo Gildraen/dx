@@ -4,13 +4,14 @@
 set -euo pipefail
 
 required_files=(
+  ".gitmodules"
   ".devcontainer/src/dx/install.sh"
-  ".devcontainer/src/dx/runtime/bin/dx-mcp"
-  ".devcontainer/src/dx/runtime/AGENTS.md"
-  ".devcontainer/src/dx/runtime/instructions/base.md"
-  ".devcontainer/src/dx/runtime/instructions/git.md"
+  ".devcontainer/src/dx/dx-mcp"
+  ".devcontainer/components/agents/AGENTS.md"
+  ".devcontainer/components/tools/taskfiles/base.yml"
   ".devcontainer/test/dx/test-resource-discovery.sh"
-  ".devcontainer/test/dx/test-runtime-hierarchy.sh"
+  ".devcontainer/test/dx/test-install.sh"
+  ".devcontainer/test/dx/test-dx-mcp-resolution.sh"
   ".devcontainer/src/dx/devcontainer-feature.json"
   ".devcontainer/devcontainer.json"
   ".github/workflows/validate.yml"
@@ -24,7 +25,6 @@ required_files=(
 
 required_tracked_executable=(
   ".devcontainer/src/dx/install.sh"
-  ".devcontainer/src/dx/runtime/bin/dx-mcp"
 )
 
 status=0

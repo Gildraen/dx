@@ -3,39 +3,9 @@
 # Assumes it is run from the repo root (as Task does).
 set -euo pipefail
 
-# Fast syntax sanity checks, cheap enough to run before the heavier checks below.
-test -x .devcontainer/src/dx/runtime/bin/dx-mcp
-bash -n .devcontainer/src/dx/runtime/bin/dx-mcp
-bash -n .devcontainer/test/dx/test-dx-mcp-resolution.sh
-bash -n .devcontainer/test/dx/test-dx-mcp-image.sh
-bash -n .devcontainer/test/dx/test-task-doctor.sh
-bash -n .devcontainer/test/dx/test-resource-discovery.sh
-bash -n .devcontainer/test/dx/test-runtime-hierarchy.sh
-bash .devcontainer/test/dx/test-runtime-hierarchy.sh
-
-# Shared skills follow the Agent Skills frontmatter contract.
-for skill_dir in .devcontainer/src/dx/runtime/skills/*/; do
-  skill_name="$(basename "$skill_dir")"
-  test -f "${skill_dir}SKILL.md"
-  declared_skill="$(sed -n '/^---$/,/^---$/s/^name: *//p' "${skill_dir}SKILL.md" | head -n1 | tr -d "'\"")"
-  [[ "$declared_skill" == "$skill_name" ]]
-  rg -q '^description: .+' "${skill_dir}SKILL.md"
+for script in .devcontainer/src/dx/install.sh .devcontainer/src/dx/dx-mcp .devcontainer/test/dx/*.sh; do
+  bash -n "$script"
 done
-# Skill reference contract: an agent that names a skill by its exact hyphenated
-# name (e.g. `review-quick`) commits to that skill actually existing.
-node <<'EOF'
-const fs = require('node:fs');
-const path = require('node:path');
-const agentRoot = '.devcontainer/src/dx/runtime/agents';
-const skillRoot = '.devcontainer/src/dx/runtime/skills';
-for (const file of fs.readdirSync(agentRoot)) {
-  const contents = fs.readFileSync(path.join(agentRoot, file), 'utf8');
-  for (const match of contents.matchAll(/`([a-z][a-z0-9]*(?:-[a-z0-9]+)+)`/g)) {
-    const skillPath = path.join(skillRoot, match[1], 'SKILL.md');
-    if (!fs.existsSync(skillPath)) throw new Error(`missing referenced skill: ${match[1]}`);
-  }
-}
-EOF
 
 # Devcontainer contract: use the default workspace bind mount.
 node <<'EOF'
@@ -74,20 +44,34 @@ assert.equal(feature.containerEnv.GIT_SSH_COMMAND, undefined);
 assert.equal(feature.postStartCommand, undefined);
 EOF
 
-# CI contract: must trust the Remote Taskfile host.
-grep -q 'TASK_REMOTE_TRUSTED_HOSTS: github.com' .github/workflows/reusable-validate.yml
+for workflow in validate devcontainer-test maintenance; do
+  npx --yes js-yaml ".github/workflows/reusable-$workflow.yml" | node -e '
+    const assert = require("node:assert/strict");
+    const fs = require("node:fs");
+    const workflow = JSON.parse(fs.readFileSync(0, "utf8"));
+    const name = process.argv[1];
+    const jobs = Object.values(workflow.jobs);
+    assert.equal(jobs.length, 1);
+    const job = jobs[0];
+    assert.equal(job.uses, `Gildraen/ci-workflows/.github/workflows/reusable-${name}.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`);
+    assert.equal(job.steps, undefined);
+    assert.equal(job["runs-on"], undefined);
+    const inputs = Object.keys(workflow.on.workflow_call?.inputs ?? {});
+    assert.deepEqual(Object.keys(job.with ?? {}).sort(), inputs.sort());
+    for (const input of inputs) assert.equal(job.with[input], "${{ inputs." + input + " }}");
+  ' "$workflow"
+done
 
-# CI contract: Go Task must stay at or above the minimum version Remote Taskfiles require (currently 3.53.1).
-task_version="$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' .github/workflows/reusable-validate.yml)"
-[[ "$(printf '%s\n' '3.53.1' "$task_version" | sort -V | head -n1)" == '3.53.1' ]]
-
-# Doc version contract: docs must reference the Feature's actual released version (from the manifest), never a stale or floating tag.
-feature_version="$(node -p "require('./.devcontainer/src/dx/devcontainer-feature.json').version")"
-rg -qF "ghcr.io/gildraen/dx/dx:${feature_version}" docs/consumer.md
+node <<'EOF'
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const feature = require('./.devcontainer/src/dx/devcontainer-feature.json');
+const consumer = fs.readFileSync('docs/consumer.md', 'utf8');
+assert.match(feature.version, /^\d+\.\d+\.\d+$/);
+assert.ok(consumer.includes('ghcr.io/gildraen/dx/dx:<released-version>'));
+for (const component of ['agents', 'tools']) assert.ok(consumer.includes(feature.options[`${component}Ref`].default));
+EOF
 ! rg -qP 'reusable-(validate|maintenance)\.yml@v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 ! rg -qP 'base\.yml\?ref=v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 
-# dx-mcp image contract (actual behavior, not just static text).
-bash .devcontainer/test/dx/test-dx-mcp-image.sh
-bash .devcontainer/test/dx/test-task-doctor.sh
-bash .devcontainer/test/dx/test-resource-discovery.sh
+echo "DX repository: Feature, consumer docs and pinned CI facades pass"

@@ -1,27 +1,40 @@
 #!/usr/bin/env bash
 # Dev Container Feature install script.
-# Copies the versioned DX runtime into DX_HOME.
 set -euo pipefail
 
 DX_HOME="/opt/dx"
 FEATURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+agents_ref="${AGENTSREF:-b65f27291bff63349fb221c38241350514275de9}"
+tools_ref="${TOOLSREF:-935bd0b6e03438a218cc7afec9fd5786b79a8c14}"
+download_root="$(mktemp -d)"
+trap 'rm -rf "$download_root"' EXIT
 
-mkdir -p "$DX_HOME"
-cp -R "$FEATURE_DIR/runtime/." "$DX_HOME/"
-find "$DX_HOME/bin" -maxdepth 1 -type f -exec chmod +x {} \;
+install_component() {
+	local name="$1" ref="$2"
+	local checkout="$download_root/$name"
+	git init -q "$checkout"
+	git -C "$checkout" remote add origin "https://github.com/Gildraen/dx-$name.git"
+	GIT_TERMINAL_PROMPT=0 git -C "$checkout" fetch --depth=1 origin "$ref"
+	git -C "$checkout" checkout -q --detach FETCH_HEAD
+	rm -rf "$checkout/.git"
+	rm -rf "$DX_HOME/components/$name"
+	mkdir -p "$DX_HOME/components/$name"
+	cp -R "$checkout/." "$DX_HOME/components/$name/"
+}
 
-install -m 0755 /dev/stdin /usr/local/bin/dx-mcp <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
+install_component agents "$agents_ref"
+install_component tools "$tools_ref"
+test -f "$DX_HOME/components/agents/AGENTS.md"
+test -x "$DX_HOME/components/tools/bin/dx-mcp"
 
-if [ -z "${DX_HOME:-}" ] && [ -d "$PWD/.devcontainer/.dx/.devcontainer/src/dx/runtime" ]; then
-	DX_HOME="$PWD/.devcontainer/.dx/.devcontainer/src/dx/runtime"
-else
-	DX_HOME="${DX_HOME:-/opt/dx}"
-fi
+for resource in AGENTS.md instructions agents skills; do
+	rm -rf "$DX_HOME/$resource"
+	ln -s "components/agents/$resource" "$DX_HOME/$resource"
+done
+for resource in bin taskfiles; do
+	rm -rf "$DX_HOME/$resource"
+	ln -s "components/tools/$resource" "$DX_HOME/$resource"
+done
+install -m 0755 "$FEATURE_DIR/dx-mcp" /usr/local/bin/dx-mcp
 
-export DX_HOME
-exec "$DX_HOME/bin/dx-mcp" "$@"
-EOF
-
-echo "dx runtime installed at $DX_HOME"
+echo "dx components installed at $DX_HOME/components"
