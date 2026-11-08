@@ -109,6 +109,9 @@ The reusable workflow calls a Task contract in your repository; the
 [workflow source](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/README.md) for its inputs and
 execution details.
 
+For `task test` in the consumer Dev Container:
+`Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@v1.0.0`.
+
 Same pattern for maintenance / link-checking:
 `Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@v1.0.0`.
 

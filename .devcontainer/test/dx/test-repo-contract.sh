@@ -84,6 +84,7 @@ feature_version="$(node -p "require('./.devcontainer/src/dx/devcontainer-feature
 rg -qF "ghcr.io/gildraen/dx/dx:${feature_version}" docs/consumer.md
 ! rg -q 'Gildraen/dx/\.github/workflows/reusable-(validate|devcontainer-test|maintenance)\.yml' README.md docs
 rg -qF 'Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v1.0.0' docs/consumer.md
+rg -qF 'Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@v1.0.0' docs/consumer.md
 rg -qF 'Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@v1.0.0' docs/consumer.md
 ! rg -qP 'base\.yml\?ref=v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 

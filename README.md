@@ -19,7 +19,7 @@ The Feature provides Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and
   installs the shared runtime (agent instructions, skills, the portable `dx-mcp` launcher,
   and Task helpers) to
   `DX_HOME` (`/opt/dx`).
-- **Reusable GitHub Actions workflows** for the `validate`/`maintenance`
+- **Reusable GitHub Actions workflows** for the `validate`/`test`/`maintenance`
   contracts from [Gildraen/ci-workflows](https://github.com/Gildraen/ci-workflows).
 - The `dx` CI keeps structural validation on the runner, runs `task test` in
   this repository's devcontainer, and runs the Feature tests directly on the
