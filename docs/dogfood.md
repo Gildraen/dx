@@ -174,7 +174,7 @@ push to `main` publishes only the Feature to GHCR through the same native
 action with `publish-features: "true"`. No Git tag
 or GitHub release is created. Choosing and increasing the manifest version
 remains manual; the CLI skips an already published Feature version.
-Git references for workflows, Remote Taskfiles and the Renovate preset must
+Git references for workflows and Remote Taskfiles must
 exist separately; publishing the Feature does not create or update them.
 A new push cancels the previous run. There is no automatic rollback;
 inspect any partial GHCR publication before rerunning a failed release.

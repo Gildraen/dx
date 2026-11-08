@@ -3,8 +3,8 @@
 Shared, consumable developer experience (DX) for Gildraen
 repositories.
 
-A consumer repository references shared workflows, Task helpers and the Renovate
-preset, and installs the runtime through the Dev Container Feature. Its bootstrap
+A consumer repository references shared workflows and Task helpers,
+and installs the runtime through the Dev Container Feature. Its bootstrap
 files and project-specific configuration remain in that repository.
 
 ## Shared tool baseline
@@ -24,9 +24,6 @@ The Feature provides Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and
 - The `dx` CI keeps structural validation on the runner, runs `task test` in
   this repository's devcontainer, and runs the Feature tests directly on the
   runner's Docker daemon.
-- Integration with the shared **Renovate preset** from
-  [Gildraen/renovate-config](https://github.com/Gildraen/renovate-config), which
-  DX and consumer repositories extend.
 - A **Remote Taskfile** of small, generic helpers
   (`.devcontainer/src/dx/runtime/taskfiles/base.yml`).
 
@@ -55,7 +52,7 @@ The `dx-mcp github` command is a small portable entry point for GitHub's
 official MCP server. It runs a pinned version of the official
 `ghcr.io/github/github-mcp-server` image via Docker. Authentication is
 handled by the official server; DX stores no token. The image tag is pinned in
-the script and kept current by Renovate, not configurable per consumer.
+the script, not configurable per consumer.
 
 See [docs/architecture.md](docs/architecture.md) for the full model.
 
@@ -75,16 +72,9 @@ jobs:
     uses: Gildraen/dx/.github/workflows/reusable-validate.yml@<released-tag>
 ```
 
-```jsonc
-// renovate.json
-{ "extends": ["github>Gildraen/renovate-config"] }
-```
-
 The Feature uses published OCI versions; workflows and Taskfiles use existing
-Git references managed separately. The Renovate preset is consumed from
-`Gildraen/renovate-config`. Feature publication does not create Git tags for
-these components.
-Renovate proposes upgrades afterwards. Full walkthrough:
+Git references managed separately. Feature publication does not create Git tags for
+these components. Full walkthrough:
 [docs/consumer.md](docs/consumer.md).
 
 ## Releases
@@ -99,11 +89,11 @@ Validation and container tests stay in PR CI. A new push cancels the previous
 run; a rerun does not guarantee repair of partially updated OCI aliases.
 
 See [the component reference](docs/decoupage.md) for the boundaries
-between Feature, IA resources, MCP, Task, workflows and Renovate.
+between Feature, IA resources, MCP, Task and workflows.
 
 This repository's own devcontainer
 consumes the Feature from local source (`./src/dx`), not a published release;
-external consumers select a published Feature version and Renovate proposes upgrades.
+external consumers select a published Feature version.
 The installed runtime is a snapshot: shared resource changes require updating
 the Feature release and rebuilding the consumer container to take effect.
 
@@ -130,7 +120,6 @@ existing repository.
 .github/workflows/       validate/maintenance (dx itself) + reusable-* (consumers) + release
 .devcontainer/test/dx/   Feature test + small runtime/taskfile/JSON/workflow checks
 docs/                    architecture, consumer guide, dogfood guide, migration guide
-renovate.json            dx's own Renovate config
 Taskfile.yml             tasks to work on dx itself (validate, test, feature:test)
 ```
 
