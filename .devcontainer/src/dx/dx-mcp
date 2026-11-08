@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -n "${DX_TOOLS_HOME:-}" ]]; then
+  tools_home="$DX_TOOLS_HOME"
+elif [[ -n "${DX_HOME:-}" ]]; then
+  tools_home="$DX_HOME"
+elif [[ -d "$PWD/.devcontainer/.dx/.devcontainer/src/dx/runtime" ]]; then
+  tools_home="$PWD/.devcontainer/.dx/.devcontainer/src/dx/runtime"
+else
+  tools_home="/opt/dx/components/tools"
+fi
+
+export DX_TOOLS_HOME="$tools_home"
+exec "$tools_home/bin/dx-mcp" "$@"
