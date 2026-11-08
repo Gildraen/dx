@@ -9,6 +9,7 @@ tasks:
   validate:
     desc: Repository sanity check (required files, JSON/workflow syntax, taskfile integrity).
     cmds:
+      - git submodule update --init --recursive
       - bash .devcontainer/test/dx/validate-required-files.sh
       - bash .devcontainer/test/dx/validate-json.sh
       - bash .devcontainer/test/dx/validate-workflows.sh
