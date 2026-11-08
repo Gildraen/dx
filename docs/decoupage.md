@@ -7,8 +7,10 @@ du runtime ; le [guide consommateur](consumer.md) decrit le bootstrap local.
 
 ## Sources et distribution
 
-Les sources de la Feature, du runtime, des workflows et du Taskfile distant
-sont dans `Gildraen/dx`. Le preset Renovate partage est dans
+Les sources de la Feature, du runtime et du Taskfile distant sont dans
+`Gildraen/dx`. Les workflows CI portables sont dans
+[Gildraen/ci-workflows](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/README.md). Le preset
+Renovate partage est dans
 [Gildraen/renovate-config](https://github.com/Gildraen/renovate-config) ; DX
 le consomme via `github>Gildraen/renovate-config`. La Feature distribue un
 snapshot du runtime par OCI sous `ghcr.io/gildraen/dx/dx`. Les workflows,
@@ -31,9 +33,9 @@ Ce workflow ne cree pas de references Git pour les autres composants.
 | [Entree IA](../.devcontainer/src/dx/runtime/AGENTS.md) | Charger les regles et orienter vers roles et skills | Bootstrap racine, `DX_HOME`, liens relatifs et metadonnees ; roles `*.agent.md`, skills `*/SKILL.md` |
 | [Lanceur MCP](../.devcontainer/src/dx/runtime/bin/dx-mcp) | Lancer le serveur GitHub officiel | `dx-mcp github [server options...]`, Docker et daemon accessibles, image `v1.10.1`, callback `127.0.0.1:8085` |
 | [Taskfile partage](../.devcontainer/src/dx/runtime/taskfiles/base.yml) | Exposer `doctor` et `mcp:github` | Include distant avec ref Git ; `DX_HOME` et executable `dx-mcp` pour les helpers |
-| [CI validate](../.github/workflows/reusable-validate.yml) | Executer le contrat Task du consommateur | Task `3.53.1` sur le runner ; input `task-name`, defaut `validate` ; confiance Task distante pour `github.com` |
-| [CI devcontainer-test](../.github/workflows/reusable-devcontainer-test.yml) | Executer `task test` dans le conteneur consommateur | `.devcontainer/devcontainer.json` et Task disponible dans ce conteneur ; aucune image poussee |
-| [CI maintenance](../.github/workflows/reusable-maintenance.yml) | Verifier les liens avec lychee | Inputs `link-check-paths` et `link-check-excludes` sur le checkout appelant |
+| [CI validate](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/.github/workflows/reusable-validate.yml) | Appeler le contrat Task `validate` ou un contrat choisi du consommateur | Référence Git indépendante ; interface décrite dans le dépôt source |
+| [CI devcontainer-test](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/.github/workflows/reusable-devcontainer-test.yml) | Appeler `task test` dans le conteneur consommateur | Référence Git indépendante ; aucune image poussée |
+| [CI maintenance](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/.github/workflows/reusable-maintenance.yml) | Appeler le contrôle de liens du dépôt consommateur | Référence Git indépendante ; interface décrite dans le dépôt source |
 | [CI Feature-test](../.github/workflows/reusable-feature-test.yml) | Tester le produit Feature DX | [Script DX](../.devcontainer/test/dx/feature-test.sh) dans le checkout appelant |
 | [Preset Renovate partage](https://github.com/Gildraen/renovate-config/blob/main/default.json) | Configurer les mises a jour partagees depuis `Gildraen/renovate-config` | `github>Gildraen/renovate-config`, regles recommandees, digests Actions, manager devcontainer et regex Task pour `Gildraen/dx` |
 | [Configuration DX](../.devcontainer/devcontainer.json), [regles racine](../AGENTS.md), [Taskfile DX](../Taskfile.yml) | Developper et verifier DX | Feature locale, runtime source, Docker-outside-of-Docker, configuration MCP et contrats du depot |
@@ -64,11 +66,10 @@ Docker est un prerequis du lanceur, pas un outil fourni par cette Feature.
 
 ## Contrats Git et CI
 
-Les workflows reutilisables se trouvent directement dans `.github/workflows`.
-Leurs appels selectionnent une ref Git et leurs jobs operent sur le checkout
-du consommateur. Les contrats `validate`, `test` et `lint` appartiennent au
-Taskfile de ce consommateur, pas aux deux helpers du Taskfile partage.
-Feature-test utilise une procedure specifique a DX.
+Les sources des workflows CI portables sont dans `Gildraen/ci-workflows`.
+Les dépôts consommateurs sélectionnent leur référence Git; les jobs opèrent
+sur leur checkout et leurs contrats Task. DX conserve les appels et le workflow
+Feature-test, spécifique à ce dépôt.
 
 Le Taskfile distant selectionne une URL Git, un chemin et une ref. La regex
 Renovate reconnait les includes `Gildraen/dx.git//...?ref=vX.Y.Z` et consulte

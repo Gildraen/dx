@@ -77,17 +77,17 @@ assert.deepEqual(renovate.extends, ['github>Gildraen/renovate-config']);
 assert.equal(renovate.customManagers, undefined);
 EOF
 
-# CI contract: must trust the Remote Taskfile host, and Renovate must be free to bump Go Task upward.
-grep -q 'TASK_REMOTE_TRUSTED_HOSTS: github.com' .github/workflows/reusable-validate.yml
-
-# CI contract: Go Task must stay at or above the minimum version Remote Taskfiles require (currently 3.53.1).
-task_version="$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' .github/workflows/reusable-validate.yml)"
-[[ "$(printf '%s\n' '3.53.1' "$task_version" | sort -V | head -n1)" == '3.53.1' ]]
+# CI contract: DX calls the separately versioned workflows from the published repository.
+grep -qF 'Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v1.0.0' .github/workflows/validate.yml
+grep -qF 'Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@v1.0.0' .github/workflows/validate.yml
+grep -qF 'Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@v1.0.0' .github/workflows/maintenance.yml
 
 # Doc version contract: docs must reference the Feature's actual released version (from the manifest), never a stale or floating tag.
 feature_version="$(node -p "require('./.devcontainer/src/dx/devcontainer-feature.json').version")"
 rg -qF "ghcr.io/gildraen/dx/dx:${feature_version}" docs/consumer.md
-! rg -qP 'reusable-(validate|maintenance)\.yml@v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
+! rg -q 'Gildraen/dx/\.github/workflows/reusable-(validate|devcontainer-test|maintenance)\.yml' README.md docs
+rg -qF 'Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v1.0.0' docs/consumer.md
+rg -qF 'Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@v1.0.0' docs/consumer.md
 ! rg -qP 'base\.yml\?ref=v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 ! rg -qP 'github>Gildraen/dx#v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
 

@@ -16,10 +16,7 @@ required_files=(
   ".devcontainer/devcontainer.json"
   ".github/workflows/validate.yml"
   ".github/workflows/maintenance.yml"
-  ".github/workflows/reusable-validate.yml"
-  ".github/workflows/reusable-devcontainer-test.yml"
   ".github/workflows/reusable-feature-test.yml"
-  ".github/workflows/reusable-maintenance.yml"
   ".github/workflows/release.yml"
 )
 

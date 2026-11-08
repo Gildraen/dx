@@ -20,7 +20,7 @@ The Feature provides Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and
   and Task helpers) to
   `DX_HOME` (`/opt/dx`).
 - **Reusable GitHub Actions workflows** for the `validate`/`maintenance`
-  contracts (`.github/workflows/reusable-*.yml`).
+  contracts from [Gildraen/ci-workflows](https://github.com/Gildraen/ci-workflows).
 - The `dx` CI keeps structural validation on the runner, runs `task test` in
   this repository's devcontainer, and runs the Feature tests directly on the
   runner's Docker daemon.
@@ -72,7 +72,7 @@ See [docs/architecture.md](docs/architecture.md) for the full model.
 # .github/workflows/validate.yml
 jobs:
   validate:
-    uses: Gildraen/dx/.github/workflows/reusable-validate.yml@<released-tag>
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v1.0.0
 ```
 
 ```jsonc
@@ -80,8 +80,8 @@ jobs:
 { "extends": ["github>Gildraen/renovate-config"] }
 ```
 
-The Feature uses published OCI versions; workflows and Taskfiles use existing
-Git references managed separately. The Renovate preset is consumed from
+The Feature uses published OCI versions; CI workflows, Taskfiles and the
+Renovate preset use Git references from their respective repositories. The Renovate preset is consumed from
 `Gildraen/renovate-config`. Feature publication does not create Git tags for
 these components.
 Renovate proposes upgrades afterwards. Full walkthrough:

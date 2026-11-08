@@ -101,18 +101,16 @@ on:
   pull_request:
 jobs:
   validate:
-    uses: Gildraen/dx/.github/workflows/reusable-validate.yml@<released-tag>
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v1.0.0
 ```
 
-The reusable workflow runs `task validate` (configurable via the `task-name`
-input) in your repository. Your `Taskfile.yml` defines what `validate` (and
-`test`, `lint`, …) means for your stack — `dx` only enforces the contract,
-not the implementation. It sets `TASK_REMOTE_TRUSTED_HOSTS=github.com` for
-the remote DX Taskfile, avoiding an interactive trust prompt in CI without
-enabling global `--yes` behavior.
+The reusable workflow calls a Task contract in your repository; the
+`Taskfile.yml` owns its implementation. See the
+[workflow source](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/README.md) for its inputs and
+execution details.
 
 Same pattern for maintenance / link-checking:
-`Gildraen/dx/.github/workflows/reusable-maintenance.yml@<released-tag>`.
+`Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@v1.0.0`.
 
 ## 3. Remote Taskfile (optional shared helpers)
 
@@ -126,12 +124,11 @@ Gives you `task dx:doctor` and `task dx:mcp:github`.
 `task dx:doctor` checks the runtime offline, not authentication.
 Your own `validate`/`test`/`lint` tasks stay in your Taskfile.
 
-Remote Taskfiles require Go Task 3.53.1 or newer. The DX Feature and reusable
-validation workflow both provide a compatible release.
+Remote Taskfiles require Go Task 3.53.1 or newer. The DX Feature provides this
+version locally; the reusable validation workflow installs it on its runner.
 
-The reusable validation workflow installs a compatible Task release on its GitHub
-Actions runner before executing `task validate`. Its availability in CI does
-not mean that the local devcontainer already provides it.
+The reusable workflow's runner installation does not mean that a local
+devcontainer provides Task.
 
 The consumer ref must exist in Git before the consumer is used; publishing the
 Feature does not create Git tags. CI downloads that exact ref and trusts only `github.com` through

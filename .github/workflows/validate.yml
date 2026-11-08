@@ -9,11 +9,11 @@ concurrency:
 
 jobs:
   validate:
-    uses: ./.github/workflows/reusable-validate.yml
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v1.0.0
     secrets: inherit
 
   test:
-    uses: ./.github/workflows/reusable-devcontainer-test.yml
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@v1.0.0
     secrets: inherit
 
   feature-test:

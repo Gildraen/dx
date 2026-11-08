@@ -1,8 +1,9 @@
 # Architecture
 
 `Gildraen/dx` provides the shared development environment, AI runtime, MCP
-launcher, Task helpers, and reusable CI workflows used by consumer repositories.
-It integrates the shared Renovate preset from
+launcher and Task helpers used by consumer repositories. It integrates reusable
+CI workflows from [Gildraen/ci-workflows](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/README.md)
+and the shared Renovate preset from
 [Gildraen/renovate-config](https://github.com/Gildraen/renovate-config).
 This document describes their integration; the
 [component reference](decoupage.md) lists responsibilities and interfaces.
@@ -31,7 +32,7 @@ These references are selected independently of the Feature version.
 | Shared skills (`*/SKILL.md`) | `.devcontainer/src/dx/runtime/skills/` | `/opt/dx/skills/` |
 | MCP launcher | [dx-mcp](../.devcontainer/src/dx/runtime/bin/dx-mcp) | `/opt/dx/bin/dx-mcp`, wrapper in `/usr/local/bin/dx-mcp` |
 | Task helpers | [base.yml](../.devcontainer/src/dx/runtime/taskfiles/base.yml) | Remote Taskfile; also installed in `/opt/dx/taskfiles/` |
-| CI | `.github/workflows/reusable-*.yml` | GitHub reusable workflow calls |
+| CI | [Gildraen/ci-workflows](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/README.md) | GitHub reusable workflow calls |
 | Renovate | [Gildraen/renovate-config/default.json](https://github.com/Gildraen/renovate-config/blob/main/default.json) | `github>Gildraen/renovate-config` |
 | Project roles and skills | Consumer `.agents/agents/*.agent.md`, `.agents/skills/*/SKILL.md` | Explicit loading; VS Code picker for project agents |
 
@@ -139,11 +140,10 @@ The shared Taskfile exposes `doctor` and `mcp:github`. The consumer defines its
 own `validate`, `test`, and `lint` contracts. `doctor` reports the resolved
 runtime directory and fails when it is absent; `mcp:github` invokes the launcher.
 
-Reusable workflows operate on the caller's checkout: validate installs Task
-`3.53.1` and runs the selected task; devcontainer-test runs `task test` inside
-the caller's container; maintenance checks selected Markdown paths with lychee.
-Feature-test invokes the DX-specific Feature test script. Their source paths
-and inputs are listed in [decoupage.md](decoupage.md).
+Reusable workflow calls select a Git reference independently of the DX Feature.
+DX retains its caller workflows and Feature-test procedure; the portable
+workflow interfaces are documented in
+[Gildraen/ci-workflows](https://github.com/Gildraen/ci-workflows/blob/v1.0.0/README.md).
 
 The Renovate preset enables recommended rules, GitHub Action digest pinning,
 the devcontainer manager, and a regex manager for DX Remote Taskfile references
