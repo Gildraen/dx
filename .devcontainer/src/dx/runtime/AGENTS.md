@@ -70,24 +70,30 @@ loading procedure.
 
 ## Delegate focused work
 
-Actively look for bounded subtasks that benefit from specialized expertise or
-a narrower context, and delegate them to subagents even when coordination
-takes longer. Prefer focused assignments over having one agent accumulate
-unrelated context. Compose several focused skills when a task spans distinct
-procedures; the selected role decides their order and integration. Run dependent
-steps sequentially and independent bounded assignments in parallel.
+At the start of every substantial task, identify whether discovery,
+implementation, testing, or review has a bounded strand that can run
+independently. If so, delegate at least one strand when subagents are available;
+make this decision before broad exploration and do not wait for an explicit
+request. Delegation is useful for focused expertise and broader coverage, not
+only for reducing elapsed time. Keep tiny or tightly coupled tasks local rather
+than manufacturing assignments.
+
+Prefer a configured reusable agent when its role fits the work. If a useful,
+bounded assignment has no fitting reusable role, create a temporary specialist
+instead of skipping delegation; tell the user its specialty and scope. Prefer
+focused assignments over having one agent accumulate unrelated context.
+Compose several focused skills when a task spans distinct procedures; the
+selected role decides their order and integration. Run dependent steps
+sequentially and independent bounded assignments in parallel.
 
 If the client cannot run a subagent, apply the selected role and skills in the
-current agent and report this fallback. If no existing agent fits a subtask,
-create a temporary
-specialized agent for it; tell the user when creating one is necessary and
-briefly state its intended specialty and scope. Give each subagent its scope,
-applicable rules, selected role and skills, expected result, and whether edits
-are allowed. Give concurrent writers disjoint file ownership. A subagent must
-not delegate its unchanged assignment again; further delegation needs a smaller
-distinct scope and must be supported by the client. The main agent remains
-responsible for integration, validation, and reporting. Delegation does not
-authorize a commit or push.
+current agent and report this fallback. Give each subagent its scope, applicable
+rules, selected role and skills, expected result, and whether edits are allowed.
+Give concurrent writers disjoint file ownership. A subagent must not delegate
+its unchanged assignment again; further delegation needs a smaller scope and
+must be supported by the client. The main agent remains responsible for
+integration, validation, and reporting. Delegation does not authorize a commit
+or push.
 
 ## Runtime location
 

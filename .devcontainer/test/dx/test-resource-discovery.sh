@@ -59,6 +59,9 @@ assert.ok(bootstrap.includes('`.agents/skills/*/SKILL.md`'));
 assert.ok(bootstrap.includes('the sole canonical locations for'));
 assert.ok(bootstrap.includes('Do not keep duplicate copies in client-specific'));
 assert.ok(bootstrap.includes('If the client cannot run a subagent'));
+assert.match(bootstrap, /At the start of every substantial task/i);
+assert.match(bootstrap, /configured reusable agent/i);
+assert.match(bootstrap, /temporary specialist/i);
 assert.ok(bootstrap.includes('## Instruction hierarchy'));
 const inheritedReminder = /\bAGENTS\.md\b|\b(?:base|git)(?:\.instructions)?\.md\b|instructions?\s+partag[eé]es?/i;
 for (const directory of ['agents', 'skills']) {
