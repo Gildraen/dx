@@ -1,7 +1,8 @@
 # Architecture
 
-`Gildraen/dx` provides the shared development environment, AI runtime, MCP
-launcher, Task helpers, and reusable CI workflows used by consumer repositories.
+`Gildraen/dx` provides the shared Dev Container Feature and integrates IA
+resources from `Gildraen/dx-agents`, tools from `Gildraen/dx-tools`, and portable
+CI workflows from `Gildraen/ci-workflows`.
 This document describes their integration; the
 [component reference](decoupage.md) lists responsibilities and interfaces.
 
@@ -10,45 +11,59 @@ This document describes their integration; the
 | Category | Delivery | Resources |
 | --- | --- | --- |
 | Referenceable | Consumer selects a Git source and ref | Reusable workflows, Remote Taskfile |
-| Installable | Dev Container Feature installs a runtime snapshot | Tools, AI resources, MCP launcher, Task helpers |
+| Installable | Dev Container Feature acquires independent Git snapshots | Tools, IA resources, MCP launcher, Task helpers |
 | Local bootstrap | Files in the consumer repository configure integration | `devcontainer.json`, `AGENTS.md`, `Taskfile.yml`, workflow callers |
 | Project-specific | Owned by the consumer | Business logic, services, ports, project commands, agents and skills |
 
 The Feature is distributed through OCI at `ghcr.io/gildraen/dx/dx`. Workflows
 and the Remote Taskfile are resolved through Git references.
 These references are selected independently of the Feature version.
+The Feature's `agentsRef` defaults to
+`b65f27291bff63349fb221c38241350514275de9`; `toolsRef` defaults to
+`935bd0b6e03438a218cc7afec9fd5786b79a8c14`. Each selects a published Git ref
+from its component repository. No versioned copy of either component is
+packaged in DX; the dogfood submodules pin their development checkouts.
 
 ## What lives where
 
 | Concern | Source | Installed location or consumer interface |
 | --- | --- | --- |
 | Environment | [Feature manifest](../.devcontainer/src/dx/devcontainer-feature.json), [installer](../.devcontainer/src/dx/install.sh) | Feature dependencies, environment variables, mount, VS Code settings |
-| Runtime entry point | [runtime AGENTS.md](../.devcontainer/src/dx/runtime/AGENTS.md) | `/opt/dx/AGENTS.md` |
-| Shared instructions | `.devcontainer/src/dx/runtime/instructions/` | `/opt/dx/instructions/` |
-| Shared roles (`*.agent.md`) | `.devcontainer/src/dx/runtime/agents/` | `/opt/dx/agents/` |
-| Shared skills (`*/SKILL.md`) | `.devcontainer/src/dx/runtime/skills/` | `/opt/dx/skills/` |
-| MCP launcher | [dx-mcp](../.devcontainer/src/dx/runtime/bin/dx-mcp) | `/opt/dx/bin/dx-mcp`, wrapper in `/usr/local/bin/dx-mcp` |
-| Task helpers | [base.yml](../.devcontainer/src/dx/runtime/taskfiles/base.yml) | Remote Taskfile; also installed in `/opt/dx/taskfiles/` |
-| CI | `.github/workflows/reusable-*.yml` | GitHub reusable workflow calls |
+| IA entry point | [dx-agents AGENTS.md](../.devcontainer/components/agents/AGENTS.md) | `/opt/dx/components/agents/AGENTS.md` |
+| Shared instructions | `Gildraen/dx-agents`, `instructions/` | `/opt/dx/components/agents/instructions/` |
+| Shared roles (`*.agent.md`) | `Gildraen/dx-agents`, `agents/` | `/opt/dx/components/agents/agents/` |
+| Shared skills (`*/SKILL.md`) | `Gildraen/dx-agents`, `skills/` | `/opt/dx/components/agents/skills/` |
+| MCP launcher | [dx-mcp](../.devcontainer/components/tools/bin/dx-mcp) | `/opt/dx/components/tools/bin/dx-mcp`, wrapper in `/usr/local/bin/dx-mcp` |
+| Task helpers | [base.yml](../.devcontainer/components/tools/taskfiles/base.yml) | Remote Taskfile; also installed in `/opt/dx/components/tools/taskfiles/` |
+| Portable CI | `Gildraen/ci-workflows`, `.github/workflows/reusable-*.yml` | GitHub reusable workflow calls |
+| Feature CI | [reusable-feature-test.yml](../.github/workflows/reusable-feature-test.yml) | DX-specific Feature tests |
 | Project roles and skills | Consumer `.agents/agents/*.agent.md`, `.agents/skills/*/SKILL.md` | Explicit loading; VS Code picker for project agents |
 
-## Runtime: `DX_HOME`
+## Component locations
 
-The installer copies the packaged runtime to `/opt/dx`. The Feature declares
-`DX_HOME=/opt/dx` through `containerEnv`:
+The installer acquires the selected agents and tools refs independently.
+The Feature declares `DX_AGENTS_HOME=/opt/dx/components/agents`,
+`DX_TOOLS_HOME=/opt/dx/components/tools`, and `DX_HOME=/opt/dx`:
 
 ```text
 /opt/dx/
-├── AGENTS.md
-├── agents/
-├── bin/
-├── instructions/
-├── skills/
-└── taskfiles/
+	components/
+		agents/   # dx-agents: AGENTS.md, instructions/, agents/, skills/
+		tools/    # dx-tools: bin/, taskfiles/
+	AGENTS.md     -> components/agents/AGENTS.md
+	instructions/ -> components/agents/instructions/
+	agents/       -> components/agents/agents/
+	skills/       -> components/agents/skills/
+	bin/          -> components/tools/bin/
+	taskfiles/    -> components/tools/taskfiles/
 ```
 
-The consumer's root `AGENTS.md` resolves `DX_HOME` from the process environment,
-using `/opt/dx` when absent, and loads the runtime entry point. See
+`DX_HOME` and the six symlinks preserve the entry point, instruction, role,
+skill and tool paths. `/opt/dx/agents` points to the roles directory, not the
+component root; the component homes live under `/opt/dx/components` to avoid
+colliding with that compatibility path.
+The consumer's root `AGENTS.md` resolves `DX_AGENTS_HOME` from the environment,
+using `/opt/dx/components/agents` when absent, and loads its entry point. See
 [consumer.md](consumer.md) for the local bootstrap files.
 
 The runtime guide loads `instructions/base.md` and `instructions/git.md`
@@ -57,10 +72,10 @@ and skill metadata, then load the relevant resources in full. Roles use the
 `.agent.md` suffix; skills use a directory containing `SKILL.md`. A directly
 selected skill also loads its owning role.
 
-The [instruction hierarchy](../.devcontainer/src/dx/runtime/AGENTS.md#instruction-hierarchy)
+The [instruction hierarchy](../.devcontainer/components/agents/AGENTS.md#instruction-hierarchy)
 assigns cross-role rules to the runtime guide and shared instructions, workflow
 selection and composition to roles, and bounded procedures and checks to skills.
-The [delegation policy](../.devcontainer/src/dx/runtime/AGENTS.md#delegate-focused-work)
+The [delegation policy](../.devcontainer/components/agents/AGENTS.md#delegate-focused-work)
 requires scoped assignments, explicit edit authorization, disjoint ownership
 for concurrent writers, and integration and validation by the main agent.
 Clients without subagent support apply the selected role and skills locally
@@ -73,11 +88,12 @@ apply; file availability alone does not guarantee automatic loading.
 
 ### Client integration
 
-The Feature configures VS Code's `chat.agentFilesLocations` for
-`.agents/agents` and declares its chat client settings in the manifest.
-This checkout additionally exposes `.devcontainer/src/dx/runtime/agents`
-through its [Dev Container configuration](../.devcontainer/devcontainer.json).
-That source path is specific to development of DX, not a consumer location.
+Native discovery reads local directories: shared roles are under
+`$DX_AGENTS_HOME/agents` and shared skills under `$DX_AGENTS_HOME/skills`.
+This checkout uses `.devcontainer/components/agents/agents` and
+`.devcontainer/components/agents/skills`. Client-specific discovery
+configuration is separate from explicit loading; a remote Git URL is not a
+native resource location.
 
 The Markdown runtime does not require a particular client, model, or editor.
 Native role discovery and subagent support depend on the client. The explicit
@@ -88,10 +104,11 @@ state must stay out of versioned files.
 
 ### Installed and live sources
 
-An installed runtime is a Feature snapshot. Updating it requires selecting the
-Feature version and rebuilding the container. This repository instead sets
-`remoteEnv.DX_HOME` to
-`${containerWorkspaceFolder}/.devcontainer/src/dx/runtime`; its root
+Installed components are snapshots of their selected refs. Updating
+`agentsRef` or `toolsRef` and rebuilding changes the component without changing
+the Feature version. This repository sets `DX_AGENTS_HOME` and `DX_TOOLS_HOME`
+to `.devcontainer/components/agents` and `.devcontainer/components/tools`;
+`initializeCommand` initializes their pinned Git submodules. Its root
 [AGENTS.md](../AGENTS.md) loads that local entry point. The
 [dogfood guide](dogfood.md) describes using a live checkout in a consumer.
 
@@ -120,10 +137,9 @@ interactive standard input and publishes the OAuth callback on
 not a dependency of the DX Feature. This checkout declares
 Docker-outside-of-Docker and the VS Code MCP server command locally.
 
-The installed wrapper resolves `DX_HOME`, then executes `bin/dx-mcp` from that
-runtime. Without an explicit value, it checks the local dogfood runtime under
-`.devcontainer/.dx` before falling back to `/opt/dx`. DX provides the launcher,
-not a custom MCP server or token store.
+The installed wrapper uses `DX_TOOLS_HOME/bin/dx-mcp` when that variable is
+set. `DX_HOME/bin/dx-mcp` remains the compatibility interface. DX installs the
+wrapper; `dx-tools` owns the launcher, not a custom MCP server or token store.
 
 The Feature sets `GH_CONFIG_DIR=/var/lib/dx/devcontainer/.gh` and bind-mounts
 the consumer's `.devcontainer` directory at `/var/lib/dx/devcontainer`.
@@ -134,13 +150,27 @@ directory and must not be committed.
 
 The shared Taskfile exposes `doctor` and `mcp:github`. The consumer defines its
 own `validate`, `test`, and `lint` contracts. `doctor` reports the resolved
-runtime directory and fails when it is absent; `mcp:github` invokes the launcher.
+tools directory and fails when it is absent; `mcp:github` invokes the launcher.
+`doctor` uses `DX_TOOLS_HOME` first, with `DX_HOME` as a compatibility fallback.
 
 Reusable workflows operate on the caller's checkout: validate installs Task
 `3.53.1` and runs the selected task; devcontainer-test runs `task test` inside
 the caller's container; maintenance checks selected Markdown paths with lychee.
-Feature-test invokes the DX-specific Feature test script. Their source paths
+The portable workflows are called from `Gildraen/ci-workflows` at
+`ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`. Local Feature-test invokes the
+DX-specific Feature test script. Their source paths
 and inputs are listed in [decoupage.md](decoupage.md).
+
+DX retains three `reusable-*.yml` compatibility wrappers for validate,
+devcontainer-test and maintenance. Each delegates to the corresponding external
+workflow at that SHA and forwards its inputs, without a local implementation
+copy. These paths serve callers using floating DX references.
+
+Task 3.53.1 uses a raw HTTP URL to select an immutable Taskfile commit; the Git
+include syntax `.git//taskfiles/base.yml?ref=<SHA>` does not work with a commit
+SHA in that release. The [consumer example](consumer.md#3-remote-taskfile-optional-shared-helpers)
+uses `github.com/.../raw/<SHA>/...`, covered by the validation workflow's
+`TASK_REMOTE_TRUSTED_HOSTS=github.com` environment value.
 
 The [release workflow](../.github/workflows/release.yml) publishes only the
 Feature through the Dev Containers action. Its manifest version identifies the
@@ -148,3 +178,10 @@ OCI artifact; the CLI manages version aliases in the repository namespace.
 Repository tagging is disabled. Publishing the Feature does not create Git refs for workflows,
 or Taskfiles. DX does not run a file-propagation or drift-checking
 engine for consumers.
+
+## Dependency updates
+
+DX extends the Renovate preset
+`github>Gildraen/renovate-config#86fd839c709a05f0ba9cea46c5e2aae2a3b35dae`.
+This published commit is pinned independently of the Feature, IA, tools and
+CI refs.
