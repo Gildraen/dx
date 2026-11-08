@@ -4,7 +4,18 @@
     "name": "Gildraen DX runtime",
     "description": "Installs the shared Gildraen developer-experience runtime and common tool baseline under /opt/dx.",
     "documentationURL": "https://github.com/Gildraen/dx",
-    "options": {},
+    "options": {
+        "agentsRef": {
+            "type": "string",
+            "default": "b65f27291bff63349fb221c38241350514275de9",
+            "description": "Git reference of Gildraen/dx-agents."
+        },
+        "toolsRef": {
+            "type": "string",
+            "default": "935bd0b6e03438a218cc7afec9fd5786b79a8c14",
+            "description": "Git reference of Gildraen/dx-tools."
+        }
+    },
     "customizations": {
         "vscode": {
             "settings": {
@@ -19,6 +30,8 @@
     },
     "containerEnv": {
         "DX_HOME": "/opt/dx",
+        "DX_AGENTS_HOME": "/opt/dx/components/agents",
+        "DX_TOOLS_HOME": "/opt/dx/components/tools",
         "GH_CONFIG_DIR": "/var/lib/dx/devcontainer/.gh"
     },
     "mounts": [

@@ -4,6 +4,8 @@ set -euo pipefail
 source dev-container-features-test-lib
 
 check "Feature exposes the installed runtime" bash -c 'test "$DX_HOME" = /opt/dx'
+check "Feature exposes installed agents" bash -c 'test "$DX_AGENTS_HOME" = /opt/dx/components/agents'
+check "Feature exposes installed tools" bash -c 'test "$DX_TOOLS_HOME" = /opt/dx/components/tools'
 check "Node baseline is installed" bash -c "command -v node >/dev/null"
 check "GitHub CLI baseline is installed" bash -c "command -v gh >/dev/null"
 check "GitHub CLI state uses the host devcontainer directory" bash -c 'test "$GH_CONFIG_DIR" = /var/lib/dx/devcontainer/.gh && mountpoint -q /var/lib/dx/devcontainer'
@@ -20,37 +22,31 @@ check "Go Task baseline meets the minimum version" bash -c '
 '
 check "jq baseline is installed" bash -c "command -v jq >/dev/null"
 check "ripgrep baseline is installed" bash -c "command -v rg >/dev/null"
-check "stable runtime installed at /opt/dx" bash -c "test -d /opt/dx"
-check "shared bootstrap present" bash -c "test -f /opt/dx/AGENTS.md"
-check "project resources are discovered from .agents" bash -c 'grep -Fq ".agents/agents/*.agent.md" /opt/dx/AGENTS.md && grep -Fq ".agents/skills/*/SKILL.md" /opt/dx/AGENTS.md'
-check "shared instructions present" bash -c "test -f /opt/dx/instructions/base.md && test -f /opt/dx/instructions/git.md"
-check "shared agents present" bash -c '
+check "agents component snapshot is installed" bash -c '
 	set -e
-	shopt -s nullglob
-	agents=(/opt/dx/agents/*.agent.md)
-	test "${#agents[@]}" -gt 0
-	for agent in "${agents[@]}"; do
-		test -f "$agent"
+	test -f "$DX_AGENTS_HOME/AGENTS.md"
+	for resource in instructions agents skills; do
+		test -d "$DX_AGENTS_HOME/$resource"
+	done
+	test ! -e "$DX_AGENTS_HOME/.git"
+'
+check "tools component snapshot is installed" bash -c '
+	set -e
+	test -x "$DX_TOOLS_HOME/bin/dx-mcp"
+	test -f "$DX_TOOLS_HOME/taskfiles/base.yml"
+	test ! -e "$DX_TOOLS_HOME/.git"
+'
+check "six legacy paths link to the installed components" bash -c '
+	set -e
+	for resource in AGENTS.md instructions agents skills bin taskfiles; do
+		component=agents
+		[[ "$resource" != bin && "$resource" != taskfiles ]] || component=tools
+		test -L "/opt/dx/$resource"
+		test "$(readlink "/opt/dx/$resource")" = "components/$component/$resource"
+		test -e "/opt/dx/$resource"
 	done
 '
-check "shared skills directory present" bash -c "test -f /opt/dx/skills/README.md"
-check "shared skills present" bash -c '
-	set -e
-	shopt -s nullglob
-	dirs=(/opt/dx/skills/*/)
-	test "${#dirs[@]}" -gt 0
-	for dir in "${dirs[@]}"; do
-		test -f "${dir}SKILL.md"
-	done
-'
-check "shared taskfile present" bash -c "test -f /opt/dx/taskfiles/base.yml"
-check "runtime contains only the command launcher" bash -c 'test "$(find /opt/dx/bin -maxdepth 1 -type f | wc -l)" -eq 1 && test -f /opt/dx/bin/dx-mcp'
-check "dx-mcp launcher is executable" bash -c "test -x /opt/dx/bin/dx-mcp"
-check "launcher defaults to /opt/dx" bash -c "grep -Fq 'DX_HOME=\"\${DX_HOME:-/opt/dx}\"' /usr/local/bin/dx-mcp"
-check "launcher detects dogfood runtime" bash -c "grep -Fq '\$PWD/.devcontainer/.dx/.devcontainer/src/dx/runtime' /usr/local/bin/dx-mcp"
-check "explicit DX_HOME has priority" bash -c "grep -Fq 'if [ -z \"\${DX_HOME:-}\" ]' /usr/local/bin/dx-mcp"
-check "dx-mcp reports usage without a server argument" bash -c "dx-mcp 2>&1 | grep -q 'usage: dx-mcp github'"
-check "official GitHub MCP image is pinned" bash -c "grep -q 'ghcr.io/github/github-mcp-server:v1.10.1' /opt/dx/bin/dx-mcp"
-DX_MCP_WRAPPER=/usr/local/bin/dx-mcp DX_MCP_LEGACY=true bash "$(dirname "${BASH_SOURCE[0]}")/test-dx-mcp-resolution.sh"
+check "DX wrapper is installed and executable" bash -c 'test -x /usr/local/bin/dx-mcp && test "$(command -v dx-mcp)" = /usr/local/bin/dx-mcp'
+check "installed wrapper resolves component homes" env DX_MCP_WRAPPER=/usr/local/bin/dx-mcp bash "$(dirname "${BASH_SOURCE[0]}")/test-dx-mcp-resolution.sh"
 
 reportResults
