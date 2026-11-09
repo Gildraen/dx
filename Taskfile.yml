@@ -19,6 +19,7 @@ tasks:
     desc: Run the dx test suite inside the dx devcontainer (non-Feature tests).
     cmds:
       - bash .devcontainer/test/dx/test-repo-contract.sh
+      - bash .devcontainer/test/dx/test-dx-mcp-resolution.sh
 
   feature:test:
     desc: Run the Dev Container Feature test suite directly with the local Docker daemon.

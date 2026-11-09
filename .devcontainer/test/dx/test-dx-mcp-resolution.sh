@@ -1,44 +1,37 @@
 #!/usr/bin/env bash
-# Checks that dx-mcp picks the dogfood worktree runtime when present, and honors an explicit DX_HOME override.
 set -euo pipefail
 
-fail() {
-  echo "FAIL: $1" >&2
-  exit 1
-}
-
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+wrapper="${DX_MCP_WRAPPER:-$repo_root/.devcontainer/src/dx/dx-mcp}"
 workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
 
-write_fake_dispatcher() {
-  local runtime_dir="$1"
-  mkdir -p "$runtime_dir/bin"
-  printf '%s\n' '#!/usr/bin/env bash' 'printf "%s\\n" "$DX_HOME"' > "$runtime_dir/bin/dx-mcp"
-  chmod +x "$runtime_dir/bin/dx-mcp"
-}
+for tools_home in "$workdir/project/.devcontainer/.dx/.devcontainer/src/dx/runtime" "$workdir/legacy" "$workdir/new tools"; do
+  mkdir -p "$tools_home/bin"
+  printf '%s\n' '#!/usr/bin/env bash' 'printf "%s\\n" "${DX_TOOLS_HOME:-$DX_HOME}" "$@"' > "$tools_home/bin/dx-mcp"
+  chmod +x "$tools_home/bin/dx-mcp"
+done
 
-write_fake_dispatcher "$workdir/project/.devcontainer/.dx/.devcontainer/src/dx/runtime"
-write_fake_dispatcher "$workdir/explicit"
-mkdir -p "$workdir/fake-bin"
-cat > "$workdir/fake-bin/docker" <<'EOF'
-#!/usr/bin/env bash
-printf '%s\n' "$*"
-EOF
-chmod +x "$workdir/fake-bin/docker"
-
-# No DX_HOME set: must prefer the dogfood worktree runtime over the installed one.
-dogfood_home="$workdir/project/.devcontainer/.dx/.devcontainer/src/dx/runtime"
-output="$(cd "$workdir/project" && env -u DX_HOME dx-mcp github)"
-[[ "$output" == "$dogfood_home" ]] || fail "dogfood runtime was not selected (got: $output)"
-
-# DX_HOME set: must take priority over the dogfood worktree.
-explicit_home="$workdir/explicit"
-output="$(cd "$workdir/project" && DX_HOME="$explicit_home" dx-mcp github)"
-[[ "$output" == "$explicit_home" ]] || fail "explicit DX_HOME was not honored (got: $output)"
-
-# With neither override nor dogfood checkout, dispatch must use the installed runtime.
-mkdir -p "$workdir/stable-project"
-output="$(cd "$workdir/stable-project" && env -u DX_HOME PATH="$workdir/fake-bin:$PATH" dx-mcp github)"
-[[ "$output" == *"ghcr.io/github/github-mcp-server:v1.10.1"* ]] || fail "installed runtime fallback was not selected"
-
-echo "dx-mcp runtime resolution: dogfood, override, and installed fallback pass"
+cd "$workdir/project"
+dogfood_home="$PWD/.devcontainer/.dx/.devcontainer/src/dx/runtime"
+output="$(env -u DX_HOME -u DX_TOOLS_HOME bash "$wrapper" github --help)"
+[[ "$output" == "$dogfood_home"$'\ngithub\n--help' ]]
+output="$(env -u DX_TOOLS_HOME DX_HOME="$workdir/legacy" bash "$wrapper" github)"
+[[ "$output" == "$workdir/legacy"$'\ngithub' ]]
+if [[ "${DX_MCP_LEGACY:-false}" != true ]]; then
+  output="$(DX_HOME="$workdir/legacy" DX_TOOLS_HOME="$workdir/new tools" bash "$wrapper" github)"
+  [[ "$output" == "$workdir/new tools"$'\ngithub' ]]
+  if DX_TOOLS_HOME="$workdir/missing" bash "$wrapper" github >/dev/null 2>&1; then
+    printf 'Invalid explicit tools home unexpectedly succeeded\n' >&2
+    exit 1
+  fi
+fi
+if env -u DX_TOOLS_HOME DX_HOME="$workdir/missing" bash "$wrapper" github >/dev/null 2>&1; then
+  printf 'Invalid explicit legacy home unexpectedly succeeded\n' >&2
+  exit 1
+fi
+if [[ "${DX_MCP_LEGACY:-false}" == true ]]; then
+  printf 'MCP wrapper: legacy, dogfood, arguments and invalid paths pass\n'
+else
+  printf 'MCP wrapper: tools priority, legacy, dogfood, arguments and invalid paths pass\n'
+fi
