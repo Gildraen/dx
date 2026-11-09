@@ -33,10 +33,11 @@ for component in agents tools; do
   fi
   git -C "$checkout" add .
   git -C "$checkout" -c user.name=dx-test -c user.email=dx-test@example.invalid -c commit.gpgsign=false commit -qm fixture
+  git -C "$checkout" tag v1.2.3
 done
 
-export AGENTSREF="$(git -C "$workdir/upstream/agents" rev-parse HEAD)"
-export TOOLSREF="$(git -C "$workdir/upstream/tools" rev-parse HEAD)"
+export AGENTSREF=v1.2.3
+export TOOLSREF=v1.2.3
 export GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_ALLOW_PROTOCOL=file
 export GIT_CONFIG_COUNT=2
 export GIT_CONFIG_KEY_0="url.file://$workdir/upstream/agents.insteadOf"

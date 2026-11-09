@@ -53,7 +53,7 @@ for workflow in validate devcontainer-test maintenance; do
     const jobs = Object.values(workflow.jobs);
     assert.equal(jobs.length, 1);
     const job = jobs[0];
-    assert.equal(job.uses, `Gildraen/ci-workflows/.github/workflows/reusable-${name}.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`);
+    assert.equal(job.uses, `Gildraen/ci-workflows/.github/workflows/reusable-${name}.yml@v0.1.0-rc.1`);
     assert.equal(job.steps, undefined);
     assert.equal(job["runs-on"], undefined);
     const inputs = Object.keys(workflow.on.workflow_call?.inputs ?? {});
@@ -71,7 +71,4 @@ assert.match(feature.version, /^\d+\.\d+\.\d+$/);
 assert.ok(consumer.includes('ghcr.io/gildraen/dx/dx:<released-version>'));
 for (const component of ['agents', 'tools']) assert.ok(consumer.includes(feature.options[`${component}Ref`].default));
 EOF
-! rg -qP 'reusable-(validate|maintenance)\.yml@v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
-! rg -qP 'base\.yml\?ref=v[0-9]+\.[0-9]+\.[0-9]+' README.md docs
-
 echo "DX repository: Feature, consumer docs and pinned CI facades pass"

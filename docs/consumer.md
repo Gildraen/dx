@@ -6,9 +6,10 @@ working on `dx` itself using a real project as a testbed, see
 
 ## 1. Dev Container Feature
 
-For this branch's integration test, use its local Feature checkout (see
+For integration testing, use the local Feature checkout (see
 [dogfood.md](dogfood.md) to create `.devcontainer/.dx`). The component refs
-below are published Git commits:
+below select the candidate version tag `v0.1.0-rc.1`, a prerelease, not a
+stable release:
 
 ```jsonc
 // .devcontainer/devcontainer.json
@@ -17,8 +18,8 @@ below are published Git commits:
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
     "./.dx/.devcontainer/src/dx": {
-      "agentsRef": "b65f27291bff63349fb221c38241350514275de9",
-      "toolsRef": "935bd0b6e03438a218cc7afec9fd5786b79a8c14"
+      "agentsRef": "v0.1.0-rc.1",
+      "toolsRef": "v0.1.0-rc.1"
     }
   }
 }
@@ -27,7 +28,7 @@ below are published Git commits:
 For an installed release, replace the local Feature key with
 `ghcr.io/gildraen/dx/dx:<released-version>` and select a published version
 whose manifest exposes `agentsRef` and `toolsRef`. A previously published
-Feature does not acquire this branch's options automatically.
+Feature does not acquire these options automatically.
 
 Only add other Features or packages for project-specific requirements
 (Docker-outside-of-Docker, project language runtimes, service CLIs, …). The DX
@@ -40,7 +41,7 @@ tool; requirements not included there remain project-specific.
 
 The Feature acquires `Gildraen/dx-agents` at `agentsRef` into `/opt/dx/components/agents`
 and `Gildraen/dx-tools` at `toolsRef` into `/opt/dx/components/tools`. These options are
-independent and default to the commits shown above. It sets `DX_AGENTS_HOME`
+independent and default to the version tags shown above. It sets `DX_AGENTS_HOME`
 and `DX_TOOLS_HOME` to those locations, retaining `DX_HOME=/opt/dx` and
 compatibility symlinks for `AGENTS.md`, `instructions/`, `agents/`, `skills/`,
 `bin/` and `taskfiles/`. Shared roles are under
@@ -116,7 +117,7 @@ on:
   pull_request:
 jobs:
   validate:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v0.1.0-rc.1
 ```
 
 The reusable workflow runs `task validate` (configurable via the `task-name`
@@ -128,15 +129,15 @@ those URLs without enabling global `--yes` behavior. The Remote Taskfile
 example below uses that host.
 
 Same pattern for maintenance / link-checking:
-`Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`.
+`Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@v0.1.0-rc.1`.
 For tests in the consumer container, use
-`Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`;
+`Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@v0.1.0-rc.1`;
 the container must provide `task test`. DX's `reusable-feature-test.yml` is
 local to the Feature repository, not part of these portable workflows.
 
 DX also exposes three compatibility wrappers at
 `Gildraen/dx/.github/workflows/reusable-{validate,devcontainer-test,maintenance}.yml`.
-They delegate to the external workflows at the SHA above and forward their
+They delegate to the external workflows at the version tag above and forward their
 inputs without copying implementations. Callers using floating DX references
 can retain these paths.
 
@@ -145,7 +146,7 @@ can retain these paths.
 ```yaml
 # Taskfile.yml
 includes:
-  dx: https://github.com/Gildraen/dx-tools/raw/935bd0b6e03438a218cc7afec9fd5786b79a8c14/taskfiles/base.yml
+  dx: https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml
 ```
 
 Gives you `task dx:doctor` and `task dx:mcp:github`.
@@ -160,9 +161,8 @@ The reusable validation workflow installs a compatible Task release on its GitHu
 Actions runner before executing `task validate`. Its availability in CI does
 not mean that the local devcontainer already provides it.
 
-The commit must exist in the tools repository. Task 3.53.1 does not support a
-commit SHA with the Git include syntax `.git//taskfiles/base.yml?ref=<SHA>`;
-use the raw HTTP URL above instead.
+The version tag must exist in the tools repository. Use the direct HTTP URL
+above with Task 3.53.1; the consumption reference is the fixed tag.
 
 For a manual invocation, either accept Task's host trust prompt or restrict
 non-interactive trust to `github.com`:
@@ -204,11 +204,10 @@ the authoritative list, not a catalog in this guide.
 
 Shared sources live at the root of `Gildraen/dx-agents` and can be used
 independently of the Feature, Docker, MCP and the tools component. For a local
-checkout pinned to the same commit, from the consumer root:
+checkout at the same version tag, from the consumer root:
 
 ```sh
-git clone https://github.com/Gildraen/dx-agents.git .devcontainer/components/agents
-git -C .devcontainer/components/agents checkout --detach b65f27291bff63349fb221c38241350514275de9
+git clone --branch v0.1.0-rc.1 --depth 1 https://github.com/Gildraen/dx-agents.git .devcontainer/components/agents
 export DX_AGENTS_HOME="$PWD/.devcontainer/components/agents"
 ```
 
@@ -217,11 +216,14 @@ consumer. Keep it out of the consumer's tracked files, or declare it as a
 pinned submodule. Tools can likewise be checked out independently:
 
 ```sh
-git clone https://github.com/Gildraen/dx-tools.git .devcontainer/components/tools
-git -C .devcontainer/components/tools checkout --detach 935bd0b6e03438a218cc7afec9fd5786b79a8c14
+git clone --branch v0.1.0-rc.1 --depth 1 https://github.com/Gildraen/dx-tools.git .devcontainer/components/tools
 export DX_TOOLS_HOME="$PWD/.devcontainer/components/tools"
 export PATH="$DX_TOOLS_HOME/bin:$PATH"
 ```
+
+Cloning a tag checks out its resolved commit in detached HEAD state. For a
+submodule, the parent repository records that commit as a gitlink; the tag is
+the selected consumption version, not an extra field in `.gitmodules`.
 
 Project-specific roles and skills remain additive
 under `.agents/agents/` and `.agents/skills/` in the consumer. These are
@@ -278,8 +280,8 @@ resource loading through `DX_AGENTS_HOME`.
 ## 6. Renovate preset
 
 DX uses the shared preset reference
-`github>Gildraen/renovate-config#86fd839c709a05f0ba9cea46c5e2aae2a3b35dae`
-in `extends`, pinned to a published commit independently of the Feature and
+`github>Gildraen/renovate-config#v0.1.0-rc.1`
+in `extends`, fixed to the candidate version tag independently of the Feature and
 component refs.
 
 ## Runtime state that never belongs in `dx` or in your repository

@@ -13,10 +13,14 @@ du runtime ; le [guide consommateur](consumer.md) decrit le bootstrap local.
 porte les workflows portables. La Feature acquiert les refs Git agents et
 tools independamment, sans copie de leurs sources versionnee dans DX.
 La version OCI, les refs des composants et les refs CI sont independantes.
+Le contrat candidat selectionne les tags `v0.1.0-rc.1` des quatre composants
+partages (agents, tools, CI et preset Renovate) ; c'est une preversion, pas une
+version stable. Les sous-modules enregistrent les commits resolus par gitlink,
+sans champ de version independant dans `.gitmodules`.
 
 Le [workflow de publication](../.github/workflows/release.yml) est declenche
 sur `main`. Son job unique a deux etapes : checkout de `github.sha`, puis
-action Dev Containers epinglee par SHA avec la CLI `0.88.0`.
+action Dev Containers `v1.4.3` avec la CLI `0.88.0`.
 La version du [manifeste](../.devcontainer/src/dx/devcontainer-feature.json)
 identifie l'artefact OCI ; la CLI gere les aliases de version. `generate-docs: false` et
 `disable-repo-tagging: true` limitent cette livraison a la Feature.
@@ -71,7 +75,7 @@ Docker est un prerequis du lanceur, pas un outil fourni par cette Feature.
 
 Les trois workflows portables se trouvent dans `.github/workflows` de
 `Gildraen/ci-workflows`, epingles ici a
-`ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`.
+`v0.1.0-rc.1`.
 Leurs appels selectionnent une ref Git et leurs jobs operent sur le checkout
 du consommateur. Les contrats `validate`, `test` et `lint` appartiennent au
 Taskfile de ce consommateur, pas aux deux helpers du Taskfile partage.
@@ -79,22 +83,22 @@ Feature-test utilise une procedure specifique a DX.
 
 DX conserve trois facades `reusable-validate.yml`,
 `reusable-devcontainer-test.yml` et `reusable-maintenance.yml` dans
-`.github/workflows/`. Ces wrappers deleguent au SHA externe ci-dessus et
+`.github/workflows/`. Ces wrappers deleguent au tag externe ci-dessus et
 transmettent leurs inputs, sans copie d'implementation, pour les appels qui
 utilisent des references DX flottantes.
 
-Le Taskfile distant utilise une URL HTTP raw avec le SHA dans le chemin,
-distincte des tags OCI. Task `3.53.1` ne resout pas un SHA via l'include Git
-`.git//taskfiles/base.yml?ref=<SHA>`. L'exemple exact et la confiance restreinte
+Le Taskfile distant utilise une URL HTTP directe avec le tag `v0.1.0-rc.1`
+dans le chemin, distinct des tags OCI. Task `3.53.1` utilise cet include HTTP.
+L'exemple exact et la confiance restreinte
 a `github.com` sont dans [consumer.md](consumer.md#3-remote-taskfile-optional-shared-helpers).
 Le workflow validate conserve `TASK_REMOTE_TRUSTED_HOSTS=github.com`, suffisant
-pour cette URL `github.com/.../raw/<SHA>/...`.
+pour l'URL `https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml`.
 Les valeurs par defaut de `agentsRef` et `toolsRef` sont respectivement
-`b65f27291bff63349fb221c38241350514275de9` et
-`935bd0b6e03438a218cc7afec9fd5786b79a8c14`.
+`v0.1.0-rc.1` et
+`v0.1.0-rc.1`.
 Le preset Renovate utilise ici
-`github>Gildraen/renovate-config#86fd839c709a05f0ba9cea46c5e2aae2a3b35dae`,
-epingle a un commit publie independamment des autres composants.
+`github>Gildraen/renovate-config#v0.1.0-rc.1`,
+fixe au tag candidat independamment des autres composants.
 
 ## Controles presents
 

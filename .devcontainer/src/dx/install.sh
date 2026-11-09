@@ -4,8 +4,8 @@ set -euo pipefail
 
 DX_HOME="/opt/dx"
 FEATURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-agents_ref="${AGENTSREF:-b65f27291bff63349fb221c38241350514275de9}"
-tools_ref="${TOOLSREF:-935bd0b6e03438a218cc7afec9fd5786b79a8c14}"
+agents_ref="${AGENTSREF:-v0.1.0-rc.1}"
+tools_ref="${TOOLSREF:-v0.1.0-rc.1}"
 download_root="$(mktemp -d)"
 trap 'rm -rf "$download_root"' EXIT
 

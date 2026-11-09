@@ -13,8 +13,9 @@ changing configuration. Preserve business settings, forwarded ports, mounts,
 environment requirements and project-specific agents and skills.
 
 Choose a DX Feature whose manifest supports `agentsRef` and `toolsRef`, plus
-existing Git references in `Gildraen/dx-agents`, `Gildraen/dx-tools` and
-`Gildraen/ci-workflows`. This branch's local Feature test and pinned component
+version tags in `Gildraen/dx-agents`, `Gildraen/dx-tools` and
+`Gildraen/ci-workflows`. The candidate component and preset version is
+`v0.1.0-rc.1`, a prerelease, not a stable release. The local Feature test and fixed component
 examples are in [consumer.md](consumer.md); they do not claim that an older
 published Feature implements the new options. OCI versions and Git refs are
 independent: publishing the Feature does not create a Git tag or GitHub release.
@@ -54,15 +55,16 @@ project's requirements.
    validation workflow supplies Task and sets
    `TASK_REMOTE_TRUSTED_HOSTS=github.com` for includes hosted on `github.com`.
    The raw URL in [consumer.md](consumer.md#3-remote-taskfile-optional-shared-helpers)
-   uses `github.com/.../raw/<SHA>/...` and is covered by that trust value.
-   Task 3.53.1 cannot use `?ref=<SHA>` Git includes. Additional project dependencies
+   uses `https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml`
+   and is covered by that trust value. Task 3.53.1 uses this direct HTTP include.
+   Additional project dependencies
    must be available on the runner. It executes the selected task on that
    runner, not inside the consumer Dev Container.
 4. **GitHub workflows**: integrate calls to the portable validate,
    devcontainer-test and maintenance workflows in `Gildraen/ci-workflows`
    without dropping application jobs, triggers or required permissions.
    DX's local reusable-feature-test is not a consumer workflow.
-   Use existing Git refs for workflows and the Remote
+   Use fixed version tags for workflows and the Remote
    Taskfile; consult [consumer.md](consumer.md) for the workflow and include syntax.
 5. **AI resources**: add the client-neutral root `AGENTS.md` bootstrap from
    [consumer.md](consumer.md), preserving project-specific rules. It resolves
@@ -82,8 +84,8 @@ project's requirements.
    machine-specific settings may contain secrets; keep authentication state
    out of versioned files and container images.
 7. **Renovate**: DX uses
-   `github>Gildraen/renovate-config#86fd839c709a05f0ba9cea46c5e2aae2a3b35dae`,
-   pinned to a published commit independently of the Feature and component refs.
+   `github>Gildraen/renovate-config#v0.1.0-rc.1`,
+   fixed to the candidate version tag independently of the Feature and component refs.
 
 ## Verify the integration
 

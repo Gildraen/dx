@@ -7,12 +7,12 @@
     "options": {
         "agentsRef": {
             "type": "string",
-            "default": "b65f27291bff63349fb221c38241350514275de9",
+            "default": "v0.1.0-rc.1",
             "description": "Git reference of Gildraen/dx-agents."
         },
         "toolsRef": {
             "type": "string",
-            "default": "935bd0b6e03438a218cc7afec9fd5786b79a8c14",
+            "default": "v0.1.0-rc.1",
             "description": "Git reference of Gildraen/dx-tools."
         }
     },

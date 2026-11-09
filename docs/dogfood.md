@@ -54,6 +54,9 @@ The DX worktree has pinned submodules at `.devcontainer/components/agents`
 and `.devcontainer/components/tools`. Changes inside them belong to
 `Gildraen/dx-agents` or `Gildraen/dx-tools`, not to DX; DX tracks their commit
 pointers. Its `initializeCommand` runs `git submodule update --init --recursive`.
+The candidate component version is `v0.1.0-rc.1`, a prerelease, not a stable
+release. To select it, check out the tag in each initialized submodule with
+`git checkout --detach v0.1.0-rc.1`; DX records the resolved commits as gitlinks.
 
 From the consumer, select those local components for the current shell:
 
@@ -112,11 +115,11 @@ does not require remote-host trust. For a remote include, local runs show
 Task's normal trust prompt on first use. The reusable validate workflow retains
 `TASK_REMOTE_TRUSTED_HOSTS=github.com` for URLs hosted on `github.com`.
 
-Restore the released remote include before committing the consumer change:
+Restore the fixed candidate remote include before committing the consumer change:
 
 ```yaml
 includes:
-  dx: https://github.com/Gildraen/dx-tools/raw/935bd0b6e03438a218cc7afec9fd5786b79a8c14/taskfiles/base.yml
+  dx: https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml
 ```
 
 For this URL, run Task with `TASK_REMOTE_TRUSTED_HOSTS=github.com` or accept
@@ -150,14 +153,14 @@ Docker daemon can bind-mount the CLI's temporary project paths. With the
 standard workspace mount, those paths differ inside the devcontainer.
 Reusable GitHub workflows cannot see a local worktree. The portable workflow
 test reference is
-`Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`
-(the same SHA applies to devcontainer-test and maintenance).
+`Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v0.1.0-rc.1`
+(the same version tag applies to devcontainer-test and maintenance).
 Testing changed CI or Remote Taskfiles requires a published ref in their
 own repository, not a branch in DX. The current component integration branch
 is `feat/component-extraction`; a test include may use
 `https://github.com/Gildraen/dx-tools/raw/feat/component-extraction/taskfiles/base.yml`.
-Task 3.53.1 cannot resolve an immutable SHA via a Git include with `?ref=<SHA>`.
-Restore the pinned raw URL before committing a consumer change. Restrict trust
+Use Task 3.53.1's direct HTTP include with the selected tag for consumption.
+Restore the fixed candidate raw URL before committing a consumer change. Restrict trust
 to `github.com` for these includes. Do not use global `--yes`. Publication
 requires explicit approval.
 
