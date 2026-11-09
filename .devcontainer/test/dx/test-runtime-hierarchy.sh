@@ -63,7 +63,7 @@ const skillContents = resources.get(skill);
 validateHierarchy(new Map(resources).set(skill, `${skillContents}\n[launcher](../../bin/dx-mcp)\n`));
 assert.throws(() => validateHierarchy(new Map(resources).set(skill, skillContents.replace(ownerLine, ''))),
   /expected one owner/);
-assert.throws(() => validateHierarchy(new Map(resources).set(skill, skillContents + skillContents.match(ownerLine)[0])),
+assert.throws(() => validateHierarchy(new Map(resources).set(skill, `${skillContents}\n${skillContents.match(ownerLine)[0]}`)),
   /expected one owner/);
 const backlink = path.relative(path.dirname(owner), skill);
 assert.throws(() => validateHierarchy(new Map(resources).set(owner, resources.get(owner).split(`](${backlink})`).join(']'))),
