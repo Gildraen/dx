@@ -18,11 +18,12 @@ This document describes their integration; the
 The Feature is distributed through OCI at `ghcr.io/gildraen/dx/dx`. Workflows
 and the Remote Taskfile are resolved through Git references.
 These references are selected independently of the Feature version.
-The Feature's `agentsRef` defaults to
-`b65f27291bff63349fb221c38241350514275de9`; `toolsRef` defaults to
-`935bd0b6e03438a218cc7afec9fd5786b79a8c14`. Each selects a published Git ref
-from its component repository. No versioned copy of either component is
-packaged in DX; the dogfood submodules pin their development checkouts.
+The Feature's `agentsVersion` defaults to
+`v0.1.0-rc.1`; `toolsVersion` defaults to
+`v0.1.0-rc.1`. Each selects the candidate version tag from its component
+repository; this is a prerelease, not a stable release. No versioned copy of
+either component is packaged in DX. The dogfood submodules record resolved
+commits as gitlinks; selecting a tag does not add a version field to `.gitmodules`.
 
 ## What lives where
 
@@ -104,9 +105,9 @@ state must stay out of versioned files.
 
 ### Installed and live sources
 
-Installed components are snapshots of their selected refs. Updating
-`agentsRef` or `toolsRef` and rebuilding changes the component without changing
-the Feature version. This repository sets `DX_AGENTS_HOME` and `DX_TOOLS_HOME`
+Installed components are snapshots of their selected versions. Updating
+`agentsVersion` or `toolsVersion` and rebuilding changes that component without
+changing the Feature version. This repository sets `DX_AGENTS_HOME` and `DX_TOOLS_HOME`
 to `.devcontainer/components/agents` and `.devcontainer/components/tools`;
 `initializeCommand` initializes their pinned Git submodules. Its root
 [AGENTS.md](../AGENTS.md) loads that local entry point. The
@@ -157,19 +158,19 @@ Reusable workflows operate on the caller's checkout: validate installs Task
 `3.53.1` and runs the selected task; devcontainer-test runs `task test` inside
 the caller's container; maintenance checks selected Markdown paths with lychee.
 The portable workflows are called from `Gildraen/ci-workflows` at
-`ee36dca8e6a5b2c40a652fcd438e4e6451c9e108`. Local Feature-test invokes the
+`v0.1.0-rc.1`. Local Feature-test invokes the
 DX-specific Feature test script. Their source paths
 and inputs are listed in [decoupage.md](decoupage.md).
 
 DX retains three `reusable-*.yml` compatibility wrappers for validate,
 devcontainer-test and maintenance. Each delegates to the corresponding external
-workflow at that SHA and forwards its inputs, without a local implementation
+workflow at that version tag and forwards its inputs, without a local implementation
 copy. These paths serve callers using floating DX references.
 
-Task 3.53.1 uses a raw HTTP URL to select an immutable Taskfile commit; the Git
-include syntax `.git//taskfiles/base.yml?ref=<SHA>` does not work with a commit
-SHA in that release. The [consumer example](consumer.md#3-remote-taskfile-optional-shared-helpers)
-uses `github.com/.../raw/<SHA>/...`, covered by the validation workflow's
+Task 3.53.1 uses a direct HTTP URL to select the fixed Taskfile version tag.
+The [consumer example](consumer.md#3-remote-taskfile-optional-shared-helpers)
+uses `https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml`,
+covered by the validation workflow's
 `TASK_REMOTE_TRUSTED_HOSTS=github.com` environment value.
 
 The [release workflow](../.github/workflows/release.yml) publishes only the
@@ -182,6 +183,6 @@ engine for consumers.
 ## Dependency updates
 
 DX extends the Renovate preset
-`github>Gildraen/renovate-config#86fd839c709a05f0ba9cea46c5e2aae2a3b35dae`.
-This published commit is pinned independently of the Feature, IA, tools and
+`github>Gildraen/renovate-config#v0.1.0-rc.1`.
+This candidate version tag is selected independently of the Feature, IA, tools and
 CI refs.

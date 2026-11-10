@@ -18,15 +18,16 @@ for (const component of ['agents', 'tools']) {
   const directory = `.devcontainer/components/${component}`;
   assert.equal(feature.containerEnv[home], `/opt/dx/components/${component}`);
   assert.equal(devcontainer.remoteEnv[home], '${containerWorkspaceFolder}/' + directory);
-  const ref = feature.options[`${component}Ref`].default;
-  assert.match(ref, /^[a-f0-9]{40}$/);
+  const version = feature.options[`${component}Version`].default;
+  assert.match(version, /^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
+  const resolved = execFileSync('git', ['-C', directory, 'rev-parse', `${version}^{commit}`], { encoding: 'utf8' }).trim();
   const entry = execFileSync('git', ['ls-files', '--stage', '--', directory], { encoding: 'utf8' }).trim();
-  assert.equal(entry, `160000 ${ref} 0\t${directory}`);
-  assert.equal(execFileSync('git', ['-C', directory, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), ref);
+  assert.equal(entry, `160000 ${resolved} 0\t${directory}`);
+  assert.equal(execFileSync('git', ['-C', directory, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), resolved);
   const url = execFileSync('git', ['config', '-f', '.gitmodules', '--get', `submodule.${directory}.url`], { encoding: 'utf8' }).trim();
   assert.equal(url, `https://github.com/Gildraen/dx-${component}.git`);
   const installer = fs.readFileSync('.devcontainer/src/dx/install.sh', 'utf8');
-  assert.ok(installer.includes(`${component.toUpperCase()}REF:-${ref}`), `installer default differs: ${component}`);
+  assert.ok(installer.includes(`${component.toUpperCase()}VERSION:-${version}`), `installer default differs: ${component}`);
 }
 for (const configuration of [feature, devcontainer]) {
   const settings = configuration.customizations?.vscode?.settings ?? {};

@@ -14,7 +14,7 @@ on:
 
 jobs:
   check-links:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@v0.1.0-rc.1
     with:
       link-check-paths: ${{ inputs.link-check-paths }}
       link-check-excludes: ${{ inputs.link-check-excludes }}

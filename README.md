@@ -23,7 +23,7 @@ The Feature provides Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and
 - **Reusable GitHub Actions workflows** from `Gildraen/ci-workflows` for
   `validate`, devcontainer tests and maintenance; the DX-specific
   `reusable-feature-test.yml` stays in this repository. Three DX compatibility
-  wrappers delegate to the external workflows at a pinned SHA, without copying
+  wrappers delegate to the external workflows at a fixed version tag, without copying
   their implementation, for callers using floating DX references.
 - The `dx` CI keeps structural validation on the runner, runs `task test` in
   this repository's devcontainer, and runs the Feature tests directly on the
@@ -71,12 +71,14 @@ See [docs/architecture.md](docs/architecture.md) for the full model.
 # .github/workflows/validate.yml
 jobs:
   validate:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@ee36dca8e6a5b2c40a652fcd438e4e6451c9e108
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v0.1.0-rc.1
 ```
 
-The Feature uses published OCI versions. Its `agentsRef` and `toolsRef` options
-select published Git refs independently; workflows and Taskfiles also select
-their own Git refs. Feature publication does not create Git tags for
+The shared components' candidate consumption version is `v0.1.0-rc.1`, a
+prerelease, not a stable release. The Feature uses published OCI versions.
+Its `agentsVersion` and `toolsVersion` options select version tags independently;
+workflows, Taskfiles and the Renovate preset also select their own version tags.
+Feature publication does not create Git tags for
 these components. Full walkthrough:
 [docs/consumer.md](docs/consumer.md).
 
@@ -97,7 +99,7 @@ between Feature, IA resources, MCP, Task and workflows.
 This repository's own devcontainer
 consumes the Feature from local source (`./src/dx`), not a published release;
 external consumers select a published Feature version.
-The installed components are snapshots: changing `agentsRef` or `toolsRef`
+The installed components are snapshots: changing `agentsVersion` or `toolsVersion`
 and rebuilding updates them without requiring a new Feature release.
 
 ## Developing a DX change (dogfood)
