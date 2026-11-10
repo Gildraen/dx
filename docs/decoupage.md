@@ -30,7 +30,7 @@ Ce workflow ne cree pas de references Git pour les autres composants.
 
 | Composant | Responsabilite | Dependances et interface actuelles |
 | --- | --- | --- |
-| [Feature](../.devcontainer/src/dx/devcontainer-feature.json) et [installer](../.devcontainer/src/dx/install.sh) | Installer les composants | Features tierces, `agentsRef`, `toolsRef`, `/opt/dx`, variables et liens de compatibilite, stockage gh |
+| [Feature](../.devcontainer/src/dx/devcontainer-feature.json) et [installer](../.devcontainer/src/dx/install.sh) | Installer les composants | Features tierces, `agentsVersion`, `toolsVersion`, `/opt/dx`, variables et liens de compatibilite, stockage gh |
 | [Entree IA](../.devcontainer/components/agents/AGENTS.md) | Charger les regles et orienter vers roles et skills | `Gildraen/dx-agents`, bootstrap racine, `DX_AGENTS_HOME`, liens relatifs et metadonnees |
 | [Lanceur MCP](../.devcontainer/components/tools/bin/dx-mcp) | Lancer le serveur GitHub officiel | `Gildraen/dx-tools`, `dx-mcp github [server options...]`, Docker et daemon accessibles, image `v1.10.1`, callback `127.0.0.1:8085` |
 | [Taskfile partage](../.devcontainer/components/tools/taskfiles/base.yml) | Exposer `doctor` et `mcp:github` | `Gildraen/dx-tools`, include distant avec ref Git ; `DX_TOOLS_HOME`, repli `DX_HOME`, executable `dx-mcp` |
@@ -93,7 +93,7 @@ L'exemple exact et la confiance restreinte
 a `github.com` sont dans [consumer.md](consumer.md#3-remote-taskfile-optional-shared-helpers).
 Le workflow validate conserve `TASK_REMOTE_TRUSTED_HOSTS=github.com`, suffisant
 pour l'URL `https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml`.
-Les valeurs par defaut de `agentsRef` et `toolsRef` sont respectivement
+Les valeurs par defaut de `agentsVersion` et `toolsVersion` sont respectivement
 `v0.1.0-rc.1` et
 `v0.1.0-rc.1`.
 Le preset Renovate utilise ici

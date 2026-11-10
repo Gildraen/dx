@@ -140,7 +140,7 @@ The normal loop is `edit Feature -> rebuild container -> test`. Component-only
 changes do not require a rebuild once the consumer reads live sources through
 `DX_AGENTS_HOME` and `DX_TOOLS_HOME`. Changes to the wrapper installed by
 `install.sh` require a rebuild. Installed consumers receive component changes
-by selecting a published `agentsRef` or `toolsRef` and rebuilding; Feature
+by selecting a published `agentsVersion` or `toolsVersion` and rebuilding; Feature
 implementation changes require a new Feature version.
 
 Run the consumer's `task validate` and `task test` in its devcontainer. The dx

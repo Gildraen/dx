@@ -76,7 +76,7 @@ jobs:
 
 The shared components' candidate consumption version is `v0.1.0-rc.1`, a
 prerelease, not a stable release. The Feature uses published OCI versions.
-Its `agentsRef` and `toolsRef` options select version tags independently;
+Its `agentsVersion` and `toolsVersion` options select version tags independently;
 workflows, Taskfiles and the Renovate preset also select their own version tags.
 Feature publication does not create Git tags for
 these components. Full walkthrough:
@@ -99,7 +99,7 @@ between Feature, IA resources, MCP, Task and workflows.
 This repository's own devcontainer
 consumes the Feature from local source (`./src/dx`), not a published release;
 external consumers select a published Feature version.
-The installed components are snapshots: changing `agentsRef` or `toolsRef`
+The installed components are snapshots: changing `agentsVersion` or `toolsVersion`
 and rebuilding updates them without requiring a new Feature release.
 
 ## Developing a DX change (dogfood)

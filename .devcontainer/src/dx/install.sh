@@ -4,17 +4,17 @@ set -euo pipefail
 
 DX_HOME="/opt/dx"
 FEATURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-agents_ref="${AGENTSREF:-v0.1.0-rc.1}"
-tools_ref="${TOOLSREF:-v0.1.0-rc.1}"
+agents_version="${AGENTSVERSION:-v0.1.0-rc.1}"
+tools_version="${TOOLSVERSION:-v0.1.0-rc.1}"
 download_root="$(mktemp -d)"
 trap 'rm -rf "$download_root"' EXIT
 
 install_component() {
-	local name="$1" ref="$2"
+	local name="$1" version="$2"
 	local checkout="$download_root/$name"
 	git init -q "$checkout"
 	git -C "$checkout" remote add origin "https://github.com/Gildraen/dx-$name.git"
-	GIT_TERMINAL_PROMPT=0 git -C "$checkout" fetch --depth=1 origin "$ref"
+	GIT_TERMINAL_PROMPT=0 git -C "$checkout" fetch --depth=1 origin "$version"
 	git -C "$checkout" checkout -q --detach FETCH_HEAD
 	rm -rf "$checkout/.git"
 	rm -rf "$DX_HOME/components/$name"
@@ -22,8 +22,8 @@ install_component() {
 	cp -R "$checkout/." "$DX_HOME/components/$name/"
 }
 
-install_component agents "$agents_ref"
-install_component tools "$tools_ref"
+install_component agents "$agents_version"
+install_component tools "$tools_version"
 test -f "$DX_HOME/components/agents/AGENTS.md"
 test -x "$DX_HOME/components/tools/bin/dx-mcp"
 

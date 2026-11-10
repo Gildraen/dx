@@ -5,15 +5,15 @@
     "description": "Installs the shared Gildraen developer-experience runtime and common tool baseline under /opt/dx.",
     "documentationURL": "https://github.com/Gildraen/dx",
     "options": {
-        "agentsRef": {
+        "agentsVersion": {
             "type": "string",
             "default": "v0.1.0-rc.1",
-            "description": "Git reference of Gildraen/dx-agents."
+            "description": "SemVer version of Gildraen/dx-agents."
         },
-        "toolsRef": {
+        "toolsVersion": {
             "type": "string",
             "default": "v0.1.0-rc.1",
-            "description": "Git reference of Gildraen/dx-tools."
+            "description": "SemVer version of Gildraen/dx-tools."
         }
     },
     "customizations": {

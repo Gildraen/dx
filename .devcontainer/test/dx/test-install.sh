@@ -36,8 +36,8 @@ for component in agents tools; do
   git -C "$checkout" tag v1.2.3
 done
 
-export AGENTSREF=v1.2.3
-export TOOLSREF=v1.2.3
+export AGENTSVERSION=v1.2.3
+export TOOLSVERSION=v1.2.3
 export GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_ALLOW_PROTOCOL=file
 export GIT_CONFIG_COUNT=2
 export GIT_CONFIG_KEY_0="url.file://$workdir/upstream/agents.insteadOf"
@@ -63,7 +63,7 @@ output="$(DX_TOOLS_HOME="$workdir/installed/components/tools" "$workdir/usr/loca
 [[ "$output" == $'fixture tools\ngithub\n--help' ]]
 
 for component in agents tools; do
-  variable="${component^^}REF"
+  variable="${component^^}VERSION"
   if env "$variable=invalid-ref" bash "$workdir/feature/install.sh" > "$workdir/invalid.log" 2>&1; then
     printf 'Installer accepted an invalid ref for: %s\n' "$component" >&2
     exit 1

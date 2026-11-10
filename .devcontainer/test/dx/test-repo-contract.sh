@@ -69,6 +69,6 @@ const feature = require('./.devcontainer/src/dx/devcontainer-feature.json');
 const consumer = fs.readFileSync('docs/consumer.md', 'utf8');
 assert.match(feature.version, /^\d+\.\d+\.\d+$/);
 assert.ok(consumer.includes('ghcr.io/gildraen/dx/dx:<released-version>'));
-for (const component of ['agents', 'tools']) assert.ok(consumer.includes(feature.options[`${component}Ref`].default));
+for (const component of ['agents', 'tools']) assert.ok(consumer.includes(feature.options[`${component}Version`].default));
 EOF
 echo "DX repository: Feature, consumer docs and pinned CI facades pass"

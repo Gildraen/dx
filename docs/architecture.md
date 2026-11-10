@@ -18,8 +18,8 @@ This document describes their integration; the
 The Feature is distributed through OCI at `ghcr.io/gildraen/dx/dx`. Workflows
 and the Remote Taskfile are resolved through Git references.
 These references are selected independently of the Feature version.
-The Feature's `agentsRef` defaults to
-`v0.1.0-rc.1`; `toolsRef` defaults to
+The Feature's `agentsVersion` defaults to
+`v0.1.0-rc.1`; `toolsVersion` defaults to
 `v0.1.0-rc.1`. Each selects the candidate version tag from its component
 repository; this is a prerelease, not a stable release. No versioned copy of
 either component is packaged in DX. The dogfood submodules record resolved
@@ -105,9 +105,9 @@ state must stay out of versioned files.
 
 ### Installed and live sources
 
-Installed components are snapshots of their selected refs. Updating
-`agentsRef` or `toolsRef` and rebuilding changes the component without changing
-the Feature version. This repository sets `DX_AGENTS_HOME` and `DX_TOOLS_HOME`
+Installed components are snapshots of their selected versions. Updating
+`agentsVersion` or `toolsVersion` and rebuilding changes that component without
+changing the Feature version. This repository sets `DX_AGENTS_HOME` and `DX_TOOLS_HOME`
 to `.devcontainer/components/agents` and `.devcontainer/components/tools`;
 `initializeCommand` initializes their pinned Git submodules. Its root
 [AGENTS.md](../AGENTS.md) loads that local entry point. The

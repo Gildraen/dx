@@ -12,7 +12,7 @@ required tools, Task contracts, CI jobs and AI resources before
 changing configuration. Preserve business settings, forwarded ports, mounts,
 environment requirements and project-specific agents and skills.
 
-Choose a DX Feature whose manifest supports `agentsRef` and `toolsRef`, plus
+Choose a DX Feature whose manifest supports `agentsVersion` and `toolsVersion`, plus
 version tags in `Gildraen/dx-agents`, `Gildraen/dx-tools` and
 `Gildraen/ci-workflows`. The candidate component and preset version is
 `v0.1.0-rc.1`, a prerelease, not a stable release. The local Feature test and fixed component

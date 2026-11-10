@@ -18,8 +18,8 @@ stable release:
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
     "./.dx/.devcontainer/src/dx": {
-      "agentsRef": "v0.1.0-rc.1",
-      "toolsRef": "v0.1.0-rc.1"
+      "agentsVersion": "v0.1.0-rc.1",
+      "toolsVersion": "v0.1.0-rc.1"
     }
   }
 }
@@ -27,7 +27,7 @@ stable release:
 
 For an installed release, replace the local Feature key with
 `ghcr.io/gildraen/dx/dx:<released-version>` and select a published version
-whose manifest exposes `agentsRef` and `toolsRef`. A previously published
+whose manifest exposes `agentsVersion` and `toolsVersion`. A previously published
 Feature does not acquire these options automatically.
 
 Only add other Features or packages for project-specific requirements
@@ -39,8 +39,8 @@ declares Node.js LTS, GitHub CLI, Go Task 3.53.1, Git, `jq`, ripgrep and
 `libatomic1`. Check the manifest of the selected release before relying on a
 tool; requirements not included there remain project-specific.
 
-The Feature acquires `Gildraen/dx-agents` at `agentsRef` into `/opt/dx/components/agents`
-and `Gildraen/dx-tools` at `toolsRef` into `/opt/dx/components/tools`. These options are
+The Feature acquires `Gildraen/dx-agents` at `agentsVersion` into `/opt/dx/components/agents`
+and `Gildraen/dx-tools` at `toolsVersion` into `/opt/dx/components/tools`. These options are
 independent and default to the version tags shown above. It sets `DX_AGENTS_HOME`
 and `DX_TOOLS_HOME` to those locations, retaining `DX_HOME=/opt/dx` and
 compatibility symlinks for `AGENTS.md`, `instructions/`, `agents/`, `skills/`,
