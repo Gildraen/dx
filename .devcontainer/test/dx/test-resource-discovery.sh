@@ -19,8 +19,11 @@ for (const component of ['agents', 'tools']) {
   assert.equal(feature.containerEnv[home], `/opt/dx/components/${component}`);
   assert.equal(devcontainer.remoteEnv[home], '${containerWorkspaceFolder}/' + directory);
   const version = feature.options[`${component}Version`].default;
+  const commit = feature.options[`${component}Commit`].default;
   assert.match(version, /^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
+  assert.match(commit, /^[0-9a-f]{40}$/);
   const resolved = execFileSync('git', ['-C', directory, 'rev-parse', `${version}^{commit}`], { encoding: 'utf8' }).trim();
+  assert.equal(resolved, commit, `${component} tag and commit SHA must match`);
   const entry = execFileSync('git', ['ls-files', '--stage', '--', directory], { encoding: 'utf8' }).trim();
   assert.equal(entry, `160000 ${resolved} 0\t${directory}`);
   assert.equal(execFileSync('git', ['-C', directory, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), resolved);
@@ -28,6 +31,7 @@ for (const component of ['agents', 'tools']) {
   assert.equal(url, `https://github.com/Gildraen/dx-${component}.git`);
   const installer = fs.readFileSync('.devcontainer/src/dx/install.sh', 'utf8');
   assert.ok(installer.includes(`${component.toUpperCase()}VERSION:-${version}`), `installer default differs: ${component}`);
+  assert.ok(installer.includes(`${component.toUpperCase()}COMMIT:-${commit}`), `installer commit default differs: ${component}`);
 }
 for (const configuration of [feature, devcontainer]) {
   const settings = configuration.customizations?.vscode?.settings ?? {};

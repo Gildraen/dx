@@ -37,7 +37,9 @@ for component in agents tools; do
 done
 
 export AGENTSVERSION=v1.2.3
+export AGENTSCOMMIT="$(git -C "$workdir/upstream/agents" rev-parse HEAD)"
 export TOOLSVERSION=v1.2.3
+export TOOLSCOMMIT="$(git -C "$workdir/upstream/tools" rev-parse HEAD)"
 export GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_ALLOW_PROTOCOL=file
 export GIT_CONFIG_COUNT=2
 export GIT_CONFIG_KEY_0="url.file://$workdir/upstream/agents.insteadOf"
@@ -63,13 +65,25 @@ output="$(DX_TOOLS_HOME="$workdir/installed/components/tools" "$workdir/usr/loca
 [[ "$output" == $'fixture tools\ngithub\n--help' ]]
 
 for component in agents tools; do
-  variable="${component^^}VERSION"
-  if env "$variable=invalid-ref" bash "$workdir/feature/install.sh" > "$workdir/invalid.log" 2>&1; then
-    printf 'Installer accepted an invalid ref for: %s\n' "$component" >&2
+  version_variable="${component^^}VERSION"
+  commit_variable="${component^^}COMMIT"
+  if env "$version_variable=invalid-ref" bash "$workdir/feature/install.sh" > "$workdir/invalid.log" 2>&1; then
+    printf 'Installer accepted an invalid version tag for: %s\n' "$component" >&2
     exit 1
   fi
   grep -Fq 'invalid-ref' "$workdir/invalid.log"
+  if env "$commit_variable=invalid-ref" bash "$workdir/feature/install.sh" > "$workdir/invalid.log" 2>&1; then
+    printf 'Installer accepted an invalid commit SHA for: %s\n' "$component" >&2
+    exit 1
+  fi
+  grep -Fq "Invalid commit SHA for $component" "$workdir/invalid.log"
 done
+
+if AGENTSCOMMIT="$TOOLSCOMMIT" bash "$workdir/feature/install.sh" > "$workdir/mismatch.log" 2>&1; then
+  printf 'Installer accepted a tag and commit SHA that do not match\n' >&2
+  exit 1
+fi
+grep -Fq 'does not match' "$workdir/mismatch.log"
 
 for component in agents tools; do
   printf 'stale\n' > "$workdir/installed/components/$component/stale"
@@ -82,4 +96,4 @@ for component in agents tools; do
   fi
 done
 
-printf 'Installer: offline refs, component snapshots, six symlinks, wrapper, replacement and invalid refs pass\n'
+printf 'Installer: tag/SHA pairs, component snapshots, six symlinks, wrapper, replacement and invalid refs pass\n'

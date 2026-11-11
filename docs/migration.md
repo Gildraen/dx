@@ -12,9 +12,10 @@ required tools, Task contracts, CI jobs and AI resources before
 changing configuration. Preserve business settings, forwarded ports, mounts,
 environment requirements and project-specific agents and skills.
 
-Choose a DX Feature whose manifest supports `agentsVersion` and `toolsVersion`, plus
-version tags in `Gildraen/dx-agents`, `Gildraen/dx-tools` and
-`Gildraen/ci-workflows`. The candidate component and preset version is
+Choose a DX Feature whose manifest supports component version and commit
+options. Component tags select Renovate's update stream and must match the
+commit SHAs used for checkout. Workflow calls use a fixed SHA with the version
+tag in a comment. The candidate tag is
 `v0.1.0-rc.1`, a prerelease, not a stable release. The local Feature test and fixed component
 examples are in [consumer.md](consumer.md); they do not claim that an older
 published Feature implements the new options. OCI versions and Git refs are
@@ -55,7 +56,7 @@ project's requirements.
    validation workflow supplies Task and sets
    `TASK_REMOTE_TRUSTED_HOSTS=github.com` for includes hosted on `github.com`.
    The raw URL in [consumer.md](consumer.md#3-remote-taskfile-optional-shared-helpers)
-   uses `https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml`
+   uses `https://github.com/Gildraen/dx-tools/raw/6630f37ffdc3a8c51af0f4795145a4743a61584b/taskfiles/base.yml # v0.1.0-rc.1`
    and is covered by that trust value. Task 3.53.1 uses this direct HTTP include.
    Additional project dependencies
    must be available on the runner. It executes the selected task on that
@@ -64,8 +65,8 @@ project's requirements.
    devcontainer-test and maintenance workflows in `Gildraen/ci-workflows`
    without dropping application jobs, triggers or required permissions.
    DX's local reusable-feature-test is not a consumer workflow.
-   Use fixed version tags for workflows and the Remote
-   Taskfile; consult [consumer.md](consumer.md) for the workflow and include syntax.
+   Pin workflow and Remote Taskfile commits by SHA, retaining version tags in
+   comments for Renovate. See [consumer.md](consumer.md) for the exact syntax.
 5. **AI resources**: add the client-neutral root `AGENTS.md` bootstrap from
    [consumer.md](consumer.md), preserving project-specific rules. It resolves
    `DX_AGENTS_HOME` and loads the shared guide and rules explicitly. Keep

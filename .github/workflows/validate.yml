@@ -9,11 +9,11 @@ concurrency:
 
 jobs:
   validate:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v0.1.0-rc.1
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1
     secrets: inherit
 
   test:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@v0.1.0-rc.1
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1
     secrets: inherit
 
   feature-test:
@@ -25,10 +25,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Same schema check the publish step runs, so a bad manifest fails before Feature publication.
-      - uses: devcontainers/action@v1.4.3
+      - uses: devcontainers/action@1082abd5d2bf3a11abccba70eef98df068277772 # v1.4.3
         with:
           validate-only: "true"
           base-path-to-features: "./.devcontainer/src"

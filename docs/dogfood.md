@@ -54,9 +54,10 @@ The DX worktree has pinned submodules at `.devcontainer/components/agents`
 and `.devcontainer/components/tools`. Changes inside them belong to
 `Gildraen/dx-agents` or `Gildraen/dx-tools`, not to DX; DX tracks their commit
 pointers. Its `initializeCommand` runs `git submodule update --init --recursive`.
-The candidate component version is `v0.1.0-rc.1`, a prerelease, not a stable
-release. To select it, check out the tag in each initialized submodule with
-`git checkout --detach v0.1.0-rc.1`; DX records the resolved commits as gitlinks.
+The candidate tag is `v0.1.0-rc.1`, a prerelease, not a stable release. It
+resolves to `a448037a8b96b2269ac1b46f0ff2018738083c1e` for agents and
+`6630f37ffdc3a8c51af0f4795145a4743a61584b` for tools. Check out those SHAs in
+the initialized submodules; DX records them as gitlinks.
 
 From the consumer, select those local components for the current shell:
 
@@ -119,7 +120,7 @@ Restore the fixed candidate remote include before committing the consumer change
 
 ```yaml
 includes:
-  dx: https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml
+  dx: https://github.com/Gildraen/dx-tools/raw/6630f37ffdc3a8c51af0f4795145a4743a61584b/taskfiles/base.yml # v0.1.0-rc.1
 ```
 
 For this URL, run Task with `TASK_REMOTE_TRUSTED_HOSTS=github.com` or accept
@@ -140,7 +141,7 @@ The normal loop is `edit Feature -> rebuild container -> test`. Component-only
 changes do not require a rebuild once the consumer reads live sources through
 `DX_AGENTS_HOME` and `DX_TOOLS_HOME`. Changes to the wrapper installed by
 `install.sh` require a rebuild. Installed consumers receive component changes
-by selecting a published `agentsVersion` or `toolsVersion` and rebuilding; Feature
+by selecting a published version tag with its matching commit SHA and rebuilding; Feature
 implementation changes require a new Feature version.
 
 Run the consumer's `task validate` and `task test` in its devcontainer. The dx
@@ -153,8 +154,9 @@ Docker daemon can bind-mount the CLI's temporary project paths. With the
 standard workspace mount, those paths differ inside the devcontainer.
 Reusable GitHub workflows cannot see a local worktree. The portable workflow
 test reference is
-`Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v0.1.0-rc.1`
-(the same version tag applies to devcontainer-test and maintenance).
+`Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10`
+with tag `v0.1.0-rc.1` in its comment (the same SHA applies to
+devcontainer-test and maintenance).
 Testing changed CI or Remote Taskfiles requires a published ref in their
 own repository, not a branch in DX. The current component integration branch
 is `feat/component-extraction`; a test include may use

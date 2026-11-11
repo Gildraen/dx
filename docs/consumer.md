@@ -7,9 +7,10 @@ working on `dx` itself using a real project as a testbed, see
 ## 1. Dev Container Feature
 
 For integration testing, use the local Feature checkout (see
-[dogfood.md](dogfood.md) to create `.devcontainer/.dx`). The component refs
-below select the candidate version tag `v0.1.0-rc.1`, a prerelease, not a
-stable release:
+[dogfood.md](dogfood.md) to create `.devcontainer/.dx`). Each component uses a
+SemVer tag for Renovate's update stream and a commit SHA as the immutable
+checkout ref. The example pair selects candidate `v0.1.0-rc.1`, a prerelease,
+not a stable release:
 
 ```jsonc
 // .devcontainer/devcontainer.json
@@ -19,7 +20,9 @@ stable release:
   "features": {
     "./.dx/.devcontainer/src/dx": {
       "agentsVersion": "v0.1.0-rc.1",
-      "toolsVersion": "v0.1.0-rc.1"
+      "agentsCommit": "a448037a8b96b2269ac1b46f0ff2018738083c1e",
+      "toolsVersion": "v0.1.0-rc.1",
+      "toolsCommit": "6630f37ffdc3a8c51af0f4795145a4743a61584b"
     }
   }
 }
@@ -27,8 +30,8 @@ stable release:
 
 For an installed release, replace the local Feature key with
 `ghcr.io/gildraen/dx/dx:<released-version>` and select a published version
-whose manifest exposes `agentsVersion` and `toolsVersion`. A previously published
-Feature does not acquire these options automatically.
+whose manifest exposes the component version and commit options. A previously
+published Feature does not acquire these options automatically.
 
 Only add other Features or packages for project-specific requirements
 (Docker-outside-of-Docker, project language runtimes, service CLIs, …). The DX
@@ -39,16 +42,17 @@ declares Node.js LTS, GitHub CLI, Go Task 3.53.1, Git, `jq`, ripgrep and
 `libatomic1`. Check the manifest of the selected release before relying on a
 tool; requirements not included there remain project-specific.
 
-The Feature acquires `Gildraen/dx-agents` at `agentsVersion` into `/opt/dx/components/agents`
-and `Gildraen/dx-tools` at `toolsVersion` into `/opt/dx/components/tools`. These options are
-independent and default to the version tags shown above. It sets `DX_AGENTS_HOME`
+The Feature fetches each tag and verifies it resolves to the matching commit
+SHA, then checks out that SHA into `/opt/dx/components/agents` and
+`/opt/dx/components/tools`. The version and commit options are independent per
+component but must be updated as a pair. It sets `DX_AGENTS_HOME`
 and `DX_TOOLS_HOME` to those locations, retaining `DX_HOME=/opt/dx` and
 compatibility symlinks for `AGENTS.md`, `instructions/`, `agents/`, `skills/`,
 `bin/` and `taskfiles/`. Shared roles are under
 `/opt/dx/components/agents/agents/`; `/opt/dx/agents` links to that directory,
 not to the component root.
 No copy of either component is versioned in the Feature source. The installed
-checkouts are snapshots; change the relevant ref and rebuild to update one
+checkouts are snapshots; change the relevant tag/SHA pair and rebuild to update one
 without changing the Feature version. For live sources, use [dogfood.md](dogfood.md).
 The launcher runs GitHub's pinned official MCP image through Docker and does
 not manage a GitHub token. A project that enables MCP must provide Docker
@@ -117,7 +121,7 @@ on:
   pull_request:
 jobs:
   validate:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v0.1.0-rc.1
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1
 ```
 
 The reusable workflow runs `task validate` (configurable via the `task-name`
@@ -129,16 +133,16 @@ those URLs without enabling global `--yes` behavior. The Remote Taskfile
 example below uses that host.
 
 Same pattern for maintenance / link-checking:
-`Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@v0.1.0-rc.1`.
+`Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1`.
 For tests in the consumer container, use
-`Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@v0.1.0-rc.1`;
+`Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1`;
 the container must provide `task test`. DX's `reusable-feature-test.yml` is
 local to the Feature repository, not part of these portable workflows.
 
 DX also exposes three compatibility wrappers at
 `Gildraen/dx/.github/workflows/reusable-{validate,devcontainer-test,maintenance}.yml`.
-They delegate to the external workflows at the version tag above and forward their
-inputs without copying implementations. Callers using floating DX references
+They delegate to the external workflows at the pinned SHA above and retain the
+version tag in a comment for Renovate. They forward their inputs without copying implementations. Callers using floating DX references
 can retain these paths.
 
 ## 3. Remote Taskfile (optional shared helpers)
@@ -146,7 +150,7 @@ can retain these paths.
 ```yaml
 # Taskfile.yml
 includes:
-  dx: https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml
+  dx: https://github.com/Gildraen/dx-tools/raw/6630f37ffdc3a8c51af0f4795145a4743a61584b/taskfiles/base.yml # v0.1.0-rc.1
 ```
 
 Gives you `task dx:doctor` and `task dx:mcp:github`.
@@ -161,8 +165,8 @@ The reusable validation workflow installs a compatible Task release on its GitHu
 Actions runner before executing `task validate`. Its availability in CI does
 not mean that the local devcontainer already provides it.
 
-The version tag must exist in the tools repository. Use the direct HTTP URL
-above with Task 3.53.1; the consumption reference is the fixed tag.
+The URL pins the commit SHA. Its trailing version tag comment is Renovate's
+update stream. Use the direct HTTP URL above with Task 3.53.1.
 
 For a manual invocation, either accept Task's host trust prompt or restrict
 non-interactive trust to `github.com`:
@@ -203,11 +207,14 @@ read the selected role or workflow before applying it. Directory contents are
 the authoritative list, not a catalog in this guide.
 
 Shared sources live at the root of `Gildraen/dx-agents` and can be used
-independently of the Feature, Docker, MCP and the tools component. For a local
-checkout at the same version tag, from the consumer root:
+independently of the Feature, Docker, MCP and the tools component. For local
+checkouts at the candidate commit SHAs, from the consumer root:
 
 ```sh
-git clone --branch v0.1.0-rc.1 --depth 1 https://github.com/Gildraen/dx-agents.git .devcontainer/components/agents
+git init .devcontainer/components/agents
+git -C .devcontainer/components/agents remote add origin https://github.com/Gildraen/dx-agents.git
+git -C .devcontainer/components/agents fetch --depth=1 origin a448037a8b96b2269ac1b46f0ff2018738083c1e
+git -C .devcontainer/components/agents checkout --detach FETCH_HEAD
 export DX_AGENTS_HOME="$PWD/.devcontainer/components/agents"
 ```
 
@@ -216,14 +223,18 @@ consumer. Keep it out of the consumer's tracked files, or declare it as a
 pinned submodule. Tools can likewise be checked out independently:
 
 ```sh
-git clone --branch v0.1.0-rc.1 --depth 1 https://github.com/Gildraen/dx-tools.git .devcontainer/components/tools
+git init .devcontainer/components/tools
+git -C .devcontainer/components/tools remote add origin https://github.com/Gildraen/dx-tools.git
+git -C .devcontainer/components/tools fetch --depth=1 origin 6630f37ffdc3a8c51af0f4795145a4743a61584b
+git -C .devcontainer/components/tools checkout --detach FETCH_HEAD
 export DX_TOOLS_HOME="$PWD/.devcontainer/components/tools"
 export PATH="$DX_TOOLS_HOME/bin:$PATH"
 ```
 
-Cloning a tag checks out its resolved commit in detached HEAD state. For a
-submodule, the parent repository records that commit as a gitlink; the tag is
-the selected consumption version, not an extra field in `.gitmodules`.
+The example tracks tag `v0.1.0-rc.1` with those exact commit SHAs. Renovate
+updates the version and commit options together. For a submodule, the parent
+repository records the pinned commit as a gitlink; `.gitmodules` does not carry
+the version tag.
 
 Project-specific roles and skills remain additive
 under `.agents/agents/` and `.agents/skills/` in the consumer. These are

@@ -23,7 +23,7 @@ The Feature provides Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and
 - **Reusable GitHub Actions workflows** from `Gildraen/ci-workflows` for
   `validate`, devcontainer tests and maintenance; the DX-specific
   `reusable-feature-test.yml` stays in this repository. Three DX compatibility
-  wrappers delegate to the external workflows at a fixed version tag, without copying
+  wrappers delegate to the external workflows at a fixed commit SHA with the version tag in a comment, without copying
   their implementation, for callers using floating DX references.
 - The `dx` CI keeps structural validation on the runner, runs `task test` in
   this repository's devcontainer, and runs the Feature tests directly on the
@@ -71,14 +71,15 @@ See [docs/architecture.md](docs/architecture.md) for the full model.
 # .github/workflows/validate.yml
 jobs:
   validate:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@v0.1.0-rc.1
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1
 ```
 
-The shared components' candidate consumption version is `v0.1.0-rc.1`, a
-prerelease, not a stable release. The Feature uses published OCI versions.
-Its `agentsVersion` and `toolsVersion` options select version tags independently;
-workflows, Taskfiles and the Renovate preset also select their own version tags.
-Feature publication does not create Git tags for
+The shared components' candidate tag is `v0.1.0-rc.1`, a prerelease, not a
+stable release. The Feature uses published OCI versions. Each component has a
+SemVer tag option (`agentsVersion` or `toolsVersion`) and a commit SHA option
+(`agentsCommit` or `toolsCommit`). The installer verifies that each tag resolves
+to its SHA, then checks out the SHA. Workflows, Taskfiles and the Renovate preset
+select their own references. Feature publication does not create Git tags for
 these components. Full walkthrough:
 [docs/consumer.md](docs/consumer.md).
 
@@ -99,8 +100,8 @@ between Feature, IA resources, MCP, Task and workflows.
 This repository's own devcontainer
 consumes the Feature from local source (`./src/dx`), not a published release;
 external consumers select a published Feature version.
-The installed components are snapshots: changing `agentsVersion` or `toolsVersion`
-and rebuilding updates them without requiring a new Feature release.
+The installed components are snapshots: update each tag and its matching commit
+SHA, then rebuild to update it without requiring a new Feature release.
 
 ## Developing a DX change (dogfood)
 

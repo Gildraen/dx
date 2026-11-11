@@ -53,7 +53,9 @@ for workflow in validate devcontainer-test maintenance; do
     const jobs = Object.values(workflow.jobs);
     assert.equal(jobs.length, 1);
     const job = jobs[0];
-    assert.equal(job.uses, `Gildraen/ci-workflows/.github/workflows/reusable-${name}.yml@v0.1.0-rc.1`);
+    assert.equal(job.uses, `Gildraen/ci-workflows/.github/workflows/reusable-${name}.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10`);
+    const source = fs.readFileSync(`.github/workflows/reusable-${name}.yml`, "utf8");
+    assert.ok(source.includes("@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1"));
     assert.equal(job.steps, undefined);
     assert.equal(job["runs-on"], undefined);
     const inputs = Object.keys(workflow.on.workflow_call?.inputs ?? {});
@@ -69,6 +71,9 @@ const feature = require('./.devcontainer/src/dx/devcontainer-feature.json');
 const consumer = fs.readFileSync('docs/consumer.md', 'utf8');
 assert.match(feature.version, /^\d+\.\d+\.\d+$/);
 assert.ok(consumer.includes('ghcr.io/gildraen/dx/dx:<released-version>'));
-for (const component of ['agents', 'tools']) assert.ok(consumer.includes(feature.options[`${component}Version`].default));
+for (const component of ['agents', 'tools']) {
+  assert.ok(consumer.includes(feature.options[`${component}Version`].default));
+  assert.ok(consumer.includes(feature.options[`${component}Commit`].default));
+}
 EOF
 echo "DX repository: Feature, consumer docs and pinned CI facades pass"

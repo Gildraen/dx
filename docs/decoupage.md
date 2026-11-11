@@ -13,9 +13,11 @@ du runtime ; le [guide consommateur](consumer.md) decrit le bootstrap local.
 porte les workflows portables. La Feature acquiert les refs Git agents et
 tools independamment, sans copie de leurs sources versionnee dans DX.
 La version OCI, les refs des composants et les refs CI sont independantes.
-Le contrat candidat selectionne les tags `v0.1.0-rc.1` des quatre composants
-partages (agents, tools, CI et preset Renovate) ; c'est une preversion, pas une
-version stable. Les sous-modules enregistrent les commits resolus par gitlink,
+Les composants agents et tools utilisent le tag candidat `v0.1.0-rc.1` pour le
+suivi Renovate et enregistrent les commits correspondants par SHA dans les
+options Feature et les gitlinks. Les workflows CI utilisent leur SHA avec le
+tag en commentaire ; le preset Renovate conserve sa reference tag native. Cette
+preversion n'est pas stable. Les sous-modules enregistrent les commits resolus par gitlink,
 sans champ de version independant dans `.gitmodules`.
 
 Le [workflow de publication](../.github/workflows/release.yml) est declenche
@@ -30,7 +32,7 @@ Ce workflow ne cree pas de references Git pour les autres composants.
 
 | Composant | Responsabilite | Dependances et interface actuelles |
 | --- | --- | --- |
-| [Feature](../.devcontainer/src/dx/devcontainer-feature.json) et [installer](../.devcontainer/src/dx/install.sh) | Installer les composants | Features tierces, `agentsVersion`, `toolsVersion`, `/opt/dx`, variables et liens de compatibilite, stockage gh |
+| [Feature](../.devcontainer/src/dx/devcontainer-feature.json) et [installer](../.devcontainer/src/dx/install.sh) | Installer les composants | Features tierces, paires `agentsVersion`/`agentsCommit` et `toolsVersion`/`toolsCommit`, `/opt/dx`, variables et liens de compatibilite, stockage gh |
 | [Entree IA](../.devcontainer/components/agents/AGENTS.md) | Charger les regles et orienter vers roles et skills | `Gildraen/dx-agents`, bootstrap racine, `DX_AGENTS_HOME`, liens relatifs et metadonnees |
 | [Lanceur MCP](../.devcontainer/components/tools/bin/dx-mcp) | Lancer le serveur GitHub officiel | `Gildraen/dx-tools`, `dx-mcp github [server options...]`, Docker et daemon accessibles, image `v1.10.1`, callback `127.0.0.1:8085` |
 | [Taskfile partage](../.devcontainer/components/tools/taskfiles/base.yml) | Exposer `doctor` et `mcp:github` | `Gildraen/dx-tools`, include distant avec ref Git ; `DX_TOOLS_HOME`, repli `DX_HOME`, executable `dx-mcp` |
@@ -87,15 +89,16 @@ DX conserve trois facades `reusable-validate.yml`,
 transmettent leurs inputs, sans copie d'implementation, pour les appels qui
 utilisent des references DX flottantes.
 
-Le Taskfile distant utilise une URL HTTP directe avec le tag `v0.1.0-rc.1`
-dans le chemin, distinct des tags OCI. Task `3.53.1` utilise cet include HTTP.
+Le Taskfile distant utilise une URL HTTP directe avec le SHA du commit dans le
+chemin, distinct des tags OCI. Le commentaire conserve le tag `v0.1.0-rc.1`
+comme flux de mise à jour Renovate. Task `3.53.1` utilise cet include HTTP.
 L'exemple exact et la confiance restreinte
 a `github.com` sont dans [consumer.md](consumer.md#3-remote-taskfile-optional-shared-helpers).
 Le workflow validate conserve `TASK_REMOTE_TRUSTED_HOSTS=github.com`, suffisant
-pour l'URL `https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml`.
-Les valeurs par defaut de `agentsVersion` et `toolsVersion` sont respectivement
-`v0.1.0-rc.1` et
-`v0.1.0-rc.1`.
+pour l'URL `https://github.com/Gildraen/dx-tools/raw/6630f37ffdc3a8c51af0f4795145a4743a61584b/taskfiles/base.yml # v0.1.0-rc.1`.
+Les valeurs par defaut de `agentsVersion` et `toolsVersion` sont
+`v0.1.0-rc.1`; `agentsCommit` et `toolsCommit` contiennent les SHA resolves
+correspondants. L'installateur refuse une paire tag/SHA incoherente.
 Le preset Renovate utilise ici
 `github>Gildraen/renovate-config#v0.1.0-rc.1`,
 fixe au tag candidat independamment des autres composants.

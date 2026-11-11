@@ -8,12 +8,22 @@
         "agentsVersion": {
             "type": "string",
             "default": "v0.1.0-rc.1",
-            "description": "SemVer version of Gildraen/dx-agents."
+            "description": "SemVer tag tracked for Gildraen/dx-agents."
+        },
+        "agentsCommit": {
+            "type": "string",
+            "default": "a448037a8b96b2269ac1b46f0ff2018738083c1e",
+            "description": "Commit SHA resolved by agentsVersion."
         },
         "toolsVersion": {
             "type": "string",
             "default": "v0.1.0-rc.1",
-            "description": "SemVer version of Gildraen/dx-tools."
+            "description": "SemVer tag tracked for Gildraen/dx-tools."
+        },
+        "toolsCommit": {
+            "type": "string",
+            "default": "6630f37ffdc3a8c51af0f4795145a4743a61584b",
+            "description": "Commit SHA resolved by toolsVersion."
         }
     },
     "customizations": {

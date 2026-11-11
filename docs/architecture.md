@@ -18,12 +18,12 @@ This document describes their integration; the
 The Feature is distributed through OCI at `ghcr.io/gildraen/dx/dx`. Workflows
 and the Remote Taskfile are resolved through Git references.
 These references are selected independently of the Feature version.
-The Feature's `agentsVersion` defaults to
-`v0.1.0-rc.1`; `toolsVersion` defaults to
-`v0.1.0-rc.1`. Each selects the candidate version tag from its component
-repository; this is a prerelease, not a stable release. No versioned copy of
-either component is packaged in DX. The dogfood submodules record resolved
-commits as gitlinks; selecting a tag does not add a version field to `.gitmodules`.
+The Feature defaults `agentsVersion` and `toolsVersion` to candidate tag
+`v0.1.0-rc.1`, a prerelease, not a stable release. `agentsCommit` and
+`toolsCommit` hold the corresponding commit SHAs. The installer verifies each
+tag/SHA pair and checks out the commit SHA. No versioned copy of either
+component is packaged in DX. The dogfood submodules record resolved commits as
+gitlinks; selecting a tag does not add a version field to `.gitmodules`.
 
 ## What lives where
 
@@ -157,19 +157,21 @@ tools directory and fails when it is absent; `mcp:github` invokes the launcher.
 Reusable workflows operate on the caller's checkout: validate installs Task
 `3.53.1` and runs the selected task; devcontainer-test runs `task test` inside
 the caller's container; maintenance checks selected Markdown paths with lychee.
-The portable workflows are called from `Gildraen/ci-workflows` at
-`v0.1.0-rc.1`. Local Feature-test invokes the
+The portable workflows are pinned to commit
+`b8cc1c66c153e49887f0c63baa4a1aa238998b10`, with tag `v0.1.0-rc.1` retained in
+comments for Renovate. Local Feature-test invokes the
 DX-specific Feature test script. Their source paths
 and inputs are listed in [decoupage.md](decoupage.md).
 
 DX retains three `reusable-*.yml` compatibility wrappers for validate,
 devcontainer-test and maintenance. Each delegates to the corresponding external
-workflow at that version tag and forwards its inputs, without a local implementation
-copy. These paths serve callers using floating DX references.
+workflow at that pinned SHA, keeps the tag comment for Renovate, and forwards its
+inputs without a local implementation copy. These paths serve callers using
+floating DX references.
 
-Task 3.53.1 uses a direct HTTP URL to select the fixed Taskfile version tag.
+Task 3.53.1 uses a direct HTTP URL whose path pins the Taskfile commit SHA.
 The [consumer example](consumer.md#3-remote-taskfile-optional-shared-helpers)
-uses `https://github.com/Gildraen/dx-tools/raw/v0.1.0-rc.1/taskfiles/base.yml`,
+uses `https://github.com/Gildraen/dx-tools/raw/6630f37ffdc3a8c51af0f4795145a4743a61584b/taskfiles/base.yml # v0.1.0-rc.1`,
 covered by the validation workflow's
 `TASK_REMOTE_TRUSTED_HOSTS=github.com` environment value.
 
