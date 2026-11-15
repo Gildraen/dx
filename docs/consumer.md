@@ -9,20 +9,22 @@ working on `dx` itself using a real project as a testbed, see
 For integration testing, use the local Feature checkout (see
 [dogfood.md](dogfood.md) to create `.devcontainer/.dx`). Each component uses a
 SemVer tag for Renovate's update stream and a commit SHA as the immutable
-checkout ref. The example pair selects candidate `v0.1.0-rc.1`, a prerelease,
-not a stable release:
+checkout ref. Replace the image placeholder with the consumer's base image and
+the component placeholders with a tag and matching commit SHA from the selected
+component source; the Feature defaults are in the
+[manifest](../.devcontainer/src/dx/devcontainer-feature.json).
 
 ```jsonc
 // .devcontainer/devcontainer.json
 {
   "name": "my-project",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "image": "<project-base-image>",
   "features": {
     "./.dx/.devcontainer/src/dx": {
-      "agentsVersion": "v0.1.0-rc.1",
-      "agentsCommit": "a448037a8b96b2269ac1b46f0ff2018738083c1e",
-      "toolsVersion": "v0.1.0-rc.1",
-      "toolsCommit": "6630f37ffdc3a8c51af0f4795145a4743a61584b"
+      "agentsVersion": "<agents-tag>",
+      "agentsCommit": "<agents-commit-sha>",
+      "toolsVersion": "<tools-tag>",
+      "toolsCommit": "<tools-commit-sha>"
     }
   }
 }
@@ -38,9 +40,9 @@ Only add other Features or packages for project-specific requirements
 Feature does not provide those tools.
 
 The [Feature manifest](../.devcontainer/src/dx/devcontainer-feature.json)
-declares Node.js LTS, GitHub CLI, Go Task 3.53.1, Git, `jq`, ripgrep and
-`libatomic1`. Check the manifest of the selected release before relying on a
-tool; requirements not included there remain project-specific.
+declares Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and `libatomic1`.
+Check the manifest of the selected release for exact tool versions and
+availability; requirements not included there remain project-specific.
 
 The Feature fetches each tag and verifies it resolves to the matching commit
 SHA, then checks out that SHA into `/opt/dx/components/agents` and
@@ -54,7 +56,7 @@ not to the component root.
 No copy of either component is versioned in the Feature source. The installed
 checkouts are snapshots; change the relevant tag/SHA pair and rebuild to update one
 without changing the Feature version. For live sources, use [dogfood.md](dogfood.md).
-The launcher runs GitHub's pinned official MCP image through Docker and does
+The launcher runs the official GitHub MCP image selected in its source through Docker and does
 not manage a GitHub token. A project that enables MCP must provide Docker
 access and configure its MCP client separately. The launcher has no
 per-consumer image setting. DX does not
@@ -121,7 +123,7 @@ on:
   pull_request:
 jobs:
   validate:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@<ci-workflow-commit-sha> # <ci-workflow-tag>
 ```
 
 The reusable workflow runs `task validate` (configurable via the `task-name`
@@ -133,16 +135,17 @@ those URLs without enabling global `--yes` behavior. The Remote Taskfile
 example below uses that host.
 
 Same pattern for maintenance / link-checking:
-`Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1`.
+`Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@<ci-workflow-commit-sha> # <ci-workflow-tag>`.
 For tests in the consumer container, use
-`Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1`;
+`Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@<ci-workflow-commit-sha> # <ci-workflow-tag>`;
 the container must provide `task test`. DX's `reusable-feature-test.yml` is
 local to the Feature repository, not part of these portable workflows.
 
 DX also exposes three compatibility wrappers at
 `Gildraen/dx/.github/workflows/reusable-{validate,devcontainer-test,maintenance}.yml`.
-They delegate to the external workflows at the pinned SHA above and retain the
-version tag in a comment for Renovate. They forward their inputs without copying implementations. Callers using floating DX references
+They delegate to the external workflows at the pinned SHA recorded in the
+[DX workflow callers](../.github/workflows/) and retain its matching tag in a
+comment for Renovate. They forward their inputs without copying implementations. Callers using floating DX references
 can retain these paths.
 
 ## 3. Remote Taskfile (optional shared helpers)
@@ -150,7 +153,7 @@ can retain these paths.
 ```yaml
 # Taskfile.yml
 includes:
-  dx: https://github.com/Gildraen/dx-tools/raw/6630f37ffdc3a8c51af0f4795145a4743a61584b/taskfiles/base.yml # v0.1.0-rc.1
+  dx: https://github.com/Gildraen/dx-tools/raw/<tools-commit-sha>/taskfiles/base.yml # <tools-tag>
 ```
 
 Gives you `task dx:doctor` and `task dx:mcp:github`.
@@ -158,15 +161,17 @@ Gives you `task dx:doctor` and `task dx:mcp:github`.
 fallback, not authentication.
 Your own `validate`/`test`/`lint` tasks stay in your Taskfile.
 
-Remote Taskfiles require Go Task 3.53.1 or newer. The DX Feature and reusable
-validation workflow both provide a compatible release.
+Remote Taskfiles require a compatible Go Task release. Check the Feature
+manifest and the selected reusable validation workflow for the versions they
+provide.
 
 The reusable validation workflow installs a compatible Task release on its GitHub
 Actions runner before executing `task validate`. Its availability in CI does
 not mean that the local devcontainer already provides it.
 
-The URL pins the commit SHA. Its trailing version tag comment is Renovate's
-update stream. Use the direct HTTP URL above with Task 3.53.1.
+The URL pins the commit SHA. Its trailing tag comment is Renovate's update
+stream. Use the direct HTTP URL form above with a Task release that supports
+remote includes.
 
 For a manual invocation, either accept Task's host trust prompt or restrict
 non-interactive trust to `github.com`:
@@ -208,12 +213,15 @@ the authoritative list, not a catalog in this guide.
 
 Shared sources live at the root of `Gildraen/dx-agents` and can be used
 independently of the Feature, Docker, MCP and the tools component. For local
-checkouts at the candidate commit SHAs, from the consumer root:
+checkouts at selected component commit SHAs, set these shell variables from
+the selected tag/SHA pairs, then run from the consumer root:
 
 ```sh
+AGENTS_COMMIT_SHA="<agents-commit-sha>"
+TOOLS_COMMIT_SHA="<tools-commit-sha>"
 git init .devcontainer/components/agents
 git -C .devcontainer/components/agents remote add origin https://github.com/Gildraen/dx-agents.git
-git -C .devcontainer/components/agents fetch --depth=1 origin a448037a8b96b2269ac1b46f0ff2018738083c1e
+git -C .devcontainer/components/agents fetch --depth=1 origin "$AGENTS_COMMIT_SHA"
 git -C .devcontainer/components/agents checkout --detach FETCH_HEAD
 export DX_AGENTS_HOME="$PWD/.devcontainer/components/agents"
 ```
@@ -225,14 +233,14 @@ pinned submodule. Tools can likewise be checked out independently:
 ```sh
 git init .devcontainer/components/tools
 git -C .devcontainer/components/tools remote add origin https://github.com/Gildraen/dx-tools.git
-git -C .devcontainer/components/tools fetch --depth=1 origin 6630f37ffdc3a8c51af0f4795145a4743a61584b
+git -C .devcontainer/components/tools fetch --depth=1 origin "$TOOLS_COMMIT_SHA"
 git -C .devcontainer/components/tools checkout --detach FETCH_HEAD
 export DX_TOOLS_HOME="$PWD/.devcontainer/components/tools"
 export PATH="$DX_TOOLS_HOME/bin:$PATH"
 ```
 
-The example tracks tag `v0.1.0-rc.1` with those exact commit SHAs. Renovate
-updates the version and commit options together. For a submodule, the parent
+Use each selected tag with its matching commit SHA. Renovate updates the
+version and commit options together. For a submodule, the parent
 repository records the pinned commit as a gitlink; `.gitmodules` does not carry
 the version tag.
 
@@ -268,8 +276,8 @@ resources from their metadata and load them before proceeding.
 Instructions are guidance, not a security enforcement boundary; use execution
 permissions and isolation for enforcement. The runtime requests delegation,
 but a managed subagent tool and its permissions depend on the client. When
-subagents are unavailable, apply the selected role in the current agent and
-report that fallback.
+subagents are unavailable, the agent applies the selected role and reports
+that fallback.
 Cross-repository use consists of loading these local shared files explicitly
 and giving the selected rules, role, scope and permissions to the client's
 subagent tool; it does not invoke an agent directly from a remote URL.
@@ -291,9 +299,8 @@ resource loading through `DX_AGENTS_HOME`.
 ## 6. Renovate preset
 
 DX uses the shared preset reference
-`github>Gildraen/renovate-config#v0.1.0-rc.1`
-in `extends`, fixed to the candidate version tag independently of the Feature and
-component refs.
+declared in [renovate.json](../renovate.json), independently of the Feature
+and component refs.
 
 ## Runtime state that never belongs in `dx` or in your repository
 

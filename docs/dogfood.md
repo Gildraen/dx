@@ -5,7 +5,7 @@ The worktree is created by the DX repository, not by the consumer repository,
 and `.devcontainer/.dx` is local-only state.
 
 Use a local DX clone, a consumer with a `.devcontainer` directory, Git worktree
-support, and Go Task 3.53.1 or newer. Feature tests also require a Docker CLI
+support, and a Go Task release compatible with the [Feature manifest](../.devcontainer/src/dx/devcontainer-feature.json). Feature tests also require a Docker CLI
 and daemon whose host can access the checkout and temporary test paths. The
 paths below are examples, not a statement that a particular repository uses DX.
 
@@ -18,13 +18,13 @@ For this layout:
 ~/projects/my-project/
 ```
 
-create a new branch and worktree from DX's published integration branch
-`feat/component-extraction`:
+create a new branch and worktree from the DX branch selected for integration:
 
 ```sh
+DX_BRANCH="<selected-dx-branch>"
 cd ~/projects/dx
-git fetch origin feat/component-extraction
-git worktree add -b feature/my-dx-change ../my-project/.devcontainer/.dx origin/feat/component-extraction
+git fetch origin "$DX_BRANCH"
+git worktree add -b feature/my-dx-change ../my-project/.devcontainer/.dx "origin/$DX_BRANCH"
 git -C ../my-project/.devcontainer/.dx submodule update --init --recursive
 ```
 
@@ -54,12 +54,12 @@ The DX worktree has pinned submodules at `.devcontainer/components/agents`
 and `.devcontainer/components/tools`. Changes inside them belong to
 `Gildraen/dx-agents` or `Gildraen/dx-tools`, not to DX; DX tracks their commit
 pointers. Its `initializeCommand` runs `git submodule update --init --recursive`.
-The candidate tag is `v0.1.0-rc.1`, a prerelease, not a stable release. It
-resolves to `a448037a8b96b2269ac1b46f0ff2018738083c1e` for agents and
-`6630f37ffdc3a8c51af0f4795145a4743a61584b` for tools. Check out those SHAs in
-the initialized submodules; DX records them as gitlinks.
+The initialized submodules record the selected component commits as gitlinks.
+Use `git submodule status` to inspect those refs. The Feature defaults and
+their corresponding tag/SHA pairs are in the
+[manifest](../.devcontainer/src/dx/devcontainer-feature.json).
 
-From the consumer, select those local components for the current shell:
+From the consumer, select those local components for this shell:
 
 ```sh
 cd ~/projects/my-project
@@ -93,7 +93,7 @@ when the agent loads them; ask it to reread changed resources in an existing
 session. Changing the environment does not configure a client's native
 picker. If the client does not read the project `AGENTS.md`, provide it through
 context or the initial request. Subagents require client support; otherwise
-the current agent applies the selected role and reports that fallback.
+the agent applies the selected role and reports that fallback.
 
 This repository's own devcontainer selects `.devcontainer/components/agents`
 through `DX_AGENTS_HOME` and `.devcontainer/components/tools` through
@@ -111,16 +111,16 @@ includes:
     taskfile: ./.devcontainer/.dx/.devcontainer/components/tools/taskfiles/base.yml
 ```
 
-Use Go Task 3.53.1 or newer, as supplied by the DX Feature. The local include
+Use a Go Task release compatible with the DX Feature. The local include
 does not require remote-host trust. For a remote include, local runs show
 Task's normal trust prompt on first use. The reusable validate workflow retains
 `TASK_REMOTE_TRUSTED_HOSTS=github.com` for URLs hosted on `github.com`.
 
-Restore the fixed candidate remote include before committing the consumer change:
+Restore the pinned remote include before committing the consumer change:
 
 ```yaml
 includes:
-  dx: https://github.com/Gildraen/dx-tools/raw/6630f37ffdc3a8c51af0f4795145a4743a61584b/taskfiles/base.yml # v0.1.0-rc.1
+  dx: https://github.com/Gildraen/dx-tools/raw/<tools-commit-sha>/taskfiles/base.yml # <tools-tag>
 ```
 
 For this URL, run Task with `TASK_REMOTE_TRUSTED_HOSTS=github.com` or accept
@@ -141,8 +141,8 @@ The normal loop is `edit Feature -> rebuild container -> test`. Component-only
 changes do not require a rebuild once the consumer reads live sources through
 `DX_AGENTS_HOME` and `DX_TOOLS_HOME`. Changes to the wrapper installed by
 `install.sh` require a rebuild. Installed consumers receive component changes
-by selecting a published version tag with its matching commit SHA and rebuilding; Feature
-implementation changes require a new Feature version.
+by selecting a published tag with its matching commit SHA and rebuilding.
+Feature implementation changes require a new, unique version in the manifest.
 
 Run the consumer's `task validate` and `task test` in its devcontainer. The dx
 repository CI follows the same model: structural `task validate` runs on the
@@ -153,20 +153,18 @@ in the checkout. Run `task feature:test` from the host checkout, where the
 Docker daemon can bind-mount the CLI's temporary project paths. With the
 standard workspace mount, those paths differ inside the devcontainer.
 Reusable GitHub workflows cannot see a local worktree. The portable workflow
-test reference is
-`Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10`
-with tag `v0.1.0-rc.1` in its comment (the same SHA applies to
-devcontainer-test and maintenance).
+test reference uses the commit SHA and matching tag recorded in the
+[DX workflow callers](../.github/workflows/); those callers also show the
+corresponding refs for devcontainer-test and maintenance.
 Testing changed CI or Remote Taskfiles requires a published ref in their
-own repository, not a branch in DX. The current component integration branch
-is `feat/component-extraction`; a test include may use
-`https://github.com/Gildraen/dx-tools/raw/feat/component-extraction/taskfiles/base.yml`.
-Use Task 3.53.1's direct HTTP include with the selected tag for consumption.
-Restore the fixed candidate raw URL before committing a consumer change. Restrict trust
+own repository, not a branch in DX. A test include may use the selected
+published tools branch or commit in the direct HTTP URL. Use a compatible Task
+release and retain the tag as the Renovate update stream. Restore the pinned
+raw URL before committing a consumer change. Restrict trust
 to `github.com` for these includes. Do not use global `--yes`. Publication
 requires explicit approval.
 
-## Clean up and publish a Feature version
+## Clean up and release a Feature
 
 From the main DX worktree, remove the linked worktree only after its changes
 are committed or discarded:
@@ -178,9 +176,9 @@ git worktree prune
 ```
 
 Open and merge the PR from `feature/my-dx-change` into `main`. For a release,
-update `.devcontainer/src/dx/devcontainer-feature.json` to a new stable version
-and keep the published-release example in the consumer guide consistent with
-that manifest before merging.
+update `.devcontainer/src/dx/devcontainer-feature.json` to a new, unique
+version number before merging. The consumer guide uses placeholders and points
+to the manifest for the selected value.
 PR CI runs validation, both container test suites and native Feature manifest
 validation through `devcontainers/action` with `validate-only: "true"`. The
 push to `main` publishes only the Feature to GHCR through the same native

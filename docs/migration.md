@@ -14,17 +14,17 @@ environment requirements and project-specific agents and skills.
 
 Choose a DX Feature whose manifest supports component version and commit
 options. Component tags select Renovate's update stream and must match the
-commit SHAs used for checkout. Workflow calls use a fixed SHA with the version
-tag in a comment. The candidate tag is
-`v0.1.0-rc.1`, a prerelease, not a stable release. The local Feature test and fixed component
-examples are in [consumer.md](consumer.md); they do not claim that an older
-published Feature implements the new options. OCI versions and Git refs are
-independent: publishing the Feature does not create a Git tag or GitHub release.
-Existing DX Git tags remain valid for their original contents.
+commit SHAs used for checkout. Workflow calls use a fixed SHA with its
+matching tag in a comment. Feature, component, workflow and Renovate refs are
+selected independently; their configured values are in the Feature manifest,
+workflow callers and `renovate.json`. The local Feature example is in
+[consumer.md](consumer.md) and uses placeholders for changing values. OCI
+versions and Git refs are independent: publishing the Feature does not create
+Git refs for the components or workflows.
 
 Dev Container use requires a compatible client and container engine. Docker
 access for GitHub MCP is a separate project dependency. Remote Taskfiles
-require Go Task 3.53.1 or newer. The
+require a compatible Go Task release. The
 [Feature manifest](../.devcontainer/src/dx/devcontainer-feature.json) declares
 the common tools; check the selected release for compatibility with the
 project's requirements.
@@ -56,8 +56,8 @@ project's requirements.
    validation workflow supplies Task and sets
    `TASK_REMOTE_TRUSTED_HOSTS=github.com` for includes hosted on `github.com`.
    The raw URL in [consumer.md](consumer.md#3-remote-taskfile-optional-shared-helpers)
-   uses `https://github.com/Gildraen/dx-tools/raw/6630f37ffdc3a8c51af0f4795145a4743a61584b/taskfiles/base.yml # v0.1.0-rc.1`
-   and is covered by that trust value. Task 3.53.1 uses this direct HTTP include.
+   shows the direct HTTP include form and is covered by that trust value. Use
+   a Task release that supports this include form.
    Additional project dependencies
    must be available on the runner. It executes the selected task on that
    runner, not inside the consumer Dev Container.
@@ -65,8 +65,9 @@ project's requirements.
    devcontainer-test and maintenance workflows in `Gildraen/ci-workflows`
    without dropping application jobs, triggers or required permissions.
    DX's local reusable-feature-test is not a consumer workflow.
-   Pin workflow and Remote Taskfile commits by SHA, retaining version tags in
-   comments for Renovate. See [consumer.md](consumer.md) for the exact syntax.
+   Pin workflow and Remote Taskfile commits by SHA, retaining matching tags in
+   comments for Renovate. Use refs from the relevant configuration as the
+   source of truth; [consumer.md](consumer.md) shows the placeholder syntax.
 5. **AI resources**: add the client-neutral root `AGENTS.md` bootstrap from
    [consumer.md](consumer.md), preserving project-specific rules. It resolves
    `DX_AGENTS_HOME` and loads the shared guide and rules explicitly. Keep
@@ -76,17 +77,16 @@ project's requirements.
    pinned checkout example is in [consumer.md](consumer.md). If the client does not load
    `AGENTS.md`, provide it through context or the initial request. Native
    discovery and managed subagent tools depend on the client; without
-   subagents, apply the selected role in the current agent and report the
-   fallback.
+   subagents, the agent applies the selected role and reports the fallback.
 6. **MCP client**: if needed, configure a stdio server using `dx-mcp github`
    and provide Docker access and an available OAuth callback port. Use the
    [MCP configuration guidance](consumer.md). Application-level client
    configuration is separate from runtime instructions. Generated
    machine-specific settings may contain secrets; keep authentication state
    out of versioned files and container images.
-7. **Renovate**: DX uses
-   `github>Gildraen/renovate-config#v0.1.0-rc.1`,
-   fixed to the candidate version tag independently of the Feature and component refs.
+7. **Renovate**: DX selects its preset in
+   [renovate.json](../renovate.json), independently of the Feature and
+   component refs.
 
 ## Verify the integration
 

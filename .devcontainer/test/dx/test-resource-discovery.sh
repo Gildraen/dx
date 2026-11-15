@@ -20,9 +20,12 @@ for (const component of ['agents', 'tools']) {
   assert.equal(devcontainer.remoteEnv[home], '${containerWorkspaceFolder}/' + directory);
   const version = feature.options[`${component}Version`].default;
   const commit = feature.options[`${component}Commit`].default;
-  assert.match(version, /^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
+  assert.match(version, /^v(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/);
   assert.match(commit, /^[0-9a-f]{40}$/);
-  const resolved = execFileSync('git', ['-C', directory, 'rev-parse', `${version}^{commit}`], { encoding: 'utf8' }).trim();
+  const tagRefs = execFileSync('git', ['-C', directory, 'ls-remote', 'origin', `refs/tags/${version}`, `refs/tags/${version}^{}`], { encoding: 'utf8' })
+    .trim().split('\n').map(line => line.split('\t'));
+  const resolved = tagRefs.find(([, ref]) => ref === `refs/tags/${version}^{}`)?.[0]
+    ?? tagRefs.find(([, ref]) => ref === `refs/tags/${version}`)?.[0];
   assert.equal(resolved, commit, `${component} tag and commit SHA must match`);
   const entry = execFileSync('git', ['ls-files', '--stage', '--', directory], { encoding: 'utf8' }).trim();
   assert.equal(entry, `160000 ${resolved} 0\t${directory}`);

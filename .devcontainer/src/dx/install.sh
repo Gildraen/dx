@@ -4,10 +4,10 @@ set -euo pipefail
 
 DX_HOME="/opt/dx"
 FEATURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-agents_version="${AGENTSVERSION:-v0.1.0-rc.1}"
-agents_commit="${AGENTSCOMMIT:-a448037a8b96b2269ac1b46f0ff2018738083c1e}"
-tools_version="${TOOLSVERSION:-v0.1.0-rc.1}"
-tools_commit="${TOOLSCOMMIT:-6630f37ffdc3a8c51af0f4795145a4743a61584b}"
+agents_version="${AGENTSVERSION:-v0.1.0}"
+agents_commit="${AGENTSCOMMIT:-2bc43f5c09a2d8676288de3470cd890ed4c08448}"
+tools_version="${TOOLSVERSION:-v0.1.0}"
+tools_commit="${TOOLSCOMMIT:-f7b5a41f48026571cafe3e7d287dd0234db9c0b6}"
 download_root="$(mktemp -d)"
 trap 'rm -rf "$download_root"' EXIT
 

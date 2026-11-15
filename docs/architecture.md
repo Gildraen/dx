@@ -18,10 +18,11 @@ This document describes their integration; the
 The Feature is distributed through OCI at `ghcr.io/gildraen/dx/dx`. Workflows
 and the Remote Taskfile are resolved through Git references.
 These references are selected independently of the Feature version.
-The Feature defaults `agentsVersion` and `toolsVersion` to candidate tag
-`v0.1.0-rc.1`, a prerelease, not a stable release. `agentsCommit` and
-`toolsCommit` hold the corresponding commit SHAs. The installer verifies each
-tag/SHA pair and checks out the commit SHA. No versioned copy of either
+The Feature manifest declares defaults for `agentsVersion` and `toolsVersion`
+and their matching `agentsCommit` and `toolsCommit` values. Each tag selects
+the Renovate update stream; its corresponding SHA is the immutable checkout
+ref. The installer verifies each tag/SHA pair and checks out the commit SHA.
+No versioned copy of either
 component is packaged in DX. The dogfood submodules record resolved commits as
 gitlinks; selecting a tag does not add a version field to `.gitmodules`.
 
@@ -91,7 +92,7 @@ apply; file availability alone does not guarantee automatic loading.
 
 Native discovery reads local directories: shared roles are under
 `$DX_AGENTS_HOME/agents` and shared skills under `$DX_AGENTS_HOME/skills`.
-This checkout uses `.devcontainer/components/agents/agents` and
+The DX checkout uses `.devcontainer/components/agents/agents` and
 `.devcontainer/components/agents/skills`. Client-specific discovery
 configuration is separate from explicit loading; a remote Git URL is not a
 native resource location.
@@ -120,10 +121,10 @@ declares the installed baseline through `dependsOn`:
 
 | Dependency Feature | Configuration |
 | --- | --- |
-| `ghcr.io/devcontainers/features/node:2` | Node.js `lts` |
-| `ghcr.io/devcontainers/features/github-cli:1` | GitHub CLI, default options |
-| `ghcr.io/devcontainers-extra/features/go-task:1` | Task `3.53.1` |
-| `ghcr.io/devcontainers-extra/features/apt-get-packages:1` | `git,jq,ripgrep,libatomic1` |
+| Node.js Feature | Node.js `lts` |
+| GitHub CLI Feature | GitHub CLI, default options |
+| Go Task Feature | Task version declared in the Feature manifest |
+| apt packages Feature | `git,jq,ripgrep,libatomic1` |
 
 Consumers rely on the manifest of their selected Feature release for tool
 availability. Project language runtimes, service CLIs, and specialist tools
@@ -131,8 +132,9 @@ are configured in the consumer environment.
 
 ## MCP and authentication
 
-`dx-mcp github [server options...]` runs GitHub's official MCP server image
-`ghcr.io/github/github-mcp-server:v1.10.1` through Docker. The launcher uses
+`dx-mcp github [server options...]` runs the official GitHub MCP server image
+configured by the [launcher](../.devcontainer/components/tools/bin/dx-mcp)
+through Docker. The launcher uses
 interactive standard input and publishes the OAuth callback on
 `127.0.0.1:8085`. Docker and an accessible daemon are prerequisites; Docker is
 not a dependency of the DX Feature. This checkout declares
@@ -154,12 +156,12 @@ own `validate`, `test`, and `lint` contracts. `doctor` reports the resolved
 tools directory and fails when it is absent; `mcp:github` invokes the launcher.
 `doctor` uses `DX_TOOLS_HOME` first, with `DX_HOME` as a compatibility fallback.
 
-Reusable workflows operate on the caller's checkout: validate installs Task
-`3.53.1` and runs the selected task; devcontainer-test runs `task test` inside
+Reusable workflows operate on the caller's checkout: validate installs a
+compatible Task release and runs the selected task; devcontainer-test runs `task test` inside
 the caller's container; maintenance checks selected Markdown paths with lychee.
-The portable workflows are pinned to commit
-`b8cc1c66c153e49887f0c63baa4a1aa238998b10`, with tag `v0.1.0-rc.1` retained in
-comments for Renovate. Local Feature-test invokes the
+The portable workflows are pinned by commit SHA, with a matching tag retained
+in comments for Renovate. Their selected refs are recorded in the
+[workflow callers](../.github/workflows/). Local Feature-test invokes the
 DX-specific Feature test script. Their source paths
 and inputs are listed in [decoupage.md](decoupage.md).
 
@@ -169,10 +171,10 @@ workflow at that pinned SHA, keeps the tag comment for Renovate, and forwards it
 inputs without a local implementation copy. These paths serve callers using
 floating DX references.
 
-Task 3.53.1 uses a direct HTTP URL whose path pins the Taskfile commit SHA.
-The [consumer example](consumer.md#3-remote-taskfile-optional-shared-helpers)
-uses `https://github.com/Gildraen/dx-tools/raw/6630f37ffdc3a8c51af0f4795145a4743a61584b/taskfiles/base.yml # v0.1.0-rc.1`,
-covered by the validation workflow's
+The Remote Taskfile uses a direct HTTP URL whose path pins the Taskfile commit
+SHA. The [consumer example](consumer.md#3-remote-taskfile-optional-shared-helpers)
+shows the URL form with placeholders; the selected tag and SHA are recorded in
+the Feature manifest and component source. The include is covered by the validation workflow's
 `TASK_REMOTE_TRUSTED_HOSTS=github.com` environment value.
 
 The [release workflow](../.github/workflows/release.yml) publishes only the
@@ -184,7 +186,6 @@ engine for consumers.
 
 ## Dependency updates
 
-DX extends the Renovate preset
-`github>Gildraen/renovate-config#v0.1.0-rc.1`.
-This candidate version tag is selected independently of the Feature, IA, tools and
-CI refs.
+DX extends the Renovate preset declared in
+[renovate.json](../renovate.json). This preset ref is selected independently
+of the Feature, IA, tools and CI refs.

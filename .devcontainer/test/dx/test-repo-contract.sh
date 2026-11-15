@@ -53,14 +53,26 @@ for workflow in validate devcontainer-test maintenance; do
     const jobs = Object.values(workflow.jobs);
     assert.equal(jobs.length, 1);
     const job = jobs[0];
-    assert.equal(job.uses, `Gildraen/ci-workflows/.github/workflows/reusable-${name}.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10`);
+    assert.equal(job.uses, `Gildraen/ci-workflows/.github/workflows/reusable-${name}.yml@62f1721ea92ffd7275f4e4e2c60727b486d7def1`);
     const source = fs.readFileSync(`.github/workflows/reusable-${name}.yml`, "utf8");
-    assert.ok(source.includes("@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1"));
+    assert.ok(source.includes("@62f1721ea92ffd7275f4e4e2c60727b486d7def1 # v0.1.0"));
     assert.equal(job.steps, undefined);
     assert.equal(job["runs-on"], undefined);
+    assert.equal(workflow.on.workflow_call?.secrets, undefined);
+    assert.equal(job.secrets, undefined);
     const inputs = Object.keys(workflow.on.workflow_call?.inputs ?? {});
     assert.deepEqual(Object.keys(job.with ?? {}).sort(), inputs.sort());
     for (const input of inputs) assert.equal(job.with[input], "${{ inputs." + input + " }}");
+  ' "$workflow"
+done
+
+for workflow in validate maintenance; do
+  npx --yes js-yaml ".github/workflows/$workflow.yml" | node -e '
+    const assert = require("node:assert/strict");
+    const fs = require("node:fs");
+    const workflow = JSON.parse(fs.readFileSync(0, "utf8"));
+    const name = process.argv[1];
+    for (const job of Object.values(workflow.jobs)) assert.equal(job.secrets, undefined);
   ' "$workflow"
 done
 
@@ -72,8 +84,8 @@ const consumer = fs.readFileSync('docs/consumer.md', 'utf8');
 assert.match(feature.version, /^\d+\.\d+\.\d+$/);
 assert.ok(consumer.includes('ghcr.io/gildraen/dx/dx:<released-version>'));
 for (const component of ['agents', 'tools']) {
-  assert.ok(consumer.includes(feature.options[`${component}Version`].default));
-  assert.ok(consumer.includes(feature.options[`${component}Commit`].default));
+  assert.ok(consumer.includes(`"${component}Version"`));
+  assert.ok(consumer.includes(`"${component}Commit"`));
 }
 EOF
 echo "DX repository: Feature, consumer docs and pinned CI facades pass"

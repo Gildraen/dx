@@ -47,8 +47,8 @@ registers a native role or skill. The Feature does not modify Copilot user direc
 For other clients, the project `AGENTS.md` bootstrap remains the explicit loading path.
 If a client does not read that file, provide it in the context or initial
 request.
-Subagents are used only when the client supports them; otherwise the current
-agent applies the selected role and reports that fallback.
+Subagents are used only when the client supports them; otherwise the agent
+applies the selected role and reports that fallback.
 
 The `dx-mcp github` command is a small portable entry point for GitHub's
 official MCP server. It runs a pinned version of the official
@@ -71,25 +71,27 @@ See [docs/architecture.md](docs/architecture.md) for the full model.
 # .github/workflows/validate.yml
 jobs:
   validate:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@b8cc1c66c153e49887f0c63baa4a1aa238998b10 # v0.1.0-rc.1
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@<ci-workflow-commit-sha> # <ci-workflow-tag>
 ```
 
-The shared components' candidate tag is `v0.1.0-rc.1`, a prerelease, not a
-stable release. The Feature uses published OCI versions. Each component has a
-SemVer tag option (`agentsVersion` or `toolsVersion`) and a commit SHA option
-(`agentsCommit` or `toolsCommit`). The installer verifies that each tag resolves
-to its SHA, then checks out the SHA. Workflows, Taskfiles and the Renovate preset
-select their own references. Feature publication does not create Git tags for
+Each component has a SemVer tag option (`agentsVersion` or `toolsVersion`) for
+Renovate and a matching commit SHA option (`agentsCommit` or `toolsCommit`) for
+immutable checkout. The installer verifies that each tag resolves to its SHA,
+then checks out the SHA. CI workflows use Git refs independently of the
+Feature; Renovate preset refs are configured separately. The selected refs are
+recorded in the [Feature manifest](.devcontainer/src/dx/devcontainer-feature.json),
+the [workflow callers](.github/workflows/), the [Renovate configuration](renovate.json)
+and the component sources. Feature publication does not create Git tags for
 these components. Full walkthrough:
 [docs/consumer.md](docs/consumer.md).
 
 ## Releases
 
-Every push to `main` runs the release workflow. Choose a new stable version in
-the Feature manifest and update the consumer example before merging. The
-workflow only checks out the pushed commit and calls the native Dev Containers
-action to publish the Feature to GHCR. The action and its CLI are pinned.
-Version selection is manual; the CLI skips an already published Feature
+Every push to `main` runs the release workflow. A Feature version bump must use
+a new unique number in the Feature manifest. Version selection is manual; the
+release workflow and its pinned action and CLI are defined in
+[release.yml](.github/workflows/release.yml). It checks out the pushed commit
+and publishes the Feature to GHCR. The CLI skips an already published Feature
 version. Publication produces OCI artifacts without Git tags or GitHub releases.
 Validation and container tests stay in PR CI. A new push cancels the previous
 run; a rerun does not guarantee repair of partially updated OCI aliases.
