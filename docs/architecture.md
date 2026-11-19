@@ -18,13 +18,12 @@ This document describes their integration; the
 The Feature is distributed through OCI at `ghcr.io/gildraen/dx/dx`. Workflows
 and the Remote Taskfile are resolved through Git references.
 These references are selected independently of the Feature version.
-The Feature manifest declares defaults for `agentsVersion` and `toolsVersion`
-and their matching `agentsCommit` and `toolsCommit` values. Each tag selects
-the Renovate update stream; its corresponding SHA is the immutable checkout
-ref. The installer verifies each tag/SHA pair and checks out the commit SHA.
-No versioned copy of either
-component is packaged in DX. The dogfood submodules record resolved commits as
-gitlinks; selecting a tag does not add a version field to `.gitmodules`.
+The installer uses fixed internal refs for `dx-agents` and `dx-tools`, verifies
+that each ref resolves to its expected commit, and checks out that commit.
+These refs are maintained in DX and are not exposed as Feature options, so
+consumers select the Feature rather than component revisions. The dogfood
+submodules record their source revisions as gitlinks; `.gitmodules` records
+the corresponding stable tags in each submodule's `branch` field for Renovate.
 
 ## What lives where
 
@@ -43,7 +42,7 @@ gitlinks; selecting a tag does not add a version field to `.gitmodules`.
 
 ## Component locations
 
-The installer acquires the selected agents and tools refs independently.
+The installer acquires the agents and tools refs maintained in DX independently.
 The Feature declares `DX_AGENTS_HOME=/opt/dx/components/agents`,
 `DX_TOOLS_HOME=/opt/dx/components/tools`, and `DX_HOME=/opt/dx`:
 
@@ -106,9 +105,9 @@ state must stay out of versioned files.
 
 ### Installed and live sources
 
-Installed components are snapshots of their selected versions. Updating
-`agentsVersion` or `toolsVersion` and rebuilding changes that component without
-changing the Feature version. This repository sets `DX_AGENTS_HOME` and `DX_TOOLS_HOME`
+Installed components are snapshots of the refs maintained in DX. Updating a
+component ref is a DX change delivered through a Feature release. This
+repository sets `DX_AGENTS_HOME` and `DX_TOOLS_HOME`
 to `.devcontainer/components/agents` and `.devcontainer/components/tools`;
 `initializeCommand` initializes their pinned Git submodules. Its root
 [AGENTS.md](../AGENTS.md) loads that local entry point. The
@@ -188,4 +187,4 @@ engine for consumers.
 
 DX extends the Renovate preset declared in
 [renovate.json](../renovate.json). This preset ref is selected independently
-of the Feature, IA, tools and CI refs.
+of the Feature release and the consumer workflow/Remote Taskfile refs.

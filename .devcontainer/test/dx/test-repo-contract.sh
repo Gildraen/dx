@@ -80,12 +80,16 @@ node <<'EOF'
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const feature = require('./.devcontainer/src/dx/devcontainer-feature.json');
+const renovate = require('./renovate.json');
 const consumer = fs.readFileSync('docs/consumer.md', 'utf8');
 assert.match(feature.version, /^\d+\.\d+\.\d+$/);
+assert.deepEqual(feature.options, {});
+assert.deepEqual(renovate.extends, ['github>Gildraen/renovate-config#v0.1.0']);
+assert.equal(renovate['git-submodules'], undefined);
 assert.ok(consumer.includes('ghcr.io/gildraen/dx/dx:<released-version>'));
 for (const component of ['agents', 'tools']) {
-  assert.ok(consumer.includes(`"${component}Version"`));
-  assert.ok(consumer.includes(`"${component}Commit"`));
+  assert.ok(!consumer.includes(`"${component}Version"`));
+  assert.ok(!consumer.includes(`"${component}Commit"`));
 }
 EOF
 echo "DX repository: Feature, consumer docs and pinned CI facades pass"

@@ -7,12 +7,8 @@ working on `dx` itself using a real project as a testbed, see
 ## 1. Dev Container Feature
 
 For integration testing, use the local Feature checkout (see
-[dogfood.md](dogfood.md) to create `.devcontainer/.dx`). Each component uses a
-SemVer tag for Renovate's update stream and a commit SHA as the immutable
-checkout ref. Replace the image placeholder with the consumer's base image and
-the component placeholders with a tag and matching commit SHA from the selected
-component source; the Feature defaults are in the
-[manifest](../.devcontainer/src/dx/devcontainer-feature.json).
+[dogfood.md](dogfood.md) to create `.devcontainer/.dx`). For a published
+release, add the Feature with an empty options object:
 
 ```jsonc
 // .devcontainer/devcontainer.json
@@ -20,20 +16,14 @@ component source; the Feature defaults are in the
   "name": "my-project",
   "image": "<project-base-image>",
   "features": {
-    "./.dx/.devcontainer/src/dx": {
-      "agentsVersion": "<agents-tag>",
-      "agentsCommit": "<agents-commit-sha>",
-      "toolsVersion": "<tools-tag>",
-      "toolsCommit": "<tools-commit-sha>"
-    }
+    "ghcr.io/gildraen/dx/dx:<released-version>": {}
   }
 }
 ```
 
-For an installed release, replace the local Feature key with
-`ghcr.io/gildraen/dx/dx:<released-version>` and select a published version
-whose manifest exposes the component version and commit options. A previously
-published Feature does not acquire these options automatically.
+The Feature installs agents and tools snapshots from refs fixed in DX source;
+consumers cannot choose component revisions in their Dev Container
+configuration. Component updates are delivered through a Feature release.
 
 Only add other Features or packages for project-specific requirements
 (Docker-outside-of-Docker, project language runtimes, service CLIs, …). The DX
@@ -44,18 +34,14 @@ declares Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and `libatomic1`.
 Check the manifest of the selected release for exact tool versions and
 availability; requirements not included there remain project-specific.
 
-The Feature fetches each tag and verifies it resolves to the matching commit
-SHA, then checks out that SHA into `/opt/dx/components/agents` and
-`/opt/dx/components/tools`. The version and commit options are independent per
-component but must be updated as a pair. It sets `DX_AGENTS_HOME`
-and `DX_TOOLS_HOME` to those locations, retaining `DX_HOME=/opt/dx` and
+The installer acquires the component snapshots from refs fixed in DX source and
+installs them into `/opt/dx/components/agents` and
+`/opt/dx/components/tools`. It sets `DX_AGENTS_HOME` and `DX_TOOLS_HOME` to
+those locations, retaining `DX_HOME=/opt/dx` and
 compatibility symlinks for `AGENTS.md`, `instructions/`, `agents/`, `skills/`,
 `bin/` and `taskfiles/`. Shared roles are under
 `/opt/dx/components/agents/agents/`; `/opt/dx/agents` links to that directory,
 not to the component root.
-No copy of either component is versioned in the Feature source. The installed
-checkouts are snapshots; change the relevant tag/SHA pair and rebuild to update one
-without changing the Feature version. For live sources, use [dogfood.md](dogfood.md).
 The launcher runs the official GitHub MCP image selected in its source through Docker and does
 not manage a GitHub token. A project that enables MCP must provide Docker
 access and configure its MCP client separately. The launcher has no
@@ -211,38 +197,10 @@ needed. It then asks the agent to list `$DX_AGENTS_HOME/agents/*.agent.md` and
 read the selected role or workflow before applying it. Directory contents are
 the authoritative list, not a catalog in this guide.
 
-Shared sources live at the root of `Gildraen/dx-agents` and can be used
-independently of the Feature, Docker, MCP and the tools component. For local
-checkouts at selected component commit SHAs, set these shell variables from
-the selected tag/SHA pairs, then run from the consumer root:
-
-```sh
-AGENTS_COMMIT_SHA="<agents-commit-sha>"
-TOOLS_COMMIT_SHA="<tools-commit-sha>"
-git init .devcontainer/components/agents
-git -C .devcontainer/components/agents remote add origin https://github.com/Gildraen/dx-agents.git
-git -C .devcontainer/components/agents fetch --depth=1 origin "$AGENTS_COMMIT_SHA"
-git -C .devcontainer/components/agents checkout --detach FETCH_HEAD
-export DX_AGENTS_HOME="$PWD/.devcontainer/components/agents"
-```
-
-This example creates a separate Git checkout, not a copy owned by the
-consumer. Keep it out of the consumer's tracked files, or declare it as a
-pinned submodule. Tools can likewise be checked out independently:
-
-```sh
-git init .devcontainer/components/tools
-git -C .devcontainer/components/tools remote add origin https://github.com/Gildraen/dx-tools.git
-git -C .devcontainer/components/tools fetch --depth=1 origin "$TOOLS_COMMIT_SHA"
-git -C .devcontainer/components/tools checkout --detach FETCH_HEAD
-export DX_TOOLS_HOME="$PWD/.devcontainer/components/tools"
-export PATH="$DX_TOOLS_HOME/bin:$PATH"
-```
-
-Use each selected tag with its matching commit SHA. Renovate updates the
-version and commit options together. For a submodule, the parent
-repository records the pinned commit as a gitlink; `.gitmodules` does not carry
-the version tag.
+The Feature installs shared sources from refs fixed in DX. Consumers use the
+installed paths exposed through `DX_AGENTS_HOME` and `DX_TOOLS_HOME`. The
+[dogfood workflow](dogfood.md) describes the live-source setup used when
+developing DX.
 
 Project-specific roles and skills remain additive
 under `.agents/agents/` and `.agents/skills/` in the consumer. These are
@@ -252,9 +210,8 @@ in client-specific directories. After the consumer's root `AGENTS.md` loads
 inspects both project paths and selects relevant resources by metadata. This
 is the client-neutral loading procedure. Native discovery uses local paths:
 `$DX_AGENTS_HOME/agents` for roles and `$DX_AGENTS_HOME/skills` for skills.
-For the separate checkout above these are `.devcontainer/components/agents/agents`
-and `.devcontainer/components/agents/skills`; for installed resources they are
-`/opt/dx/components/agents/agents` and `/opt/dx/components/agents/skills`. VS Code custom agent
+For installed resources these are `/opt/dx/components/agents/agents` and
+`/opt/dx/components/agents/skills`. VS Code custom agent
 directories require `.agent.md` files. Configure discovery using the client's
 supported mechanisms; a GitHub URL is not a native agent or skill directory.
 The Feature does not install resources into Copilot user directories.
@@ -300,7 +257,7 @@ resource loading through `DX_AGENTS_HOME`.
 
 DX uses the shared preset reference
 declared in [renovate.json](../renovate.json), independently of the Feature
-and component refs.
+and the consumer workflow/Remote Taskfile refs.
 
 ## Runtime state that never belongs in `dx` or in your repository
 

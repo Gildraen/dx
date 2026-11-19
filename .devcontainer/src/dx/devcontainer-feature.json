@@ -4,28 +4,7 @@
     "name": "Gildraen DX runtime",
     "description": "Installs the shared Gildraen developer-experience runtime and common tool baseline under /opt/dx.",
     "documentationURL": "https://github.com/Gildraen/dx",
-    "options": {
-        "agentsVersion": {
-            "type": "string",
-            "default": "v0.1.0",
-            "description": "SemVer tag tracked for Gildraen/dx-agents."
-        },
-        "agentsCommit": {
-            "type": "string",
-            "default": "2bc43f5c09a2d8676288de3470cd890ed4c08448",
-            "description": "Commit SHA resolved by agentsVersion."
-        },
-        "toolsVersion": {
-            "type": "string",
-            "default": "v0.1.0",
-            "description": "SemVer tag tracked for Gildraen/dx-tools."
-        },
-        "toolsCommit": {
-            "type": "string",
-            "default": "f7b5a41f48026571cafe3e7d287dd0234db9c0b6",
-            "description": "Commit SHA resolved by toolsVersion."
-        }
-    },
+    "options": {},
     "customizations": {
         "vscode": {
             "settings": {

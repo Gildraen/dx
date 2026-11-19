@@ -7,15 +7,6 @@ trap 'rm -rf "$workdir"' EXIT
 export workdir
 mkdir -p "$workdir/feature" "$workdir/usr/local/bin"
 
-node - "${DX_INSTALL_SOURCE:-$repo_root/.devcontainer/src/dx/install.sh}" "$workdir/feature/install.sh" <<'EOF'
-const fs = require('node:fs');
-const source = fs.readFileSync(process.argv[2], 'utf8');
-if (!source.includes('/opt/dx') || !source.includes('/usr/local/bin')) throw new Error('installer fixture paths no longer match');
-fs.writeFileSync(process.argv[3], source.replaceAll('/opt/dx', `${process.env.workdir}/installed`)
-  .replaceAll('/usr/local/bin', `${process.env.workdir}/usr/local/bin`));
-EOF
-cp "$repo_root/.devcontainer/src/dx/dx-mcp" "$workdir/feature/dx-mcp"
-
 for component in agents tools; do
   checkout="$workdir/upstream/$component"
   git init -q "$checkout"
@@ -36,10 +27,31 @@ for component in agents tools; do
   git -C "$checkout" tag v1.2.3
 done
 
-export AGENTSVERSION=v1.2.3
-export AGENTSCOMMIT="$(git -C "$workdir/upstream/agents" rev-parse HEAD)"
-export TOOLSVERSION=v1.2.3
-export TOOLSCOMMIT="$(git -C "$workdir/upstream/tools" rev-parse HEAD)"
+agents_commit="$(git -C "$workdir/upstream/agents" rev-parse HEAD)"
+tools_commit="$(git -C "$workdir/upstream/tools" rev-parse HEAD)"
+
+node - "${DX_INSTALL_SOURCE:-$repo_root/.devcontainer/src/dx/install.sh}" "$workdir/feature/install.sh" "$workdir" "$agents_commit" "$tools_commit" <<'EOF'
+const fs = require('node:fs');
+const [sourcePath, targetPath, workdir, agentsCommit, toolsCommit] = process.argv.slice(2);
+let source = fs.readFileSync(sourcePath, 'utf8');
+const replacements = [
+  ['agents_version="v0.1.0"', 'agents_version="v1.2.3"'],
+  ['agents_commit="2bc43f5c09a2d8676288de3470cd890ed4c08448"', `agents_commit="${agentsCommit}"`],
+  ['tools_version="v0.1.0"', 'tools_version="v1.2.3"'],
+  ['tools_commit="f7b5a41f48026571cafe3e7d287dd0234db9c0b6"', `tools_commit="${toolsCommit}"`],
+];
+for (const [expected, replacement] of replacements) {
+  if (!source.includes(expected)) throw new Error(`installer pin changed: ${expected}`);
+  source = source.replace(expected, replacement);
+}
+if (!source.includes('/opt/dx') || !source.includes('/usr/local/bin')) {
+  throw new Error('installer fixture paths no longer match');
+}
+fs.writeFileSync(targetPath, source.replaceAll('/opt/dx', `${workdir}/installed`)
+  .replaceAll('/usr/local/bin', `${workdir}/usr/local/bin`));
+EOF
+cp "$repo_root/.devcontainer/src/dx/dx-mcp" "$workdir/feature/dx-mcp"
+
 export GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_ALLOW_PROTOCOL=file
 export GIT_CONFIG_COUNT=2
 export GIT_CONFIG_KEY_0="url.file://$workdir/upstream/agents.insteadOf"
@@ -64,22 +76,33 @@ cmp "$workdir/feature/dx-mcp" "$workdir/usr/local/bin/dx-mcp"
 output="$(DX_TOOLS_HOME="$workdir/installed/components/tools" "$workdir/usr/local/bin/dx-mcp" github --help)"
 [[ "$output" == $'fixture tools\ngithub\n--help' ]]
 
-for component in agents tools; do
-  version_variable="${component^^}VERSION"
-  commit_variable="${component^^}COMMIT"
-  if env "$version_variable=invalid-ref" bash "$workdir/feature/install.sh" > "$workdir/invalid.log" 2>&1; then
-    printf 'Installer accepted an invalid version tag for: %s\n' "$component" >&2
-    exit 1
-  fi
-  grep -Fq 'invalid-ref' "$workdir/invalid.log"
-  if env "$commit_variable=invalid-ref" bash "$workdir/feature/install.sh" > "$workdir/invalid.log" 2>&1; then
-    printf 'Installer accepted an invalid commit SHA for: %s\n' "$component" >&2
-    exit 1
-  fi
-  grep -Fq "Invalid commit SHA for $component" "$workdir/invalid.log"
-done
+write_installer_variant() {
+  local variant="$1" expected="$2" replacement="$3"
+  node - "$workdir/feature/install.sh" "$workdir/$variant" "$expected" "$replacement" <<'EOF'
+const fs = require('node:fs');
+const [sourcePath, targetPath, expected, replacement] = process.argv.slice(2);
+const source = fs.readFileSync(sourcePath, 'utf8');
+if (!source.includes(expected)) throw new Error(`installer pin not found: ${expected}`);
+fs.writeFileSync(targetPath, source.replace(expected, replacement));
+EOF
+}
 
-if AGENTSCOMMIT="$TOOLSCOMMIT" bash "$workdir/feature/install.sh" > "$workdir/mismatch.log" 2>&1; then
+write_installer_variant invalid-version.sh 'agents_version="v1.2.3"' 'agents_version="invalid-ref"'
+if bash "$workdir/invalid-version.sh" > "$workdir/invalid.log" 2>&1; then
+  printf 'Installer accepted an invalid version tag\n' >&2
+  exit 1
+fi
+grep -Fq 'invalid-ref' "$workdir/invalid.log"
+
+write_installer_variant invalid-commit.sh "agents_commit=\"$agents_commit\"" 'agents_commit="invalid-ref"'
+if bash "$workdir/invalid-commit.sh" > "$workdir/invalid.log" 2>&1; then
+  printf 'Installer accepted an invalid commit SHA\n' >&2
+  exit 1
+fi
+grep -Fq 'Invalid commit SHA for agents' "$workdir/invalid.log"
+
+write_installer_variant mismatched-pair.sh "agents_commit=\"$agents_commit\"" "agents_commit=\"$tools_commit\""
+if bash "$workdir/mismatched-pair.sh" > "$workdir/mismatch.log" 2>&1; then
   printf 'Installer accepted a tag and commit SHA that do not match\n' >&2
   exit 1
 fi

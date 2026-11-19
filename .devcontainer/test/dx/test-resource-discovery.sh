@@ -10,7 +10,9 @@ const fs = require('node:fs');
 const { execFileSync } = require('node:child_process');
 const feature = require('./.devcontainer/src/dx/devcontainer-feature.json');
 const devcontainer = require('./.devcontainer/devcontainer.json');
+const installer = fs.readFileSync('.devcontainer/src/dx/install.sh', 'utf8');
 assert.equal(feature.containerEnv.DX_HOME, '/opt/dx');
+assert.deepEqual(feature.options, {});
 assert.equal(devcontainer.remoteEnv.DX_HOME, undefined);
 assert.equal(devcontainer.initializeCommand, 'git submodule update --init --recursive');
 for (const component of ['agents', 'tools']) {
@@ -18,8 +20,10 @@ for (const component of ['agents', 'tools']) {
   const directory = `.devcontainer/components/${component}`;
   assert.equal(feature.containerEnv[home], `/opt/dx/components/${component}`);
   assert.equal(devcontainer.remoteEnv[home], '${containerWorkspaceFolder}/' + directory);
-  const version = feature.options[`${component}Version`].default;
-  const commit = feature.options[`${component}Commit`].default;
+  const version = installer.match(new RegExp(`^${component}_version="([^"]+)"$`, 'm'))?.[1];
+  const commit = installer.match(new RegExp(`^${component}_commit="([^"]+)"$`, 'm'))?.[1];
+  assert.ok(version, `installer must fix the ${component} version`);
+  assert.ok(commit, `installer must fix the ${component} commit`);
   assert.match(version, /^v(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/);
   assert.match(commit, /^[0-9a-f]{40}$/);
   const tagRefs = execFileSync('git', ['-C', directory, 'ls-remote', 'origin', `refs/tags/${version}`, `refs/tags/${version}^{}`], { encoding: 'utf8' })
@@ -32,9 +36,11 @@ for (const component of ['agents', 'tools']) {
   assert.equal(execFileSync('git', ['-C', directory, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), resolved);
   const url = execFileSync('git', ['config', '-f', '.gitmodules', '--get', `submodule.${directory}.url`], { encoding: 'utf8' }).trim();
   assert.equal(url, `https://github.com/Gildraen/dx-${component}.git`);
-  const installer = fs.readFileSync('.devcontainer/src/dx/install.sh', 'utf8');
-  assert.ok(installer.includes(`${component.toUpperCase()}VERSION:-${version}`), `installer default differs: ${component}`);
-  assert.ok(installer.includes(`${component.toUpperCase()}COMMIT:-${commit}`), `installer commit default differs: ${component}`);
+  const branch = execFileSync('git', ['config', '-f', '.gitmodules', '--get', `submodule.${directory}.branch`], { encoding: 'utf8' }).trim();
+  assert.equal(branch, version, `${component} Renovate branch must match the installer tag`);
+  const annotation = `# renovate: datasource=github-tags depName=${directory} packageName=Gildraen/dx-${component}\n${component}_version="${version}"\n${component}_commit="${commit}"`;
+  assert.ok(installer.includes(annotation), `${component} installer pin must be annotated for Renovate`);
+  assert.doesNotMatch(installer, new RegExp(`${component.toUpperCase()}VERSION|${component.toUpperCase()}COMMIT`));
 }
 for (const configuration of [feature, devcontainer]) {
   const settings = configuration.customizations?.vscode?.settings ?? {};
@@ -55,7 +61,6 @@ for (const configuration of [feature, devcontainer]) {
 assert.equal(devcontainer.customizations.vscode.settings['chat.permissions.default'], 'autopilot');
 assert.ok(fs.readFileSync('AGENTS.md', 'utf8').includes('(.devcontainer/components/agents/AGENTS.md)'));
 assert.ok(!fs.existsSync('.devcontainer/src/dx/runtime'), 'DX must not embed component sources');
-const installer = fs.readFileSync('.devcontainer/src/dx/install.sh', 'utf8');
 assert.doesNotMatch(installer, /_REMOTE_USER_HOME|\.copilot|link_resource/);
 assert.doesNotMatch(installer, /\.agents\/agents/);
 EOF

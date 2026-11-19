@@ -12,15 +12,14 @@ required tools, Task contracts, CI jobs and AI resources before
 changing configuration. Preserve business settings, forwarded ports, mounts,
 environment requirements and project-specific agents and skills.
 
-Choose a DX Feature whose manifest supports component version and commit
-options. Component tags select Renovate's update stream and must match the
-commit SHAs used for checkout. Workflow calls use a fixed SHA with its
-matching tag in a comment. Feature, component, workflow and Renovate refs are
-selected independently; their configured values are in the Feature manifest,
-workflow callers and `renovate.json`. The local Feature example is in
-[consumer.md](consumer.md) and uses placeholders for changing values. OCI
-versions and Git refs are independent: publishing the Feature does not create
-Git refs for the components or workflows.
+Add the DX Feature with an empty options object. Its component snapshots come
+from refs fixed in DX source; consumers do not select component revisions.
+Workflow calls and Remote Taskfile includes use independent Git refs. Pin those
+consumer refs by commit SHA and retain the corresponding tag in a comment for
+Renovate. Their values belong in workflow callers and Taskfile includes, not in
+Feature options. The local Feature example is in [consumer.md](consumer.md).
+Feature releases and Git refs are independent: publishing the Feature does not
+create Git refs for the components or workflows.
 
 Dev Container use requires a compatible client and container engine. Docker
 access for GitHub MCP is a separate project dependency. Remote Taskfiles
@@ -41,7 +40,7 @@ project's requirements.
    and helper paths: `AGENTS.md`, `instructions/`, `agents/`, `skills/`, `bin/`
    and `taskfiles/`. `/opt/dx/agents` links to `components/agents/agents`, not
    to the component home. Rebuild to
-   apply the selected refs.
+   apply the selected Feature release.
 2. **Authentication and storage**: keep Git identity and credentials on the
    host for native VS Code Dev Containers sharing. Ensure the remote user can
    write to the `.devcontainer` bind mount backing `GH_CONFIG_DIR`. Exclude
@@ -86,7 +85,7 @@ project's requirements.
    out of versioned files and container images.
 7. **Renovate**: DX selects its preset in
    [renovate.json](../renovate.json), independently of the Feature and
-   component refs.
+   consumer workflow/Taskfile refs.
 
 ## Verify the integration
 
@@ -104,8 +103,9 @@ task --list
 task validate
 ```
 
-The installed defaults are `/opt/dx/components/agents` and `/opt/dx/components/tools`; explicit
-live-source overrides select different checkouts. With the optional shared
+The installed locations are `/opt/dx/components/agents` and
+`/opt/dx/components/tools`; the live-source overrides used while developing DX
+are described in [dogfood.md](dogfood.md). With the optional shared
 Taskfile include, run `task dx:doctor` to check tools presence offline. It does not check
 authentication. Run the project's `task test` and `task lint` when defined,
 then verify CI with the selected Git refs and project dependencies.

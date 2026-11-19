@@ -13,13 +13,13 @@ du runtime ; le [guide consommateur](consumer.md) decrit le bootstrap local.
 porte les workflows portables. La Feature acquiert les refs Git agents et
 tools independamment, sans copie de leurs sources versionnee dans DX.
 La version OCI, les refs des composants et les refs CI sont independantes.
-Les options Feature associent a chaque composant un tag pour le suivi Renovate
-et le SHA correspondant pour le checkout immuable. Les workflows CI utilisent
-leur propre SHA avec le tag correspondant en commentaire ; le preset Renovate
-conserve sa reference dans `renovate.json`. Le manifeste Feature, les appelants
-CI, les sous-modules et les configurations Renovate portent les refs effectives.
-Les sous-modules enregistrent les commits resolus par gitlink, sans champ de
-version independant dans `.gitmodules`.
+Les paires tag/SHA des composants sont fixees dans l'installateur, qui verifie
+que chaque tag resout le commit attendu. Elles ne sont pas exposees comme
+options Feature ; le preset Renovate les met a jour ensemble a partir de leurs
+annotations. Les workflows CI utilisent leur propre SHA avec le tag
+correspondant en commentaire. `renovate.json` fixe le preset partage utilise ;
+`.gitmodules` porte le tag stable dans `branch`, tandis que le gitlink enregistre
+le commit utilise.
 
 Le [workflow de publication](../.github/workflows/release.yml) est declenche
 sur `main`. Son job unique a deux etapes : checkout de `github.sha`, puis
@@ -33,7 +33,7 @@ Ce workflow ne cree pas de references Git pour les autres composants.
 
 | Composant | Responsabilite | Dependances et interface actuelles |
 | --- | --- | --- |
-| [Feature](../.devcontainer/src/dx/devcontainer-feature.json) et [installer](../.devcontainer/src/dx/install.sh) | Installer les composants | Features tierces, paires `agentsVersion`/`agentsCommit` et `toolsVersion`/`toolsCommit`, `/opt/dx`, variables et liens de compatibilite, stockage gh |
+| [Feature](../.devcontainer/src/dx/devcontainer-feature.json) et [installer](../.devcontainer/src/dx/install.sh) | Installer les composants | Features tierces, refs internes maintenues dans DX, `/opt/dx`, variables et liens de compatibilite, stockage gh |
 | [Entree IA](../.devcontainer/components/agents/AGENTS.md) | Charger les regles et orienter vers roles et skills | `Gildraen/dx-agents`, bootstrap racine, `DX_AGENTS_HOME`, liens relatifs et metadonnees |
 | [Lanceur MCP](../.devcontainer/components/tools/bin/dx-mcp) | Lancer le serveur GitHub officiel | `Gildraen/dx-tools`, `dx-mcp github [server options...]`, Docker et daemon accessibles, image definie dans le lanceur, callback `127.0.0.1:8085` |
 | [Taskfile partage](../.devcontainer/components/tools/taskfiles/base.yml) | Exposer `doctor` et `mcp:github` | `Gildraen/dx-tools`, include distant avec ref Git ; `DX_TOOLS_HOME`, repli `DX_HOME`, executable `dx-mcp` |
@@ -46,7 +46,8 @@ Ce workflow ne cree pas de references Git pour les autres composants.
 ## Couplages du runtime
 
 L'installer acquiert agents et tools par deux refs distinctes.
-Les liens entre roles et skills et la hierarchie des regles reposent sur la
+Ces refs sont fixees dans la source DX; elles ne sont pas des options de la
+Feature. Les liens entre roles et skills et la hierarchie des regles reposent sur la
 topologie de `dx-agents`. Le Markdown IA ne depend pas fonctionnellement de
 Docker, de MCP ou de Node ; son chargement depend du bootstrap `AGENTS.md`.
 
@@ -95,12 +96,11 @@ chemin, distinct des tags OCI. Le commentaire conserve le tag suivi par
 Renovate. L'exemple et la confiance restreinte
 a `github.com` sont dans [consumer.md](consumer.md#3-remote-taskfile-optional-shared-helpers).
 Le workflow validate conserve `TASK_REMOTE_TRUSTED_HOSTS=github.com`, suffisant
-pour le format d'URL indique dans le guide consommateur. Les valeurs par
-defaut de `agentsVersion`, `toolsVersion`, `agentsCommit` et `toolsCommit` sont
-dans le [manifeste](../.devcontainer/src/dx/devcontainer-feature.json).
-L'installateur refuse une paire tag/SHA incoherente. Le preset Renovate est
-configure dans [renovate.json](../renovate.json), independamment des autres
-composants.
+pour le format d'URL indique dans le guide consommateur. Le manifeste ne propose
+pas d'options de version pour les composants; leurs refs sont maintenues par
+l'installateur et verifiees avant installation. Le preset Renovate est
+configure dans [renovate.json](../renovate.json), independamment des refs de la
+Feature et des workflows/Taskfiles consommateurs.
 
 ## Controles presents
 

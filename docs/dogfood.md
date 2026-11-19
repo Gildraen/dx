@@ -50,16 +50,17 @@ git status --short
 
 ## Use the live DX sources
 
-The DX worktree has pinned submodules at `.devcontainer/components/agents`
+The DX worktree has submodules at `.devcontainer/components/agents`
 and `.devcontainer/components/tools`. Changes inside them belong to
 `Gildraen/dx-agents` or `Gildraen/dx-tools`, not to DX; DX tracks their commit
 pointers. Its `initializeCommand` runs `git submodule update --init --recursive`.
-The initialized submodules record the selected component commits as gitlinks.
-Use `git submodule status` to inspect those refs. The Feature defaults and
-their corresponding tag/SHA pairs are in the
-[manifest](../.devcontainer/src/dx/devcontainer-feature.json).
+The initialized submodules follow the gitlinks recorded in the DX repository.
+Use `git submodule status` to inspect the registered gitlinks. Each `.gitmodules`
+`branch` records the stable tag Renovate tracks; the gitlink records the exact
+commit. Keep both aligned with the component tag/SHA pairs in the Feature
+installer.
 
-From the consumer, select those local components for this shell:
+For this dogfood run, point the container environment at the local DX sources:
 
 ```sh
 cd ~/projects/my-project
@@ -67,9 +68,9 @@ export DX_AGENTS_HOME="$PWD/.devcontainer/.dx/.devcontainer/components/agents"
 export DX_TOOLS_HOME="$PWD/.devcontainer/.dx/.devcontainer/components/tools"
 ```
 
-The Feature defaults to installed checkouts at `/opt/dx/components/agents` and
-`/opt/dx/components/tools`; these explicit overrides select live sources instead.
-The installed `/usr/local/bin/dx-mcp` wrapper uses
+The installed component locations are `/opt/dx/components/agents` and
+`/opt/dx/components/tools`. In this dogfood run, the explicit environment values
+above point to live sources in the DX worktree.
 `$DX_TOOLS_HOME/bin/dx-mcp`. Editing that launcher affects its next invocation
 without a rebuild. `DX_HOME=/opt/dx` and `DX_HOME/bin/dx-mcp` remain compatibility
 interfaces; `DX_HOME` alone does not select the live IA component.
@@ -140,9 +141,9 @@ rebuild the container:
 The normal loop is `edit Feature -> rebuild container -> test`. Component-only
 changes do not require a rebuild once the consumer reads live sources through
 `DX_AGENTS_HOME` and `DX_TOOLS_HOME`. Changes to the wrapper installed by
-`install.sh` require a rebuild. Installed consumers receive component changes
-by selecting a published tag with its matching commit SHA and rebuilding.
-Feature implementation changes require a new, unique version in the manifest.
+`install.sh` require a rebuild. Installed consumers receive component updates
+through a Feature release containing the updated DX-maintained refs.
+Feature implementation changes are delivered through a subsequent Feature release.
 
 Run the consumer's `task validate` and `task test` in its devcontainer. The dx
 repository CI follows the same model: structural `task validate` runs on the
@@ -157,10 +158,11 @@ test reference uses the commit SHA and matching tag recorded in the
 [DX workflow callers](../.github/workflows/); those callers also show the
 corresponding refs for devcontainer-test and maintenance.
 Testing changed CI or Remote Taskfiles requires a published ref in their
-own repository, not a branch in DX. A test include may use the selected
-published tools branch or commit in the direct HTTP URL. Use a compatible Task
-release and retain the tag as the Renovate update stream. Restore the pinned
-raw URL before committing a consumer change. Restrict trust
+own repository, not a branch in DX. A temporary Task include may use a ref from
+the Taskfile's own repository in the direct HTTP URL. Consumer workflow and
+Taskfile refs remain independently pinned with their corresponding Renovate
+tag comments. Restore the consumer's pinned raw URL before committing a change.
+Use a compatible Task release. Restrict trust
 to `github.com` for these includes. Do not use global `--yes`. Publication
 requires explicit approval.
 

@@ -4,10 +4,12 @@ set -euo pipefail
 
 DX_HOME="/opt/dx"
 FEATURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-agents_version="${AGENTSVERSION:-v0.1.0}"
-agents_commit="${AGENTSCOMMIT:-2bc43f5c09a2d8676288de3470cd890ed4c08448}"
-tools_version="${TOOLSVERSION:-v0.1.0}"
-tools_commit="${TOOLSCOMMIT:-f7b5a41f48026571cafe3e7d287dd0234db9c0b6}"
+# renovate: datasource=github-tags depName=.devcontainer/components/agents packageName=Gildraen/dx-agents
+agents_version="v0.1.0"
+agents_commit="2bc43f5c09a2d8676288de3470cd890ed4c08448"
+# renovate: datasource=github-tags depName=.devcontainer/components/tools packageName=Gildraen/dx-tools
+tools_version="v0.1.0"
+tools_commit="f7b5a41f48026571cafe3e7d287dd0234db9c0b6"
 download_root="$(mktemp -d)"
 trap 'rm -rf "$download_root"' EXIT
 

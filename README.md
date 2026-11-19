@@ -16,7 +16,7 @@ The Feature provides Node.js LTS, GitHub CLI, Go Task, Git, `jq`, ripgrep and
 ## What it provides
 
 - A Dev Container **Feature** (`ghcr.io/gildraen/dx/dx:<released-version>`) that
-  installs independent pinned checkouts of `Gildraen/dx-agents` and
+  installs the DX-maintained snapshots of `Gildraen/dx-agents` and
   `Gildraen/dx-tools` in `/opt/dx/components/agents` and
   `/opt/dx/components/tools`, plus the `dx-mcp` wrapper. `DX_HOME=/opt/dx`
   retains compatibility paths through symlinks.
@@ -74,15 +74,11 @@ jobs:
     uses: Gildraen/ci-workflows/.github/workflows/reusable-validate.yml@<ci-workflow-commit-sha> # <ci-workflow-tag>
 ```
 
-Each component has a SemVer tag option (`agentsVersion` or `toolsVersion`) for
-Renovate and a matching commit SHA option (`agentsCommit` or `toolsCommit`) for
-immutable checkout. The installer verifies that each tag resolves to its SHA,
-then checks out the SHA. CI workflows use Git refs independently of the
-Feature; Renovate preset refs are configured separately. The selected refs are
-recorded in the [Feature manifest](.devcontainer/src/dx/devcontainer-feature.json),
-the [workflow callers](.github/workflows/), the [Renovate configuration](renovate.json)
-and the component sources. Feature publication does not create Git tags for
-these components. Full walkthrough:
+Component revisions are fixed in the DX Feature source and are not exposed as
+Feature options. CI workflow calls and Remote Taskfile includes use separate
+refs that consumers pin independently; Renovate configuration for those refs
+is separate. Feature publication does not create Git refs for these components.
+Full walkthrough:
 [docs/consumer.md](docs/consumer.md).
 
 ## Releases
@@ -99,11 +95,10 @@ run; a rerun does not guarantee repair of partially updated OCI aliases.
 See [the component reference](docs/decoupage.md) for the boundaries
 between Feature, IA resources, MCP, Task and workflows.
 
-This repository's own devcontainer
-consumes the Feature from local source (`./src/dx`), not a published release;
-external consumers select a published Feature version.
-The installed components are snapshots: update each tag and its matching commit
-SHA, then rebuild to update it without requiring a new Feature release.
+This repository's own devcontainer consumes the Feature from local source
+(`./src/dx`), not a published release; external consumers select a published
+Feature release. Component revisions are maintained in DX and delivered to
+consumers through a Feature release; consumers do not configure component refs.
 
 ## Developing a DX change (dogfood)
 
