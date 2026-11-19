@@ -11,4 +11,4 @@ concurrency:
 
 jobs:
   check-links:
-    uses: ./.github/workflows/reusable-maintenance.yml
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@62f1721ea92ffd7275f4e4e2c60727b486d7def1 # v0.1.0
