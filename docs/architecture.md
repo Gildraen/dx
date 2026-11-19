@@ -25,6 +25,15 @@ consumers select the Feature rather than component revisions. The dogfood
 submodules record their source revisions as gitlinks; `.gitmodules` records
 the corresponding stable tags in each submodule's `branch` field for Renovate.
 
+Shared repository conventions are maintained in
+[the DX Agents baseline](https://github.com/Gildraen/dx-agents/blob/main/instructions/base.md).
+Consumer repositories discover that baseline after selecting a `dx-agents`
+revision containing the convention and loading it through their root
+`AGENTS.md`, which loads `$DX_AGENTS_HOME/AGENTS.md` and its shared instructions.
+Repositories that do not load the DX runtime must adopt the conventions
+explicitly; local exceptions remain in their own instructions or adjacent
+configuration.
+
 ## What lives where
 
 | Concern | Source | Installed location or consumer interface |
