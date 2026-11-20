@@ -10,3 +10,4 @@ TODO.md
 
 # Local generated archives — never tracked
 artifacts/
+/tmp/worktree/

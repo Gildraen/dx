@@ -81,12 +81,28 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const feature = require('./.devcontainer/src/dx/devcontainer-feature.json');
 const renovate = require('./renovate.json');
+const releaseConfig = require('./release-please-config.json');
+const releaseManifest = require('./.release-please-manifest.json');
 const consumer = fs.readFileSync('docs/consumer.md', 'utf8');
 assert.match(feature.version, /^\d+\.\d+\.\d+$/);
 assert.deepEqual(feature.options, {});
-assert.deepEqual(renovate.extends, ['github>Gildraen/renovate-config#v0.1.0']);
+assert.deepEqual(renovate.extends, ['github>Gildraen/renovate-config#0.2.0']);
 assert.equal(renovate['git-submodules'], undefined);
 assert.ok(consumer.includes('ghcr.io/gildraen/dx/dx:<released-version>'));
+assert.equal(releaseConfig['include-v-in-tag'], false);
+assert.equal(releaseConfig['bootstrap-sha'], 'b27495c93afc79cd6cba5a481bf6013ce2284279');
+assert.equal(releaseConfig.packages['.']['version-file'], 'version.txt');
+assert.deepEqual(releaseConfig.packages['.']['extra-files'], [{
+  type: 'json',
+  path: '.devcontainer/src/dx/devcontainer-feature.json',
+  jsonpath: '$.version',
+}]);
+assert.equal(releaseManifest['.'], '1.3.0');
+assert.equal(feature.version, releaseManifest['.']);
+assert.equal(fs.readFileSync('version.txt', 'utf8').trim(), releaseManifest['.']);
+const releaseWorkflow = fs.readFileSync('.github/workflows/validate.yml', 'utf8');
+assert.match(releaseWorkflow, /needs: \[validate, test, feature-test, feature-manifest\]/);
+assert.match(releaseWorkflow, /config-file: release-please-config\.json/);
 for (const component of ['agents', 'tools']) {
   assert.ok(!consumer.includes(`"${component}Version"`));
   assert.ok(!consumer.includes(`"${component}Commit"`));
