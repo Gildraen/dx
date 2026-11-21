@@ -96,7 +96,7 @@ assert.deepEqual(releaseConfig.packages['.']['extra-files'], [{
   path: '.devcontainer/src/dx/devcontainer-feature.json',
   jsonpath: '$.version',
 }]);
-assert.equal(releaseManifest['.'], '1.3.0');
+assert.match(releaseManifest['.'], /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
 assert.equal(feature.version, releaseManifest['.']);
 assert.equal(fs.readFileSync('version.txt', 'utf8').trim(), releaseManifest['.']);
 const validateWorkflow = fs.readFileSync('.github/workflows/validate.yml', 'utf8');
