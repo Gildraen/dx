@@ -1,5 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "DX Renovate configuration: consumes the shared Gildraen preset.",
-  "extends": ["github>Gildraen/renovate-config#v0.1.0"]
+  "extends": ["github>Gildraen/renovate-config#0.2.0"]
 }

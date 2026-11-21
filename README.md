@@ -83,14 +83,25 @@ Full walkthrough:
 
 ## Releases
 
-Every push to `main` runs the release workflow. A Feature version bump must use
-a new unique number in the Feature manifest. Version selection is manual; the
-release workflow and its pinned action and CLI are defined in
-[release.yml](.github/workflows/release.yml). It checks out the pushed commit
-and publishes the Feature to GHCR. The CLI skips an already published Feature
-version. Publication produces OCI artifacts without Git tags or GitHub releases.
-Validation and container tests stay in PR CI. A new push cancels the previous
-run; a rerun does not guarantee repair of partially updated OCI aliases.
+After all validation jobs succeed on a push to `main`, the separate
+`release-please.yml` workflow waits for the `validate` run and calls the shared
+Release Please workflow. It opens or updates a release PR from Conventional
+Commits. The repository tag omits the
+`v` prefix. Merging the release PR updates `version.txt` and the Feature
+manifest together; the existing [release workflow](.github/workflows/release.yml)
+then publishes that Feature version to GHCR. Feature OCI publication and Git
+tag creation remain separate outputs. Existing `v` tags are not renamed. The
+release job calls the shared Release Please workflow pinned to ci-workflows
+commit `b04cfb98139aa06de661c70a128452184f2004dd` (future tag `0.2.0`).
+
+The baseline is `1.3.0`. Release Please and Renovate pins use the shared preset
+version `0.2.0`; merge this PR only after that preset release is published.
+Publish ci-workflows `0.2.0` before merging this PR so the shared release
+workflow ref is available.
+Configure `RELEASE_PLEASE_TOKEN` as a fine-grained repository secret if Actions
+should trigger CI automatically on the release PR. GitHub suppresses workflow
+runs for pull requests created with `GITHUB_TOKEN`; without the secret, required
+PR checks may not run and must be handled before merging.
 
 See [the component reference](docs/decoupage.md) for the boundaries
 between Feature, IA resources, MCP, Task and workflows.
