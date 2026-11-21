@@ -83,14 +83,16 @@ Full walkthrough:
 
 ## Releases
 
-After all validation jobs succeed on a push to `main`, Release Please opens or
-updates a release PR from Conventional Commits. The repository tag omits the
+After all validation jobs succeed on a push to `main`, the separate
+`release-please.yml` workflow waits for the `validate` run and calls the shared
+Release Please workflow. It opens or updates a release PR from Conventional
+Commits. The repository tag omits the
 `v` prefix. Merging the release PR updates `version.txt` and the Feature
 manifest together; the existing [release workflow](.github/workflows/release.yml)
 then publishes that Feature version to GHCR. Feature OCI publication and Git
 tag creation remain separate outputs. Existing `v` tags are not renamed. The
 release job calls the shared Release Please workflow pinned to ci-workflows
-commit `4b4026ff669b5fe8da2aa83e216591bb09e1e8a1` (future tag `0.2.0`).
+commit `b04cfb98139aa06de661c70a128452184f2004dd` (future tag `0.2.0`).
 
 The baseline is `1.3.0`. Release Please and Renovate pins use the shared preset
 version `0.2.0`; merge this PR only after that preset release is published.

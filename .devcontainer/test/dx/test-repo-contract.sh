@@ -107,16 +107,20 @@ assert.deepEqual(releaseConfig.packages['.']['extra-files'], [{
 assert.equal(releaseManifest['.'], '1.3.0');
 assert.equal(feature.version, releaseManifest['.']);
 assert.equal(fs.readFileSync('version.txt', 'utf8').trim(), releaseManifest['.']);
-const releaseWorkflow = fs.readFileSync('.github/workflows/validate.yml', 'utf8');
-assert.match(releaseWorkflow, /needs: \[validate, test, feature-test, feature-manifest\]/);
-assert.match(releaseWorkflow, /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/);
+const validateWorkflow = fs.readFileSync('.github/workflows/validate.yml', 'utf8');
+const releaseWorkflow = fs.readFileSync('.github/workflows/release-please.yml', 'utf8');
+assert.match(releaseWorkflow, /workflows: \[validate\]/);
+assert.match(releaseWorkflow, /types: \[completed\]/);
+assert.match(releaseWorkflow, /if: github\.event\.workflow_run\.conclusion == 'success' && github\.event\.workflow_run\.head_branch == 'main' && github\.event\.workflow_run\.event == 'push'/);
 assert.match(releaseWorkflow, /permissions:\n      contents: write\n      issues: write\n      pull-requests: write/);
-assert.match(releaseWorkflow, /reusable-release-please\.yml@4b4026ff669b5fe8da2aa83e216591bb09e1e8a1 # 0\.2\.0/);
+assert.match(releaseWorkflow, /reusable-release-please\.yml@b04cfb98139aa06de661c70a128452184f2004dd # 0\.2\.0/);
 assert.match(releaseWorkflow, /config-file: release-please-config\.json/);
 assert.match(releaseWorkflow, /manifest-file: \.release-please-manifest\.json/);
 assert.match(releaseWorkflow, /target-branch: main/);
+assert.match(releaseWorkflow, /expected-sha: \$\{\{ github\.event\.workflow_run\.head_sha \}\}/);
 assert.match(releaseWorkflow, /release-please-token: \$\{\{ secrets\.RELEASE_PLEASE_TOKEN \|\| secrets\.GITHUB_TOKEN \}\}/);
 assert.doesNotMatch(releaseWorkflow, /googleapis\/release-please-action/);
+assert.doesNotMatch(validateWorkflow, /reusable-release-please|release-please-action/);
 for (const component of ['agents', 'tools']) {
   assert.ok(!consumer.includes(`"${component}Version"`));
   assert.ok(!consumer.includes(`"${component}Commit"`));
