@@ -53,9 +53,10 @@ for workflow in validate devcontainer-test maintenance; do
     const jobs = Object.values(workflow.jobs);
     assert.equal(jobs.length, 1);
     const job = jobs[0];
-    assert.equal(job.uses, `Gildraen/ci-workflows/.github/workflows/reusable-${name}.yml@62f1721ea92ffd7275f4e4e2c60727b486d7def1`);
+    assert.match(job.uses, new RegExp(`^Gildraen/ci-workflows/\\.github/workflows/reusable-${name}\\.yml@[0-9a-f]{40}$`));
     const source = fs.readFileSync(`.github/workflows/reusable-${name}.yml`, "utf8");
-    assert.ok(source.includes("@62f1721ea92ffd7275f4e4e2c60727b486d7def1 # v0.1.0"));
+    const workflowSha = job.uses.split("@").pop();
+    assert.ok(source.includes(`@${workflowSha} # 0.2.0`));
     assert.equal(job.steps, undefined);
     assert.equal(job["runs-on"], undefined);
     assert.equal(workflow.on.workflow_call?.secrets, undefined);
