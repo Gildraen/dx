@@ -92,16 +92,17 @@ manifest together; the existing [release workflow](.github/workflows/release.yml
 then publishes that Feature version to GHCR. Feature OCI publication and Git
 tag creation remain separate outputs. Existing `v` tags are not renamed. The
 release job calls the shared Release Please workflow pinned to ci-workflows
-commit `b04cfb98139aa06de661c70a128452184f2004dd` (future tag `0.2.0`).
+commit `495bb9b377719414123af8c329b02aeff58ab440` (future tag `0.2.0`).
 
 The baseline is `1.3.0`. Release Please and Renovate pins use the shared preset
 version `0.2.0`; merge this PR only after that preset release is published.
 Publish ci-workflows `0.2.0` before merging this PR so the shared release
 workflow ref is available.
-Configure `RELEASE_PLEASE_TOKEN` as a fine-grained repository secret if Actions
-should trigger CI automatically on the release PR. GitHub suppresses workflow
-runs for pull requests created with `GITHUB_TOKEN`; without the secret, required
-PR checks may not run and must be handled before merging.
+Install the Release Please GitHub App on this repository with Contents, Issues,
+and Pull requests write permissions. Configure repository variable
+`RELEASE_PLEASE_APP_CLIENT_ID` and repository Actions secret
+`RELEASE_PLEASE_APP_PRIVATE_KEY`. Release PRs use an App token so their CI checks
+run normally.
 
 See [the component reference](docs/decoupage.md) for the boundaries
 between Feature, IA resources, MCP, Task and workflows.
