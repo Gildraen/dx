@@ -72,7 +72,14 @@ for workflow in validate maintenance; do
     const fs = require("node:fs");
     const workflow = JSON.parse(fs.readFileSync(0, "utf8"));
     const name = process.argv[1];
-    for (const job of Object.values(workflow.jobs)) assert.equal(job.secrets, undefined);
+    for (const [jobName, job] of Object.entries(workflow.jobs)) {
+      if (name === "validate" && jobName === "release") {
+        assert.equal(job.secrets["release-please-token"],
+          "${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}");
+      } else {
+        assert.equal(job.secrets, undefined);
+      }
+    }
   ' "$workflow"
 done
 
@@ -102,7 +109,14 @@ assert.equal(feature.version, releaseManifest['.']);
 assert.equal(fs.readFileSync('version.txt', 'utf8').trim(), releaseManifest['.']);
 const releaseWorkflow = fs.readFileSync('.github/workflows/validate.yml', 'utf8');
 assert.match(releaseWorkflow, /needs: \[validate, test, feature-test, feature-manifest\]/);
+assert.match(releaseWorkflow, /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/);
+assert.match(releaseWorkflow, /permissions:\n      contents: write\n      issues: write\n      pull-requests: write/);
+assert.match(releaseWorkflow, /reusable-release-please\.yml@4b4026ff669b5fe8da2aa83e216591bb09e1e8a1 # 0\.2\.0/);
 assert.match(releaseWorkflow, /config-file: release-please-config\.json/);
+assert.match(releaseWorkflow, /manifest-file: \.release-please-manifest\.json/);
+assert.match(releaseWorkflow, /target-branch: main/);
+assert.match(releaseWorkflow, /release-please-token: \$\{\{ secrets\.RELEASE_PLEASE_TOKEN \|\| secrets\.GITHUB_TOKEN \}\}/);
+assert.doesNotMatch(releaseWorkflow, /googleapis\/release-please-action/);
 for (const component of ['agents', 'tools']) {
   assert.ok(!consumer.includes(`"${component}Version"`));
   assert.ok(!consumer.includes(`"${component}Commit"`));
