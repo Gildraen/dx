@@ -1,0 +1,19 @@
+name: documentation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-links:
+    uses: Gildraen/ci-workflows/.github/workflows/reusable-maintenance.yml@eabb9d61ea2a827476f46e7e3e9577d956d8f470 # 0.2.0
+    with:
+      link-check-paths: "README.md AGENTS.md CHANGELOG.md docs/**/*.md"

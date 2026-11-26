@@ -1,39 +1,11 @@
-# dx - Guide agent de developpement
+# dx - Instructions de maintenance du catalogue
 
-Ce repository est le developpement du produit `dx` lui-meme : la Feature Dev
-Container et l'integration des composants partages avec les autres repos
-Gildraen.
+Ce dépôt indexe et explique les responsabilités des projets DX; il ne contient
+pas leur runtime ni leurs outils.
 
-Ce fichier concerne le developpement de `dx`. Il ne doit pas etre copie dans
-les repositories consommateurs — voir [docs/consumer.md](docs/consumer.md)
-pour le bootstrap consommateur.
+Avant de modifier une description, vérifier le contrat dans le dépôt qui en est
+propriétaire. Garder les références courantes sans versions recopiées et
+distinguer clairement les faits publiés des étapes de transition.
 
-## Role
-
-- Source canonique de la Feature DX et de son integration
-  — voir [docs/architecture.md](docs/architecture.md).
-- Les instructions partagees et skills generiques destinees aux consommateurs
-  vivent dans `Gildraen/dx-agents`, accessible ici par le sous-module
-  `.devcontainer/components/agents/`. Les outils et Taskfiles vivent dans
-  `Gildraen/dx-tools`, sous `.devcontainer/components/tools/`.
-- Le socle d'outils commun reste volontairement limite : un outil y entre
-  seulement s'il est un contrat DX ou un besoin durable de la plupart des
-  projets, jamais seulement par commodite.
-
-## Chargement des ressources IA
-
-Avant toute intervention, lire
-[.devcontainer/components/agents/AGENTS.md](.devcontainer/components/agents/AGENTS.md)
-qui porte les regles communes et la delegation aux sous-agents.
-Pour le developpement de `dx`, ce chemin local fait autorite ;
-`DX_AGENTS_HOME` designe ce sous-module. S'il manque, executer
-`git submodule update --init --recursive` a la racine du depot.
-
-## Commandes utiles
-
-```sh
-task --list
-task validate
-task test
-task feature:test
-```
+La validation automatique de ce dépôt vérifie les liens Markdown. Il n'y a pas
+de Feature, de Taskfile ou de commande DX à exécuter ici.

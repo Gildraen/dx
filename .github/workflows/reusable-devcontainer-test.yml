@@ -1,8 +1,0 @@
-name: reusable-devcontainer-test
-
-on:
-  workflow_call:
-
-jobs:
-  test:
-    uses: Gildraen/ci-workflows/.github/workflows/reusable-devcontainer-test.yml@eabb9d61ea2a827476f46e7e3e9577d956d8f470 # 0.2.0
