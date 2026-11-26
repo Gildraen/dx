@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.4.0](https://github.com/Gildraen/dx/compare/1.3.0...1.4.0) (2026-11-21)
+## 1.4.0 (2026-11-21)
 
 
 ### Features
